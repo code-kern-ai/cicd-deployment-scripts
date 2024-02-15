@@ -55,6 +55,7 @@ jobs:
       id: tf-plan
       run: |
         export exitcode=0
+        source .env.example
         tofu plan -detailed-exitcode -out tfplan || export exitcode=$?
 
         echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
