@@ -50,9 +50,7 @@ jobs:
       id: tf-plan
       run: |
         export exitcode=0
-        pwd
-        ls -al
-        
+
         if [ -f vars-dev.tfvars ]; then
           tofu plan -detailed-exitcode -var-file vars-dev.tfvars -out tfplan || export exitcode=$?
         else
