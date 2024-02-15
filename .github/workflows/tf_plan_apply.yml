@@ -91,11 +91,11 @@ jobs:
         echo "${delimiter}" >> $GITHUB_OUTPUT
         
     # Publish OpenTofu Plan as task summary
-    - name: Publish OpenTofu Plan to Task Summary
-      env:
-        SUMMARY: ${{ steps.tf-plan-string.outputs.summary }}
-      run: |
-        echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
+    # - name: Publish OpenTofu Plan to Task Summary
+    #   env:
+    #     SUMMARY: ${{ steps.tf-plan-string.outputs.summary }}
+    #   run: |
+    #     echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
       
     # If this is a PR post the changes
     - name: Push OpenTofu Output to PR
