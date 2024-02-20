@@ -21,6 +21,7 @@ jobs:
       ARM_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
       ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
       ARM_USE_OIDC: true
+      TF_DESTROY: "${{ vars.TF_DESTROY }}"
     outputs:
       tfplanExitCode: ${{ steps.tf-plan.outputs.exitcode }}
 
@@ -52,9 +53,9 @@ jobs:
         export exitcode=0
 
         if [ -f vars-dev.tfvars ]; then
-          tofu plan -detailed-exitcode -var-file vars-dev.tfvars -out tfplan || export exitcode=$?
+          tofu plan $TF_DESTROY -detailed-exitcode -var-file vars-dev.tfvars -out tfplan || export exitcode=$?
         else
-          tofu plan -detailed-exitcode -out tfplan || export exitcode=$?
+          tofu plan $TF_DESTROY -detailed-exitcode -out tfplan || export exitcode=$?
         fi
 
         echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
@@ -126,6 +127,7 @@ jobs:
       ARM_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
       ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
       ARM_USE_OIDC: true
+      TF_DESTROY: "${{ vars.TF_DESTROY }}"
     needs: [tofu-plan]
     
     steps:
@@ -149,4 +151,4 @@ jobs:
 
     # OpenTofu Apply
     - name: OpenTofu Apply
-      run: tofu apply -auto-approve tfplan
+      run: tofu apply $TF_DESTROY -auto-approve tfplan
