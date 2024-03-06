@@ -37,7 +37,7 @@ jobs:
         tofu_wrapper: false
 
     - name: GitHub Configuration
-      run: git config --global url."https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com".insteadOf https://github.com
+      run: git config --global url."https://oauth2:${{ secrets.TOKEN_GITHUB }}@github.com".insteadOf https://github.com
 
     # Initialize a new or existing OpenTofu working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: OpenTofu Init
@@ -143,7 +143,7 @@ jobs:
       uses: opentofu/setup-opentofu@v1
 
     - name: GitHub Configuration
-      run: git config --global url."https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com".insteadOf https://github.com
+      run: git config --global url."https://oauth2:${{ secrets.TOKEN_GITHUB }}@github.com".insteadOf https://github.com
 
 
     # Initialize a new or existing OpenTofu working directory by creating initial files, loading any remote state, downloading modules, etc.
