@@ -1,0 +1,50 @@
+name: 'Kubernetes Apply'
+
+on:
+  workflow_call:
+
+# Special permissions required for OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  k8-apply:
+    name: 'Kubernetes Apply'
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
+      KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
+      KUBERNETES_MANIFEST_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}"
+      AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # Install the latest version of Kubernetes CLI and configure the Kubernetes CLI configuration file with a Kubernetes Cloud user API token
+    - name: Azure Login
+      uses: Azure/login@v2
+
+    # Use kubelogin to configure your kubeconfig for Azure auth
+    - name: Set up kubelogin for non-interactive login
+      uses: azure/use-kubelogin@v1
+      with:
+        kubelogin-version: 'v0.0.25'
+
+    - uses: azure/aks-set-context@v3
+      with:
+        resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
+        cluster-name: ${{ env.KUBERNETES_CLUSTER_NAME }}
+        admin: 'false'
+        use-kubelogin: 'true'
+        
+    # Deploys application based on given manifest file
+    - name: Deploys application
+      uses: Azure/k8s-deploy@v4
+      with:
+        action: deploy
+        manifests: ${{ env.KUBERNETES_MANIFEST_PATH }}
+        namespace: ${{ env.KUBERNETES_NAMESPACE }}
