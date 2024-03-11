@@ -44,7 +44,7 @@ jobs:
         cluster-name: ${{ env.KUBERNETES_CLUSTER_NAME }}
         admin: 'false'
         use-kubelogin: 'true'
-        
+    
     # Deploys application based on given manifest file
     - name: Deploys application
       uses: Azure/k8s-deploy@v4
