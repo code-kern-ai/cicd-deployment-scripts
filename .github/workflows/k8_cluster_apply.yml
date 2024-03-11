@@ -51,8 +51,8 @@ jobs:
         ls -la
         cat ${{ github.workspace }}/${{ env.KUBERNETES_MANIFEST_DIR }}kustomization.yml
         echo "Kubernetes Manifest Directory: ${{ github.workspace }}/${{ env.KUBERNETES_MANIFEST_DIR }}"
-        ls -la ${{ github.workspace }}/${{ env.KUBERNETES_MANIFEST_DIR }}"
+        ls -la ${{ github.workspace }}/${{ env.KUBERNETES_MANIFEST_DIR }}
     
     # Deploys application based on given kustomize-manifest file
     - name: Deploys Application
-      run: kubectl apply -k ${{ env.KUBERNETES_MANIFEST_DIR }}
+      run: kubectl apply -k ${{ github.workspace }}/${{ env.KUBERNETES_MANIFEST_DIR }}
