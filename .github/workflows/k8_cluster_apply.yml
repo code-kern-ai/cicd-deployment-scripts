@@ -7,7 +7,7 @@ on:
 permissions:
   id-token: write
   contents: read
-  pull-requests: write
+  actions: read
 
 jobs:
   k8-apply:
