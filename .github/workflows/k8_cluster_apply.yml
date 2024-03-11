@@ -45,6 +45,12 @@ jobs:
         admin: 'false'
         use-kubelogin: 'true'
     
+    - run: |
+        echo "Current location:  `pwd`"
+        ls -la
+        echo "Kubernetes Manifest Directory: ${{ env.KUBERNETES_MANIFEST_DIR }}"
+        ls -la ${{ env.KUBERNETES_MANIFEST_DIR }}"
+    
     # Deploys application based on given kustomize-manifest file
     - name: Deploys Application
       run: kubectl apply -k ${{ env.KUBERNETES_MANIFEST_DIR }}
