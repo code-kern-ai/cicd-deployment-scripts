@@ -49,7 +49,7 @@ jobs:
       run: |
         echo "Current location: $(pwd)"
         ls -la
-        cat ${{ github.workspace }}/${{ env.KUBERNETES_MANIFEST_DIR }}/kustomization.yaml
+        cat ${{ github.workspace }}/${{ env.KUBERNETES_MANIFEST_DIR }}kustomization.yaml
         echo "Kubernetes Manifest Directory: ${{ github.workspace }}/${{ env.KUBERNETES_MANIFEST_DIR }}"
         ls -la ${{ github.workspace }}/${{ env.KUBERNETES_MANIFEST_DIR }}"
     
