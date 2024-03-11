@@ -17,7 +17,7 @@ jobs:
     env:
       KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
       KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
-      KUBERNETES_MANIFEST_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}"
+      KUBERNETES_MANIFEST_DIR: "${{ vars.KUBERNETES_MANIFEST_DIR }}"
       AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
     steps:
     # Checkout the repository to the GitHub Actions runner
@@ -45,10 +45,6 @@ jobs:
         admin: 'false'
         use-kubelogin: 'true'
     
-    # Deploys application based on given manifest file
-    - name: Deploys application
-      uses: Azure/k8s-deploy@v4
-      with:
-        action: deploy
-        manifests: ${{ env.KUBERNETES_MANIFEST_PATH }}
-        namespace: ${{ env.KUBERNETES_NAMESPACE }}
+    # Deploys application based on given kustomize-manifest file
+    - name: Deploys Application
+      run: kubectl apply -k ${{ env.KUBERNETES_MANIFEST_DIR }}
