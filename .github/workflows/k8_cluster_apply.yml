@@ -24,6 +24,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: GitHub Configuration
+      run: git config --global url."https://oauth2:${{ secrets.TOKEN_GITHUB }}@github.com".insteadOf https://github.com
+
+
     # Install the latest version of Kubernetes CLI and configure the Kubernetes CLI configuration file with a Kubernetes Cloud user API token
     - name: Azure Login
       uses: Azure/login@v2
@@ -46,9 +50,20 @@ jobs:
         use-kubelogin: 'true'
         
     # Deploys application based on given manifest file
-    - name: Deploys application
-      uses: Azure/k8s-deploy@v4
-      with:
-        action: deploy
-        manifests: ${{ env.KUBERNETES_MANIFEST_PATH }}
-        namespace: ${{ env.KUBERNETES_NAMESPACE }}
+    # - name: Deploys application
+    #   uses: Azure/k8s-deploy@v4
+    #   with:
+    #     action: deploy
+    #     manifests: ${{ env.KUBERNETES_MANIFEST_PATH }}
+    #     namespace: ${{ env.KUBERNETES_NAMESPACE }}
+
+    # Installs kustomize using a custom script
+    - name: Install Kustomize
+      shell: bash
+      run: |
+        git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
+        bash cicd-deployment-scripts/k8-cluster/install_kustomize.sh
+
+    - name: Apply Kustomization
+      shell: bash
+      run: kubectl apply -k ${{ env.KUBERNETES_MANIFEST_PATH }}
