@@ -1,4 +1,4 @@
-name: 'Kubernetes Apply'
+name: 'Kubernetes Destroy'
 
 on:
   workflow_call:
@@ -10,17 +10,15 @@ permissions:
   actions: read
 
 jobs:
-  k8-cluster-apply:
-    name: 'K8: Apply Cluster'
+  k8-cluster-destroy:
+    name: 'K8: Destroy Deployments & Services'
     runs-on: ubuntu-latest
     environment: dev
     env:
-      KUBELOGIN_VERSION: "v0.0.25"
-      KUSTOMIZE_VERSION: "${{ vars.KUSTOMIZE_VERSION }}"
-      AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
-      KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
       KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
+      KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
       KUBERNETES_MANIFEST_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}"
+      AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
@@ -41,7 +39,7 @@ jobs:
     - name: Set up kubelogin for non-interactive login
       uses: azure/use-kubelogin@v1
       with:
-        kubelogin-version: ${{ env.KUBELOGIN_VERSION }}
+        kubelogin-version: 'v0.0.25'
 
     - uses: azure/aks-set-context@v3
       with:
@@ -49,20 +47,7 @@ jobs:
         cluster-name: ${{ env.KUBERNETES_CLUSTER_NAME }}
         admin: 'false'
         use-kubelogin: 'true'
-    
-    # Installs kustomize using a custom script
-    - name: Install Kustomize
-      shell: bash
-      env:
-        INSTALL_KUSTOMIZE_SH: "cicd-deployment-scripts/k8-cluster/install_kustomize.sh"
-      run: |
-        git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
-        bash ${{ env.INSTALL_KUSTOMIZE_SH }} -v ${{ env.KUSTOMIZE_VERSION }}
-
-    - name: Apply Kustomization
-      shell: bash
-      run: kubectl apply -k ${{ env.KUBERNETES_MANIFEST_PATH }}
-
+        
     # Deploys application based on given manifest file
     # - name: Deploys application
     #   uses: Azure/k8s-deploy@v4
@@ -70,3 +55,9 @@ jobs:
     #     action: deploy
     #     manifests: ${{ env.KUBERNETES_MANIFEST_PATH }}
     #     namespace: ${{ env.KUBERNETES_NAMESPACE }}
+
+    - name: Destroy Deployments
+      shell: bash
+      run: |
+        git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
+        bash cicd-deployment-scripts/k8-cluster/k8_destroy.sh

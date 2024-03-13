@@ -3,7 +3,7 @@ set -e
 
 KUSTOMIZE_VERSION="5.3.0"
 
-while getopts v flag
+while getopts v: flag
 do
     case "${flag}" in
         v) KUSTOMIZE_VERSION=${OPTARG};;
