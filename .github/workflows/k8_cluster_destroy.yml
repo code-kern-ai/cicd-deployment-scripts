@@ -52,7 +52,7 @@ jobs:
       shell: bash
       run: |
         git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
-        bash cicd-deployment-scripts/k8-cluster/k8_destroy.sh
+        bash cicd-deployment-scripts/k8-cluster/destroy.sh
 
     # Deploys application based on given manifest file
     # - name: Deploys application
