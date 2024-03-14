@@ -11,6 +11,8 @@ do
 done
 
 kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE
+echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
+
 KUBERNETES_JOBS=$(kubectl get jobs --output json | jq -r '.items[].metadata.name')
 KUBERNETES_DEPLOYMENTS=$(kubectl get deployment --output json \
     | jq -r '.items[] | select(.metadata.name as $name 
