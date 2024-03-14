@@ -1,4 +1,4 @@
-name: 'Azure Container Registry Docker Push'
+name: 'ACR Docker Push'
 
 on:
   workflow_call:
