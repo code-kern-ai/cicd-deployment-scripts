@@ -1,4 +1,4 @@
-name: 'ACR Docker Push'
+name: 'ACR: Docker Push'
 
 on:
   workflow_call:

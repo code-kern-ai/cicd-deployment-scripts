@@ -1,4 +1,4 @@
-name: 'Kubernetes Destroy'
+name: 'K8: Destroy'
 
 on:
   workflow_call:

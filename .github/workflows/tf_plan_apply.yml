@@ -1,4 +1,4 @@
-name: 'OpenTofu Plan/Apply'
+name: 'OpenTofu: Plan/Apply'
 
 on:
   workflow_call:

@@ -1,4 +1,4 @@
-name: 'Kubernetes Restart'
+name: 'K8: Restart'
 
 on:
   workflow_call:

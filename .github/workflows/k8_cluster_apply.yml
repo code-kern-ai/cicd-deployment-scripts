@@ -1,4 +1,4 @@
-name: 'Kubernetes Apply'
+name: 'K8: Apply'
 
 on:
   workflow_call:
