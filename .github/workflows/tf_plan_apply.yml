@@ -13,8 +13,9 @@ jobs:
   tofu-plan:
     name: 'OpenTofu Plan'
     runs-on: ubuntu-latest
-    environment: dev
+    environment: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}
     env:
+      ENVIRONMENT_NAME: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}
       #this is needed since we are running tofu with read-only permissions
       ARM_SKIP_PROVIDER_REGISTRATION: true
       ARM_CLIENT_ID: "${{ secrets.AZURE_CLIENT_ID }}"
@@ -41,12 +42,12 @@ jobs:
 
     # Initialize a new or existing OpenTofu working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: OpenTofu Init
-      run: tofu init
-
-    # Checks that all OpenTofu configuration files adhere to a canonical format
-    # Will fail the build if not
-    # - name: OpenTofu Format
-    #   run: tofu fmt -check
+      run: |
+        tofu init \
+          -backend-config="resource_group_name=${{ env.ENVIRONMENT_NAME }}-tf-azure-admin" \
+          -backend-config="storage_account_name=${{ env.ENVIRONMENT_NAME }}kernaiadmin" \
+          -backend-config="container_name=tfstate" \
+          -backend-config="key=${{ github.event.repository.name }}/${{ env.ENVIRONMENT_NAME }}.tfstate"
 
     # Generates an execution plan for OpenTofu
     # An exit code of 0 indicated no changes, 1 a tofu failure, 2 there are pending changes.
@@ -55,10 +56,10 @@ jobs:
       run: |
         export exitcode=0
 
-        if [ -f vars-dev.tfvars ]; then
-          tofu plan $TF_DESTROY -detailed-exitcode -var-file vars-dev.tfvars -out tfplan || export exitcode=$?
+        if [ -f vars-${{ env.ENVIRONMENT_NAME }}.tfvars ]; then
+          tofu plan ${{ env.TF_DESTROY }} -detailed-exitcode -var-file vars-${{ env.ENVIRONMENT_NAME }}.tfvars -out tfplan || export exitcode=$?
         else
-          tofu plan $TF_DESTROY -detailed-exitcode -out tfplan || export exitcode=$?
+          tofu plan ${{ env.TF_DESTROY }} -detailed-exitcode -out tfplan || export exitcode=$?
         fi
 
         echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
@@ -72,57 +73,17 @@ jobs:
         
     # Save plan to artifacts  
     - name: Publish OpenTofu Plan
+      if: ${{ github.event_name == 'push' }}
       uses: actions/upload-artifact@v4
       with:
         name: tfplan
         path: tfplan
-        
-    # Create string output of OpenTofu Plan
-    - name: Create String Output
-      id: tf-plan-string
-      run: |
-        OPENTOFU_PLAN=$(tofu show tfplan)
-        
-        delimiter="$(openssl rand -hex 8)"
-        echo "summary<<${delimiter}" >> $GITHUB_OUTPUT
-        echo "## OpenTofu Plan Output" >> $GITHUB_OUTPUT
-        echo "<details><summary>Click to expand</summary>" >> $GITHUB_OUTPUT
-        echo "" >> $GITHUB_OUTPUT
-        echo '```terraform' >> $GITHUB_OUTPUT
-        echo "$OPENTOFU_PLAN" >> $GITHUB_OUTPUT
-        echo '```' >> $GITHUB_OUTPUT
-        echo "</details>" >> $GITHUB_OUTPUT
-        echo "${delimiter}" >> $GITHUB_OUTPUT
-        
-    # Publish OpenTofu Plan as task summary
-    # - name: Publish OpenTofu Plan to Task Summary
-    #   env:
-    #     SUMMARY: ${{ steps.tf-plan-string.outputs.summary }}
-    #   run: |
-    #     echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
-      
-    # If this is a PR post the changes
-    - name: Push OpenTofu Output to PR
-      if: github.ref != 'refs/heads/main' && github.event_name == 'pull_request'
-      uses: actions/github-script@v6
-      env:
-        SUMMARY: "${{ steps.tf-plan-string.outputs.summary }}"
-      with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const body = `${process.env.SUMMARY}`;
-            github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: body
-            })
                 
   tofu-apply:
     name: 'OpenTofu Apply'
-    if: github.ref == 'refs/heads/dev' && needs.tofu-plan.outputs.tfplanExitCode == 2
+    if: github.event_name == 'push' && needs.tofu-plan.outputs.tfplanExitCode == 2
     runs-on: ubuntu-latest
-    environment: dev
+    environment: ${{ github.ref_name }}
     env:
       #this is needed since we are running tofu with read-only permissions
       ARM_SKIP_PROVIDER_REGISTRATION: true
@@ -148,7 +109,12 @@ jobs:
 
     # Initialize a new or existing OpenTofu working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: OpenTofu Init
-      run: tofu init
+      run: |
+        tofu init \
+          -backend-config="resource_group_name=${{ github.ref_name }}-tf-azure-admin" \
+          -backend-config="storage_account_name=${{ github.ref_name }}kernaiadmin" \
+          -backend-config="container_name=tfstate" \
+          -backend-config="key=${{ github.event.repository.name }}-${{ github.ref_name }}.tfstate"
 
     # Download saved plan from artifacts  
     - name: Download OpenTofu Plan
@@ -158,4 +124,4 @@ jobs:
 
     # OpenTofu Apply
     - name: OpenTofu Apply
-      run: tofu apply $TF_DESTROY -auto-approve tfplan
+      run: tofu apply ${{ env.TF_DESTROY }} -auto-approve tfplan
