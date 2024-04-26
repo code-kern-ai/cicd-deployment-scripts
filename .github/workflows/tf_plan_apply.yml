@@ -114,7 +114,7 @@ jobs:
           -backend-config="resource_group_name=${{ github.ref_name }}-tf-azure-admin" \
           -backend-config="storage_account_name=${{ github.ref_name }}kernaiadmin" \
           -backend-config="container_name=tfstate" \
-          -backend-config="key=${{ github.event.repository.name }}-${{ github.ref_name }}.tfstate"
+          -backend-config="key=${{ github.event.repository.name }}/${{ github.ref_name }}.tfstate"
 
     # Download saved plan from artifacts  
     - name: Download OpenTofu Plan
