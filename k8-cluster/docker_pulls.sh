@@ -19,12 +19,12 @@ echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
 
 DOCKER_POD=$(kubectl get pods -l app=docker -o jsonpath='{.items[0].metadata.name}')
 
+# "workflow-code-exec-env"
 PULL_IMAGE_NAMES=(
     "refinery-ac-exec-env"
     "refinery-lf-exec-env"
     "refinery-ml-exec-env"
     "refinery-record-ide-env"
-    "workflow-code-exec-env"
 )
 total_images=${#PULL_IMAGE_NAMES[@]}
 
