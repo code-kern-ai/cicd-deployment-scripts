@@ -45,7 +45,7 @@ jobs:
       run: |
         tofu init \
           -backend-config="resource_group_name=${{ env.ENVIRONMENT_NAME }}-tf-azure-admin" \
-          -backend-config="storage_account_name=${{ env.ENVIRONMENT_NAME }}kernaiadmin" \
+          -backend-config="storage_account_name=${{ env.ENVIRONMENT_NAME }}ahreljaadmin" \
           -backend-config="container_name=tfstate" \
           -backend-config="key=${{ github.event.repository.name }}/${{ env.ENVIRONMENT_NAME }}.tfstate"
 
@@ -112,7 +112,7 @@ jobs:
       run: |
         tofu init \
           -backend-config="resource_group_name=${{ github.ref_name }}-tf-azure-admin" \
-          -backend-config="storage_account_name=${{ github.ref_name }}kernaiadmin" \
+          -backend-config="storage_account_name=${{ github.ref_name }}ahreljaadmin" \
           -backend-config="container_name=tfstate" \
           -backend-config="key=${{ github.event.repository.name }}/${{ github.ref_name }}.tfstate"
 
