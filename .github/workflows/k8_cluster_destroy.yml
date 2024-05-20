@@ -51,8 +51,10 @@ jobs:
       with:
         inlineScript: |
           cd /usr/local/bin
-          curl -L https://aka.ms/downloadazcopy-${{ env.AZCOPY_VERSION }}-linux | tar --strip-components=1 --exclude=*.txt -xzvf -
+          wget https://aka.ms/downloadazcopy-${{ env.AZCOPY_VERSION }}-linux
+          tar --strip-components=1 --exclude="*.txt" -xzvf downloadazcopy-${{ env.AZCOPY_VERSION }}-linux
           chmod +x azcopy
+          
           azcopy remove \
             "https://${{ env.AZURE_STORAGE_ACCOUNT }}.file.core.windows.net/${{ env.AZURE_STORAGE_FILE_SHARE }}" \
             --exclude-path='
