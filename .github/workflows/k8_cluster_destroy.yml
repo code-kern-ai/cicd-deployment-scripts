@@ -56,9 +56,11 @@ jobs:
 
     - name: Install AzCopy
       shell: bash
-      env:
-        AZCOPY_AUTO_LOGIN_TYPE: AZCLI
       run: bash cicd-deployment-scripts/k8-cluster/install_azcopy.sh -v ${{ env.AZCOPY_VERSION }}
+
+    - name: AzCopy Login
+      shell: bash
+      run: azcopy login --identity --identity-client-id ${{ secrets.AZURE_CLIENT_ID }}
 
     - name: Destroy Cluster Namespace
       shell: bash

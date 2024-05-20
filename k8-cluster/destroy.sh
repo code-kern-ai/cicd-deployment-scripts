@@ -5,7 +5,7 @@ KUBERNETES_NAMESPACE=""
 AZURE_STORAGE_ACCOUNT=""
 AZURE_STORAGE_FILE_SHARE=""
 
-while getopts n: flag
+while getopts n:s:f: flag
 do
     case "${flag}" in
         n) KUBERNETES_NAMESPACE=${OPTARG};;
@@ -17,7 +17,6 @@ done
 kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE
 echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
 
-azcopy login --identity
 azcopy remove \
     "https://${AZURE_STORAGE_ACCOUNT}.file.core.windows.net/${AZURE_STORAGE_FILE_SHARE}" \
     --exclude-path='
