@@ -17,16 +17,7 @@ done
 kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE
 echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
 
-azcopy remove \
-    "https://${AZURE_STORAGE_ACCOUNT}.file.core.windows.net/${AZURE_STORAGE_FILE_SHARE}" \
-    --exclude-path='
-        caddy/Caddyfile;
-        kratos/identity.schema.json;
-        kratos/kratos.yml;
-        oathkeeper/oathkeeeper.yml;
-        oathkeeper/access-rules.yml;
-        oathkeeper/jwks.json' \
-    --recursive=true
+
 
 kubectl delete namespace $KUBERNETES_NAMESPACE
 kubectl delete persistentvolumeclaims --all
