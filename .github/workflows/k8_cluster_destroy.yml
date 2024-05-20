@@ -30,6 +30,9 @@ jobs:
     - name: GitHub Configuration
       run: git config --global url."https://oauth2:${{ secrets.TOKEN_GITHUB }}@github.com".insteadOf https://github.com
 
+    - name: Clone cicd-deployment-scripts
+      run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
+
     # Install the latest version of Kubernetes CLI and configure the Kubernetes CLI configuration file with a Kubernetes Cloud user API token
     - name: Azure Login
       uses: Azure/login@v2
@@ -58,9 +61,6 @@ jobs:
         cluster-name: ${{ env.KUBERNETES_CLUSTER_NAME }}
         admin: 'false'
         use-kubelogin: 'true'
-
-    - name: Clone cicd-deployment-scripts
-      run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
 
     - name: Destroy Cluster Namespace
       shell: bash
