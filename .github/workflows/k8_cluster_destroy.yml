@@ -33,9 +33,6 @@ jobs:
     - name: Clone cicd-deployment-scripts
       run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
 
-    - name: Install AzCopy
-      run: bash cicd-deployment-scripts/az/install_azcopy.sh -v ${{ env.AZCOPY_VERSION }}
-    
     # Install the latest version of Kubernetes CLI and configure the Kubernetes CLI configuration file with a Kubernetes Cloud user API token
     - name: Azure Login
       uses: azure/login@v2
@@ -43,28 +40,6 @@ jobs:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-  
-    - name: Azure CLI
-      uses: azure/cli@v2
-      env:
-        AZCOPY_AUTO_LOGIN_TYPE: AZCLI
-      with:
-        inlineScript: |
-          cd /usr/local/bin
-          wget https://aka.ms/downloadazcopy-${{ env.AZCOPY_VERSION }}-linux
-          tar --strip-components=1 --exclude="*.txt" -xzvf downloadazcopy-${{ env.AZCOPY_VERSION }}-linux
-          chmod +x azcopy
-          
-          azcopy remove \
-            "https://${{ env.AZURE_STORAGE_ACCOUNT }}.file.core.windows.net/${{ env.AZURE_STORAGE_FILE_SHARE }}" \
-            --exclude-path='
-                caddy/Caddyfile;
-                kratos/identity.schema.json;
-                kratos/kratos.yml;
-                oathkeeper/oathkeeeper.yml;
-                oathkeeper/access-rules.yml;
-                oathkeeper/jwks.json' \
-            --recursive=true
   
     # Use kubelogin to configure your kubeconfig for Azure auth
     - name: Set up kubelogin for non-interactive login
