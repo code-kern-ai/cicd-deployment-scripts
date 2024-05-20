@@ -60,14 +60,11 @@ jobs:
         AZCOPY_AUTO_LOGIN_TYPE: AZCLI
       run: bash cicd-deployment-scripts/k8-cluster/install_azcopy.sh -v ${{ env.AZCOPY_VERSION }}
 
-    - name: Delete Storage Share Contents
-      run: |
-        azcopy remove \
-          "https://${{ env.AZURE_STORAGE_ACCOUNT }}.file.core.windows.net/${{ env.AZURE_STORAGE_FILE_SHARE }}" \
-          --exclude-path=caddy/Caddyfile;kratos/identity.schema.json;kratos/kratos.yml;oathkeeper/oathkeeeper.yml;oathkeeper/access-rules.yml;oathkeeper/jwks.json \
-          --recursive=true
-
     - name: Destroy Cluster Namespace
       shell: bash
-      run: bash cicd-deployment-scripts/k8-cluster/destroy.sh -n ${{ env.KUBERNETES_NAMESPACE }}
+      run: |
+        bash cicd-deployment-scripts/k8-cluster/destroy.sh \
+          -n ${{ env.KUBERNETES_NAMESPACE }} \
+          -s ${{ env.AZURE_STORAGE_ACCOUNT }} \
+          -f ${{ env.AZURE_STORAGE_FILE_SHARE }}
     
