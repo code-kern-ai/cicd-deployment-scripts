@@ -64,6 +64,7 @@ jobs:
       run: |
         azcopy remove \
           "https://${{ env.AZURE_STORAGE_ACCOUNT }}.file.core.windows.net/${{ env.AZURE_STORAGE_FILE_SHARE }}" \
+          --exclude-path=caddy/Caddyfile;kratos/identity.schema.json;kratos/kratos.yml;oathkeeper/oathkeeeper.yml;oathkeeper/access-rules.yml;oathkeeper/jwks.json \
           --recursive=true
 
     - name: Destroy Cluster Namespace
