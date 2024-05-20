@@ -13,10 +13,11 @@ jobs:
   k8-cluster-apply:
     name: 'K8: Apply Cluster'
     runs-on: ubuntu-latest
-    environment: dev
+    if: github.event_name == 'push'
+    environment: ${{ github.ref_name }}
     env:
       KUBELOGIN_VERSION: "v0.0.25"
-      KUSTOMIZE_VERSION: "${{ vars.KUSTOMIZE_VERSION }}"
+      KUSTOMIZE_VERSION: "5.3.0"
       AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
       KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
       KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
