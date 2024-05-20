@@ -13,7 +13,21 @@ done
 kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE
 echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
 
-kubectl delete namespace $KUBERNETES_NAMESPACE
-kubectl delete persistentvolumeclaims --all
-kubectl delete persistentvolumes --all
-kubectl delete storageclass --all
+KUBERNETES_DEPLOYMENTS=$(kubectl get deployment --output json \
+    | jq -r '.items[] | select(.metadata.name as $name 
+        | ["caddy"] 
+        | index($name) | not) 
+    | .metadata.name')
+KUBERNETES_SERVICES=$(kubectl get service --output json \
+    | jq -r '.items[] | select(.metadata.name as $name 
+        | ["caddy"] 
+        | index($name) | not) 
+    | .metadata.name')
+
+for deploy in $KUBERNETES_DEPLOYMENTS; do
+  kubectl delete deployment $deploy
+done
+
+for svc in $KUBERNETES_SERVICES; do
+  kubectl delete service $svc
+done
