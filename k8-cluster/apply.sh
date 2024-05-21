@@ -15,4 +15,5 @@ done
 kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE
 echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
 
-kubectl apply -k $KUBERNETES_MANIFEST_PATH | grep -E 'created|configured' || true
+# kubectl apply -k $KUBERNETES_MANIFEST_PATH | grep -E 'created|configured' || true
+kubectl kustomize $KUBERNETES_MANIFEST_PATH
