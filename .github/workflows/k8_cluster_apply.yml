@@ -62,8 +62,7 @@ jobs:
       with:
          namespace: ${{ env.KUBERNETES_NAMESPACE }}
          manifests: apply.yml
-         strategy: canary
+         strategy: blue-green
          action: deploy
-         traffic-split-method: smi
-         percentage: 20
-         baseline-and-canary-replicas: 1
+         route-method: service
+         version-switch-buffer: 15
