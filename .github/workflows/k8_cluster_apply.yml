@@ -63,6 +63,7 @@ jobs:
       with:
          namespace: ${{ env.KUBERNETES_NAMESPACE }}
          manifests: apply.yml
+         images: kernaidev.azurecr.io/hosted-inference-api:latest
          strategy: blue-green
          action: deploy
          route-method: service
@@ -73,6 +74,7 @@ jobs:
       with:
         namespace: ${{ env.KUBERNETES_NAMESPACE }}
         manifests: apply.yml
+        images: kernaidev.azurecr.io/hosted-inference-api:latest
         strategy: blue-green
         action: promote
         route-method: service
@@ -83,6 +85,7 @@ jobs:
       with:
         namespace: ${{ env.KUBERNETES_NAMESPACE }}
         manifests: apply.yml
+        images: kernaidev.azurecr.io/hosted-inference-api:latest
         strategy: blue-green
         action: reject
         route-method: service
