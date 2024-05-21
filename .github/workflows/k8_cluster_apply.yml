@@ -30,6 +30,9 @@ jobs:
     - name: GitHub Configuration
       run: git config --global url."https://oauth2:${{ secrets.TOKEN_GITHUB }}@github.com".insteadOf https://github.com
 
+    - name: Clone cicd-deployment-scripts
+      run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
+
     # Install the latest version of Kubernetes CLI and configure the Kubernetes CLI configuration file with a Kubernetes Cloud user API token
     - name: Azure Login
       uses: Azure/login@v2
@@ -56,9 +59,7 @@ jobs:
     #   shell: bash
     #   env:
     #     INSTALL_KUSTOMIZE_SH: "cicd-deployment-scripts/k8-cluster/install_kustomize.sh"
-    #   run: |
-    #     git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
-    #     bash ${{ env.INSTALL_KUSTOMIZE_SH }} -v ${{ env.KUSTOMIZE_VERSION }}
+    #   run: bash ${{ env.INSTALL_KUSTOMIZE_SH }} -v ${{ env.KUSTOMIZE_VERSION }}
 
     - name: Run Kustomization
       shell: bash
