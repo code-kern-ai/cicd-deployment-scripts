@@ -54,14 +54,16 @@ jobs:
         admin: 'false'
         use-kubelogin: 'true'
     
-    # Installs kustomize using a custom script
-    # - name: Install Kustomize
-    #   shell: bash
-    #   env:
-    #     INSTALL_KUSTOMIZE_SH: "cicd-deployment-scripts/k8-cluster/install_kustomize.sh"
-    #   run: bash ${{ env.INSTALL_KUSTOMIZE_SH }} -v ${{ env.KUSTOMIZE_VERSION }}
-
-    - name: Run Kustomization
+    - name: Generate Kustomization
       shell: bash
-      run: bash cicd-deployment-scripts/k8-cluster/apply.sh -n ${{ env.KUBERNETES_NAMESPACE }} -p ${{ env.KUBERNETES_MANIFEST_PATH }}
+      run: bash cicd-deployment-scripts/k8-cluster/kustomize.sh -n ${{ env.KUBERNETES_NAMESPACE }} -p ${{ env.KUBERNETES_MANIFEST_PATH }}
   
+    - uses: Azure/k8s-deploy@v5
+      with:
+         namespace: ${{ env.KUBERNETES_NAMESPACE }}
+         manifests: apply.yml
+         strategy: canary
+         action: deploy
+         traffic-split-method: smi
+         percentage: 20
+         baseline-and-canary-replicas: 1
