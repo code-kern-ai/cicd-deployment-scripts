@@ -18,6 +18,7 @@ jobs:
     env:
       KUBELOGIN_VERSION: "v0.0.25"
       KUSTOMIZE_VERSION: "5.3.0"
+      AZURE_CONTAINER_REGISTRY: "${{ vars.AZURE_CONTAINER_REGISTRY }}"
       AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
       KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
       KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
@@ -40,6 +41,13 @@ jobs:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Log into registry
+      uses: docker/login-action@v3
+      with:
+        registry: "${{ env.AZURE_CONTAINER_REGISTRY }}"
+        username: "${{ secrets.ACR_LOGIN_USERNAME }}"
+        password: "${{ secrets.ACR_LOGIN_PASSWORD }}"
 
     # Use kubelogin to configure your kubeconfig for Azure auth
     - name: Set up kubelogin for non-interactive login
