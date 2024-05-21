@@ -18,7 +18,6 @@ jobs:
     env:
       KUBELOGIN_VERSION: "v0.0.25"
       KUSTOMIZE_VERSION: "5.3.0"
-      AZURE_CONTAINER_REGISTRY: "${{ vars.AZURE_CONTAINER_REGISTRY }}"
       AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
       KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
       KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
@@ -35,19 +34,12 @@ jobs:
       run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
 
     # Install the latest version of Kubernetes CLI and configure the Kubernetes CLI configuration file with a Kubernetes Cloud user API token
-    - name: Azure Login
+    - name: Azure Cloud Login
       uses: Azure/login@v2
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-    - name: Log into registry
-      uses: docker/login-action@v3
-      with:
-        registry: "${{ env.AZURE_CONTAINER_REGISTRY }}"
-        username: "${{ secrets.ACR_LOGIN_USERNAME }}"
-        password: "${{ secrets.ACR_LOGIN_PASSWORD }}"
 
     # Use kubelogin to configure your kubeconfig for Azure auth
     - name: Set up kubelogin for non-interactive login
@@ -71,10 +63,11 @@ jobs:
       with:
          namespace: ${{ env.KUBERNETES_NAMESPACE }}
          manifests: apply.yml
-         images: kernaidev.azurecr.io/hosted-inference-api:latest
-         strategy: blue-green
+         pull-images: false
+         images: kernaidev.azurecr.io/hosted-inference-api:amd64
+         strategy: canary
          action: deploy
-         route-method: service
+         percentage: 20
  
     - name: Promote Deployment
       uses: Azure/k8s-deploy@v5
@@ -82,10 +75,10 @@ jobs:
       with:
         namespace: ${{ env.KUBERNETES_NAMESPACE }}
         manifests: apply.yml
-        images: kernaidev.azurecr.io/hosted-inference-api:latest
-        strategy: blue-green
+        pull-images: false
+        images: kernaidev.azurecr.io/hosted-inference-api:amd64
+        strategy: canary
         action: promote
-        route-method: service
 
     - name: Reject Deployment
       uses: Azure/k8s-deploy@v5
@@ -93,7 +86,7 @@ jobs:
       with:
         namespace: ${{ env.KUBERNETES_NAMESPACE }}
         manifests: apply.yml
-        images: kernaidev.azurecr.io/hosted-inference-api:latest
-        strategy: blue-green
+        pull-images: false
+        images: kernaidev.azurecr.io/hosted-inference-api:amd64
+        strategy: canary
         action: reject
-        route-method: service
