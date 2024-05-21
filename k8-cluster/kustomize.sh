@@ -17,3 +17,4 @@ echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
 
 # kubectl apply -k $KUBERNETES_MANIFEST_PATH | grep -E 'created|configured' || true
 kubectl kustomize $KUBERNETES_MANIFEST_PATH --output apply.yml
+cat apply.yml
