@@ -58,10 +58,31 @@ jobs:
       shell: bash
       run: bash cicd-deployment-scripts/k8-cluster/kustomize.sh -n ${{ env.KUBERNETES_NAMESPACE }} -p ${{ env.KUBERNETES_MANIFEST_PATH }}
   
-    - uses: Azure/k8s-deploy@v5
+    - name: Generate Deployment
+      uses: Azure/k8s-deploy@v5
       with:
          namespace: ${{ env.KUBERNETES_NAMESPACE }}
          manifests: apply.yml
          strategy: blue-green
          action: deploy
          route-method: service
+ 
+    - name: Promote Deployment
+      uses: Azure/k8s-deploy@v5
+      if: success()
+      with:
+        namespace: ${{ env.KUBERNETES_NAMESPACE }}
+        manifests: apply.yml
+        strategy: blue-green
+        action: promote
+        route-method: service
+
+    - name: Reject Deployment
+      uses: Azure/k8s-deploy@v5
+      if: failure()
+      with:
+        namespace: ${{ env.KUBERNETES_NAMESPACE }}
+        manifests: apply.yml
+        strategy: blue-green
+        action: reject
+        route-method: service
