@@ -1,4 +1,4 @@
-name: 'K8: Docker Pulls'
+name: 'K8: Inference Reload Config'
 
 on:
   workflow_call:
@@ -10,15 +10,13 @@ permissions:
   actions: read
 
 jobs:
-  k8-docker-pulls:
-    name: 'K8: Docker Pulls'
+  k8-inference-reload-config:
+    name: 'K8: Inference - Reload Last Config'
     runs-on: ubuntu-latest
     environment: dev
     env:
       KUBELOGIN_VERSION: "v0.0.25"
-      AZURE_IMAGE_TAG: ${{ vars.AZURE_IMAGE_TAG }}
       AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
-      AZURE_CONTAINER_REGISTRY: "${{ vars.AZURE_CONTAINER_REGISTRY }}"
       KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
       KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
     steps:
@@ -50,12 +48,9 @@ jobs:
         admin: 'false'
         use-kubelogin: 'true'
 
-    - name: Execute docker pull
+    - name: Execute Inference Reload Config
       shell: bash
       run: |
         git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
-        bash cicd-deployment-scripts/k8-cluster/docker_pulls.sh \
-          -n ${{ env.KUBERNETES_NAMESPACE }} \
-          -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
-          -t ${{ env.AZURE_IMAGE_TAG }}
+        bash cicd-deployment-scripts/k8s/inference_reload_config.sh -n ${{ env.KUBERNETES_NAMESPACE }}
   

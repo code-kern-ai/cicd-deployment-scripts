@@ -1,4 +1,4 @@
-name: 'K8: Destroy'
+name: 'K8: Docker Pulls'
 
 on:
   workflow_call:
@@ -10,18 +10,17 @@ permissions:
   actions: read
 
 jobs:
-  k8-cluster-destroy:
-    name: 'K8: Destroy Cluster Namespace'
+  k8-docker-pulls:
+    name: 'K8: Docker Pulls'
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name }}
+    environment: dev
     env:
-      KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
-      KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
-      KUBERNETES_MANIFEST_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}"
+      KUBELOGIN_VERSION: "v0.0.25"
+      AZURE_IMAGE_TAG: ${{ vars.AZURE_IMAGE_TAG }}
       AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
-      AZURE_STORAGE_ACCOUNT: ${{ vars.AZURE_STORAGE_ACCOUNT }}
-      AZURE_STORAGE_FILE_SHARE: ${{ vars.AZURE_STORAGE_FILE_SHARE }}
-      AZCOPY_VERSION: "v10"
+      AZURE_CONTAINER_REGISTRY: "${{ vars.AZURE_CONTAINER_REGISTRY }}"
+      KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
+      KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
@@ -30,22 +29,19 @@ jobs:
     - name: GitHub Configuration
       run: git config --global url."https://oauth2:${{ secrets.TOKEN_GITHUB }}@github.com".insteadOf https://github.com
 
-    - name: Clone cicd-deployment-scripts
-      run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
-
     # Install the latest version of Kubernetes CLI and configure the Kubernetes CLI configuration file with a Kubernetes Cloud user API token
     - name: Azure Login
-      uses: azure/login@v2
+      uses: Azure/login@v2
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-  
+
     # Use kubelogin to configure your kubeconfig for Azure auth
     - name: Set up kubelogin for non-interactive login
       uses: azure/use-kubelogin@v1
       with:
-        kubelogin-version: 'v0.0.25'
+        kubelogin-version: ${{ env.KUBELOGIN_VERSION }}
 
     - uses: azure/aks-set-context@v3
       with:
@@ -54,11 +50,12 @@ jobs:
         admin: 'false'
         use-kubelogin: 'true'
 
-    - name: Destroy Cluster Namespace
+    - name: Execute docker pull
       shell: bash
       run: |
-        bash cicd-deployment-scripts/k8-cluster/destroy.sh \
+        git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
+        bash cicd-deployment-scripts/k8s/exec_env_pull.sh \
           -n ${{ env.KUBERNETES_NAMESPACE }} \
-          -s ${{ env.AZURE_STORAGE_ACCOUNT }} \
-          -f ${{ env.AZURE_STORAGE_FILE_SHARE }}
-    
+          -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
+          -t ${{ env.AZURE_IMAGE_TAG }}
+  

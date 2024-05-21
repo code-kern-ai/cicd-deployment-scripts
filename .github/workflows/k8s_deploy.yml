@@ -1,11 +1,7 @@
-name: 'K8: Run Migration'
+name: 'K8: Deploy'
 
 on:
   workflow_call:
-    inputs:
-      migration-job-name:
-        description: "Migration Job Name"
-        type: string
 
 # Special permissions required for OIDC authentication
 permissions:
@@ -14,10 +10,11 @@ permissions:
   actions: read
 
 jobs:
-  k8-cluster-run-migration:
-    name: 'K8: Run Migration'
+  k8-cluster-deploy:
+    name: 'K8: Deploy Cluster'
     runs-on: ubuntu-latest
-    environment: dev
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    environment: ${{ github.ref_name }}
     env:
       KUBELOGIN_VERSION: "v0.0.25"
       AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
@@ -25,14 +22,18 @@ jobs:
       KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
       KUBERNETES_MANIFEST_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}"
     steps:
+    # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v4
 
     - name: GitHub Configuration
       run: git config --global url."https://oauth2:${{ secrets.TOKEN_GITHUB }}@github.com".insteadOf https://github.com
 
+    - name: Clone cicd-deployment-scripts
+      run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
+
     # Install the latest version of Kubernetes CLI and configure the Kubernetes CLI configuration file with a Kubernetes Cloud user API token
-    - name: Azure Login
+    - name: Azure Cloud Login
       uses: Azure/login@v2
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -51,13 +52,42 @@ jobs:
         cluster-name: ${{ env.KUBERNETES_CLUSTER_NAME }}
         admin: 'false'
         use-kubelogin: 'true'
-
-    - name: Execute run migration
+    
+    - name: Generate Kustomization
       shell: bash
       run: |
-        git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
-        bash cicd-deployment-scripts/k8-cluster/run_migration.sh \
-          -n ${{ env.KUBERNETES_NAMESPACE }} \
-          -p ${{ env.KUBERNETES_MANIFEST_PATH }} \
-          -j ${{ inputs.migration-job-name }}
+        kubectl kustomize ${{ env.KUBERNETES_MANIFEST_PATH }} --output apply.yml
+        cat apply.yml
   
+    - name: Generate Deployment
+      uses: Azure/k8s-deploy@v5
+      with:
+         namespace: ${{ env.KUBERNETES_NAMESPACE }}
+         manifests: apply.yml
+         pull-images: false
+         images: kernaidev.azurecr.io/hosted-inference-api:amd64
+         strategy: canary
+         action: deploy
+         percentage: 20
+ 
+    - name: Promote Deployment
+      uses: Azure/k8s-deploy@v5
+      if: success()
+      with:
+        namespace: ${{ env.KUBERNETES_NAMESPACE }}
+        manifests: apply.yml
+        pull-images: false
+        images: kernaidev.azurecr.io/hosted-inference-api:amd64
+        strategy: canary
+        action: promote
+
+    - name: Reject Deployment
+      uses: Azure/k8s-deploy@v5
+      if: failure()
+      with:
+        namespace: ${{ env.KUBERNETES_NAMESPACE }}
+        manifests: apply.yml
+        pull-images: false
+        images: kernaidev.azurecr.io/hosted-inference-api:amd64
+        strategy: canary
+        action: reject

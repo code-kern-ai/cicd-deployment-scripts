@@ -37,17 +37,15 @@ jobs:
           file: ${{ env.DOCKERFILE }}
           tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform}}
           push: true
-          build-args: |
-            platform=linux/${{ matrix.platform}}
+          build-args: platform=linux/${{ matrix.platform}}
 
-      - name: Build & Push - Replace branch
-        if: ${{ github.ref != github.repository.default_branch }}
-        uses: docker/build-push-action@v5
-        with:
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          file: ${{ env.DOCKERFILE }}
-          tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform}}-${{ github.ref_name }}
-          push: true
-          build-args: |
-            platform=linux/${{ matrix.platform}}
+      # - name: Build & Push - Replace branch
+      #   if: ${{ github.ref != github.repository.default_branch }}
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     push: true
+      #     file: ${{ env.DOCKERFILE }}
+      #     tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform}}-${{ github.ref_name }}
+      #     cache-from: type=gha
+      #     cache-to: type=gha,mode=max
+      #     build-args: platform=linux/${{ matrix.platform}}
