@@ -65,4 +65,3 @@ jobs:
          strategy: blue-green
          action: deploy
          route-method: service
-         version-switch-buffer: 15
