@@ -2,13 +2,19 @@ name: 'ACR: Docker Push'
 
 on:
   workflow_call:
+    inputs:
+      test_tag:
+        description: 'Create test tag'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   az-acr-push-dev:
     name: "DEV: ACR Build & Push"
     runs-on: ubuntu-latest
     environment: dev
-    if: github.ref_name != 'prod'
+    if: github.event.inputs.test_tag != true && github.ref_name != 'prod'
     env:
       DOCKERFILE: ${{ vars.DOCKERFILE || 'Dockerfile' }}
       AZURE_CONTAINER_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY }}
@@ -54,7 +60,7 @@ jobs:
     name: "DEV: ACR Build & Push Tests"
     runs-on: ubuntu-latest
     environment: dev
-    if: github.ref_name != 'prod'
+    if: github.event.inputs.test_tag == true
     env:
       DOCKERFILE: dev.Dockerfile
       AZURE_CONTAINER_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY }}
