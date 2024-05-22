@@ -68,4 +68,4 @@ jobs:
           -n ${{ env.KUBERNETES_NAMESPACE }} \
           -d ${{ github.event.repository.name }} \
           -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
-          -t ${{ github.event.inputs.test_cmd }}
+          -t ${{ inputs.test_cmd }}
