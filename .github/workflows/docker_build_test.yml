@@ -38,6 +38,7 @@ jobs:
   test:
     name: "Docker: Test"
     runs-on: ubuntu-latest
+    needs: [build]
     env:
       DOCKERFILE: 'dev.Dockerfile'
     steps:
