@@ -1,4 +1,4 @@
-name: 'K8: Deploy'
+name: 'K8: Test'
 
 on:
   workflow_call:
@@ -14,14 +14,13 @@ permissions:
   actions: read
 
 jobs:
-  k8-cluster-deploy:
-    name: 'K8: Deploy Cluster'
+  k8-test:
+    name: 'K8: Test'
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    environment: ${{ github.ref_name }}
+    environment: dev
     env:
       KUBELOGIN_VERSION: "v0.0.25"
-      KUBERNETES_CLUSTER_REPO_NAME: "k8s-cluster-freeapi"
+      KUBERNETES_CLUSTER_REPO_NAME: ${{ vars.KUBERNETES_CLUSTER_REPO_NAME }}
       KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
       KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
       KUBERNETES_MANIFEST_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}"

@@ -10,8 +10,8 @@ permissions:
   actions: read
 
 jobs:
-  k8-cluster-deploy:
-    name: 'K8: Deploy Cluster'
+  k8-deploy:
+    name: 'K8: Deploy'
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     environment: ${{ github.ref_name }}
