@@ -5,9 +5,8 @@ on:
     inputs:
       test_tag:
         description: 'Create test tag'
-        required: false
-        default: false
-        type: boolean
+        default: 'false'
+        type: string
 
 jobs:
   az-acr-push-dev:
