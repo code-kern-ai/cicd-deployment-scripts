@@ -2,22 +2,16 @@ name: 'ACR: Docker Push'
 
 on:
   workflow_call:
-    inputs:
-      image_tag:
-        description: 'Image Tag (semantic version)'
-        required: false
-        default: null
-        type: string
 
 jobs:
   az-acr-push-dev:
     name: "Azure: ACR Build & Push"
     runs-on: ubuntu-latest
-    environment: dev
-    if: github.event.inputs.image_tag == null
+    environment: ${{ github.ref_name }}
+    if: github.ref_name == 'dev'
     env:
       DOCKERFILE: ${{ vars.DOCKERFILE || 'Dockerfile' }}
-      AZURE_CONTAINER_REGISTRY: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
+      AZURE_CONTAINER_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY }}
       ACR_LOGIN_USERNAME: ${{ secrets.ACR_LOGIN_USERNAME }}
       ACR_LOGIN_PASSWORD: ${{ secrets.ACR_LOGIN_PASSWORD }}
     strategy:
@@ -60,10 +54,10 @@ jobs:
   az-acr-push-prod:
     name: "Azure: ACR Build & Push"
     runs-on: ubuntu-latest
-    environment: prod
-    if: github.event.inputs.image_tag != null
+    environment: ${{ github.ref_name }}
+    if: github.ref_name == 'prod'
     env:
-      AZURE_CONTAINER_REGISTRY: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
+      AZURE_CONTAINER_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY }}
       ACR_LOGIN_USERNAME: ${{ secrets.ACR_LOGIN_USERNAME }}
       ACR_LOGIN_PASSWORD: ${{ secrets.ACR_LOGIN_PASSWORD }}
     steps:
