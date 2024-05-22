@@ -14,7 +14,7 @@ jobs:
     name: "DEV: ACR Build & Push"
     runs-on: ubuntu-latest
     environment: dev
-    if: github.event.inputs.test_tag != true && github.ref_name != 'prod'
+    if: github.event.inputs.test_tag == 'false' && github.ref_name != 'prod'
     env:
       DOCKERFILE: ${{ vars.DOCKERFILE || 'Dockerfile' }}
       AZURE_CONTAINER_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY }}
@@ -57,10 +57,10 @@ jobs:
           build-args: platform=linux/${{ matrix.platform}}
 
   az-acr-push-test:
-    name: "DEV: ACR Build & Push Tests"
+    name: "TEST: ACR Build & Push"
     runs-on: ubuntu-latest
     environment: dev
-    if: github.event.inputs.test_tag == true
+    if: github.event.inputs.test_tag == 'true'
     env:
       DOCKERFILE: dev.Dockerfile
       AZURE_CONTAINER_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY }}
@@ -89,7 +89,7 @@ jobs:
           build-args: platform=linux/amd64
 
   az-acr-push-prod:
-    name: "Azure: ACR Build & Push"
+    name: "PROD: ACR Build & Push"
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     if: github.ref_name == 'prod'
