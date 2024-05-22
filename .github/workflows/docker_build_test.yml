@@ -1,0 +1,38 @@
+name: 'Docker: Build & Test'
+
+on:
+  workflow_call:
+    inputs:
+      test_cmd:
+        description: 'Test Command'
+        required: false
+        default: null
+        type: string
+
+jobs:
+  docker-build-test:
+    name: "Docker: Build & Test"
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_cmd != null
+    env:
+      DOCKERFILE: 'dev.Dockerfile'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build & Test
+        uses: docker/build-push-action@v5
+        with:
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          file: ${{ env.DOCKERFILE }}
+          tags: ${{ github.event.repository.name }}:test
+
+      - name: Test
+        run: |
+          export WORKDIR=$(cat ${{ env.DOCKERFILE }} | grep WORKDIR | awk '{print $2}')
+          docker run --name ${{ github.event.repository.name }} --rm ${{ github.event.repository.name }}:test
+          docker exec -it ${{ github.event.repository.name }} sh -c "cd ${WORKDIR} && ${{ github.event.inputs.test_cmd }}"
+  
