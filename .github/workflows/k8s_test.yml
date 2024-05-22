@@ -20,7 +20,6 @@ jobs:
     environment: dev
     env:
       KUBELOGIN_VERSION: "v0.0.25"
-      KUBERNETES_CLUSTER_REPO_NAME: ${{ vars.KUBERNETES_CLUSTER_REPO_NAME }}
       KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
       KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
       KUBERNETES_MANIFEST_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}"
@@ -30,16 +29,12 @@ jobs:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.TOKEN_GITHUB }}
-        repository: ${{ github.repository_owner }}/${{ env.KUBERNETES_CLUSTER_REPO_NAME }}
-        ref: refs/heads/dev
 
     - name: GitHub Configuration
       run: git config --global url."https://oauth2:${{ secrets.TOKEN_GITHUB }}@github.com".insteadOf https://github.com
 
     - name: Clone cicd-deployment-scripts
-      run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git  
+      run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
 
     # Install the latest version of Kubernetes CLI and configure the Kubernetes CLI configuration file with a Kubernetes Cloud user API token
     - name: Azure Cloud Login
