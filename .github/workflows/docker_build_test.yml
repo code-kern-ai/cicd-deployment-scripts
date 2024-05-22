@@ -9,8 +9,8 @@ on:
         type: string
 
 jobs:
-  docker-build-test:
-    name: "Docker: Build & Test"
+  build:
+    name: "Docker: Build"
     runs-on: ubuntu-latest
     env:
       DOCKERFILE: 'dev.Dockerfile'
@@ -20,17 +20,38 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       
-      - name: Build & Test
+      - name: Build
         uses: docker/build-push-action@v5
         with:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           file: ${{ env.DOCKERFILE }}
           tags: ${{ github.event.repository.name }}:test
+          outputs: type=docker,dest=/tmp/${{ github.event.repository.name }}.tar
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: myimage
+          path: /tmp/${{ github.event.repository.name }}.tar
+
+  test:
+    name: "Docker: Test"
+    runs-on: ubuntu-latest
+    env:
+      DOCKERFILE: 'dev.Dockerfile'
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}
+          path: /tmp
+      
       - name: Test
         run: |
           export WORKDIR=$(cat ${{ env.DOCKERFILE }} | grep WORKDIR | awk '{print $2}')
+
+          docker load --input /tmp/${{ github.event.repository.name }}.tar
           docker run --name ${{ github.event.repository.name }} --rm ${{ github.event.repository.name }}:test
           docker exec -it ${{ github.event.repository.name }} sh -c "cd ${WORKDIR} && ${{ github.event.inputs.test_cmd }}"
   
