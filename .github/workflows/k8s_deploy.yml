@@ -1,8 +1,7 @@
 name: 'K8: Deploy'
 
 on:
-  release:
-    types: [released]
+  workflow_call:
 
 # Special permissions required for OIDC authentication
 permissions:
@@ -23,6 +22,7 @@ jobs:
       KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
       KUBERNETES_MANIFEST_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}"
       AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
+      AZURE_CONTAINER_REGISTRY: "${{ vars.AZURE_CONTAINER_REGISTRY }}"
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
@@ -63,7 +63,7 @@ jobs:
          namespace: ${{ env.KUBERNETES_NAMESPACE }}
          manifests: apply.yml
          pull-images: false
-         images: kernaidev.azurecr.io/${{ github.event.repository.name }}:amd64
+         images: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:amd64
          strategy: canary
          action: deploy
          percentage: 20
@@ -75,7 +75,7 @@ jobs:
         namespace: ${{ env.KUBERNETES_NAMESPACE }}
         manifests: apply.yml
         pull-images: false
-        images: kernaidev.azurecr.io/${{ github.event.repository.name }}:amd64
+        images: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:amd64
         strategy: canary
         action: promote
 
@@ -86,6 +86,6 @@ jobs:
         namespace: ${{ env.KUBERNETES_NAMESPACE }}
         manifests: apply.yml
         pull-images: false
-        images: kernaidev.azurecr.io/${{ github.event.repository.name }}:amd64
+        images: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:amd64
         strategy: canary
         action: reject
