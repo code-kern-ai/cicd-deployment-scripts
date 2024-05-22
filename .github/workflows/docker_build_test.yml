@@ -6,14 +6,13 @@ on:
       test_cmd:
         description: 'Test Command'
         required: false
-        default: null
         type: string
 
 jobs:
   docker-build-test:
     name: "Docker: Build & Test"
     runs-on: ubuntu-latest
-    if: github.event.inputs.test_cmd != null
+    if: github.event.inputs.test_cmd
     env:
       DOCKERFILE: 'dev.Dockerfile'
     steps:
