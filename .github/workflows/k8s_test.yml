@@ -10,6 +10,7 @@ on:
 
 # Special permissions required for OIDC authentication
 permissions:
+  id-token: write
   contents: read
   actions: read
 
