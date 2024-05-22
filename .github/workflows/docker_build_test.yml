@@ -12,7 +12,6 @@ jobs:
   docker-build-test:
     name: "Docker: Build & Test"
     runs-on: ubuntu-latest
-    if: github.event.inputs.test_cmd
     env:
       DOCKERFILE: 'dev.Dockerfile'
     steps:
