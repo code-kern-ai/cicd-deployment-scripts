@@ -13,7 +13,7 @@ jobs:
     name: "DEV: ACR Build & Push"
     runs-on: ubuntu-latest
     environment: dev
-    if: github.event.inputs.test_tag == 'false' && github.ref_name != 'prod'
+    if: github.event.inputs.test_tag != 'true' && github.ref_name != 'prod'
     env:
       DOCKERFILE: ${{ vars.DOCKERFILE || 'Dockerfile' }}
       AZURE_CONTAINER_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY }}
