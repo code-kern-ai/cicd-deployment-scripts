@@ -1,8 +1,12 @@
 name: 'K8: Deploy'
 
 on:
-  release:
-    types: [released]
+  workflow_call:
+    inputs:
+      test_cmd:
+        description: 'Test Command'
+        required: true
+        type: string
 
 # Special permissions required for OIDC authentication
 permissions:
@@ -23,12 +27,19 @@ jobs:
       KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
       KUBERNETES_MANIFEST_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}"
       AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
+      AZURE_CONTAINER_REGISTRY: "${{ vars.AZURE_CONTAINER_REGISTRY }}"
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v4
       with:
         repository: ${{ github.repository_owner }}/${{ env.KUBERNETES_CLUSTER_REPO_NAME }}
+
+    - name: GitHub Configuration
+      run: git config --global url."https://oauth2:${{ secrets.TOKEN_GITHUB }}@github.com".insteadOf https://github.com
+
+    - name: Clone cicd-deployment-scripts
+      run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git  
 
     # Install the latest version of Kubernetes CLI and configure the Kubernetes CLI configuration file with a Kubernetes Cloud user API token
     - name: Azure Cloud Login
@@ -51,41 +62,11 @@ jobs:
         admin: 'false'
         use-kubelogin: 'true'
     
-    - name: Generate Kustomization
+    - name: Run Test
       shell: bash
       run: |
-        kubectl kustomize ${{ env.KUBERNETES_MANIFEST_PATH }} --output apply.yml
-        cat apply.yml
-  
-    - name: Generate Deployment
-      uses: Azure/k8s-deploy@v5
-      with:
-         namespace: ${{ env.KUBERNETES_NAMESPACE }}
-         manifests: apply.yml
-         pull-images: false
-         images: kernaidev.azurecr.io/${{ github.event.repository.name }}:amd64
-         strategy: canary
-         action: deploy
-         percentage: 20
- 
-    - name: Promote Deployment
-      uses: Azure/k8s-deploy@v5
-      if: success()
-      with:
-        namespace: ${{ env.KUBERNETES_NAMESPACE }}
-        manifests: apply.yml
-        pull-images: false
-        images: kernaidev.azurecr.io/${{ github.event.repository.name }}:amd64
-        strategy: canary
-        action: promote
-
-    - name: Reject Deployment
-      uses: Azure/k8s-deploy@v5
-      if: failure()
-      with:
-        namespace: ${{ env.KUBERNETES_NAMESPACE }}
-        manifests: apply.yml
-        pull-images: false
-        images: kernaidev.azurecr.io/${{ github.event.repository.name }}:amd64
-        strategy: canary
-        action: reject
+        bash cicd-deployment-scripts/k8s/test.sh \
+          -n ${{ env.KUBERNETES_NAMESPACE }} \
+          -d ${{ github.event.repository.name }} \
+          -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
+          -t ${{ github.event.inputs.test_cmd }}
