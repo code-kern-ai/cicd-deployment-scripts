@@ -19,6 +19,7 @@ jobs:
       AZURE_CONTAINER_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY }}
       ACR_LOGIN_USERNAME: ${{ secrets.ACR_LOGIN_USERNAME }}
       ACR_LOGIN_PASSWORD: ${{ secrets.ACR_LOGIN_PASSWORD }}
+      IMAGE_TAG: ${{ github.action == 'release' && github.event.release.tag_name || 'amd64' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -37,7 +38,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           file: ${{ env.DOCKERFILE }}
-          tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:v${{ github.event.release.tag_name }}
+          tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
           push: true
           build-args: platform=linux/amd64
   
@@ -54,6 +55,7 @@ jobs:
       KUBERNETES_MANIFEST_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}"
       AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
       AZURE_CONTAINER_REGISTRY: "${{ vars.AZURE_CONTAINER_REGISTRY }}"
+      IMAGE_TAG: ${{ github.action == 'release' && github.event.release.tag_name || 'amd64' }}
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
@@ -96,7 +98,7 @@ jobs:
          namespace: ${{ env.KUBERNETES_NAMESPACE }}
          manifests: apply.yml
          pull-images: false
-         images: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:v${{ github.event.release.tag_name }}
+         images: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
          strategy: canary
          action: deploy
          percentage: 20
@@ -108,7 +110,7 @@ jobs:
         namespace: ${{ env.KUBERNETES_NAMESPACE }}
         manifests: apply.yml
         pull-images: false
-        images: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:v${{ github.event.release.tag_name }}
+        images: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
         strategy: canary
         action: promote
 
@@ -119,6 +121,6 @@ jobs:
         namespace: ${{ env.KUBERNETES_NAMESPACE }}
         manifests: apply.yml
         pull-images: false
-        images: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:v${{ github.event.release.tag_name }}
+        images: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
         strategy: canary
         action: reject
