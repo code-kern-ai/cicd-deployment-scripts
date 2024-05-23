@@ -59,7 +59,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
+        token: ${{ secrets.TOKEN_GITHUB }}
         repository: ${{ github.repository_owner }}/${{ env.KUBERNETES_CLUSTER_REPO_NAME }}
+        ref: refs/heads/dev
 
     # Install the latest version of Kubernetes CLI and configure the Kubernetes CLI configuration file with a Kubernetes Cloud user API token
     - name: Azure Cloud Login
