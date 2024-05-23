@@ -29,6 +29,7 @@ kubectl set image deployment/${KUBERNETES_DEPLOYMENT_NAME} ${KUBERNETES_DEPLOYME
 echo "::warning::using ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:test-${GITHUB_HEAD_REF}"
 
 kubectl rollout status deployment ${KUBERNETES_DEPLOYMENT_NAME}
+kubectl wait --for jsonpath='{.status.phase}'=Running pod --selector app=${KUBERNETES_DEPLOYMENT_NAME}
 
 KUBERNETES_POD_NAME=$(kubectl get pod --output json \
     --selector app=${KUBERNETES_DEPLOYMENT_NAME} \
