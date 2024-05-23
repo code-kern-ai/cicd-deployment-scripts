@@ -122,4 +122,5 @@ jobs:
           inlineScript: |
             az acr repository delete \
               --name ${{ env.AZURE_CONTAINER_REGISTRY }} \
-              --image ${{ github.event.repository.name }}:test-${{ github.head_ref }}
+              --image ${{ github.event.repository.name }}:test-${{ github.head_ref }} \
+              --yes
