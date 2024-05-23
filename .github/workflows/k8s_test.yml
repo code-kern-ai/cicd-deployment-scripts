@@ -97,4 +97,4 @@ jobs:
           -d ${{ github.event.repository.name }} \
           -h ${{ github.head_ref }} \
           -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
-          -t ${{ inputs.test_cmd }}
+          -t "${{ inputs.test_cmd }}"
