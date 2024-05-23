@@ -18,6 +18,9 @@ do
     esac
 done
 
+kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE
+echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
+
 KUBERNETES_POD_EXISTING_IMAGE=$(kubectl get pod --output json \
     --selector app=${KUBERNETES_DEPLOYMENT_NAME} \
     | jq -r '.items[] | .spec.containers[0].image')
