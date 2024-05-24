@@ -53,91 +53,12 @@ jobs:
           build-args: platform=linux/amd64
 
   k8-deploy:
-    name: 'K8: Deploy'
-    runs-on: ubuntu-latest
+    uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/_k8s_deploy.yml@dev
     needs: [az-acr-push]
-    environment: ${{ github.event_name == 'release' && 'prod' || 'dev' }}
-    env:
-      KUBELOGIN_VERSION: "v0.0.25"
-      KUBERNETES_CLUSTER_REPO_NAME: "${{ vars.KUBERNETES_CLUSTER_REPO_NAME }}"
-      KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
-      KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
-      KUBERNETES_MANIFEST_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}"
-      AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
-      AZURE_CONTAINER_REGISTRY: "${{ vars.AZURE_CONTAINER_REGISTRY }}"
-      IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || 'amd64' }}
-    steps:
-    # Checkout the repository to the GitHub Actions runner
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.TOKEN_GITHUB }}
-        repository: ${{ github.repository_owner }}/${{ env.KUBERNETES_CLUSTER_REPO_NAME }}
-        ref: refs/heads/dev
-
-    # Install the latest version of Kubernetes CLI and configure the Kubernetes CLI configuration file with a Kubernetes Cloud user API token
-    - name: Azure Cloud Login
-      uses: Azure/login@v2
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-    # Use kubelogin to configure your kubeconfig for Azure auth
-    - name: Set up kubelogin for non-interactive login
-      uses: azure/use-kubelogin@v1
-      with:
-        kubelogin-version: ${{ env.KUBELOGIN_VERSION }}
-
-    - uses: azure/aks-set-context@v3
-      with:
-        resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-        cluster-name: ${{ env.KUBERNETES_CLUSTER_NAME }}
-        admin: 'false'
-        use-kubelogin: 'true'
-    
-    - name: Generate Kustomization
-      shell: bash
-      env:
-        KUBECTL_EXTERNAL_DIFF: "colordiff -N -u"
-      run: |
-        kubectl kustomize ${{ env.KUBERNETES_MANIFEST_PATH }} --output apply.yml
-        kubectl diff --filename apply.yml || true
-  
-    - name: Generate Deployment
-      uses: Azure/k8s-deploy@v5
-      timeout-minutes: 10
-      with:
-         namespace: ${{ env.KUBERNETES_NAMESPACE }}
-         manifests: apply.yml
-         pull-images: false
-         images: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
-         strategy: canary
-         action: deploy
-         percentage: 20
- 
-    - name: Promote Deployment
-      uses: Azure/k8s-deploy@v5
-      if: success()
-      with:
-        namespace: ${{ env.KUBERNETES_NAMESPACE }}
-        manifests: apply.yml
-        pull-images: false
-        images: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
-        strategy: canary
-        action: promote
-
-    - name: Reject Deployment
-      uses: Azure/k8s-deploy@v5
-      if: failure() || cancelled()
-      with:
-        namespace: ${{ env.KUBERNETES_NAMESPACE }}
-        manifests: apply.yml
-        pull-images: false
-        images: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
-        strategy: canary
-        action: reject
-
+    secrets: inherit
+    with:
+      environment: ${{ github.event_name == 'release' && 'prod' || 'dev' }}
+        
   gh-release-publish:
     name: 'GitHub: Publish Release'
     runs-on: ubuntu-latest
