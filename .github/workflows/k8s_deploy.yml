@@ -106,7 +106,7 @@ jobs:
   
     - name: Generate Deployment
       uses: Azure/k8s-deploy@v5
-      timeout-minutes: 5
+      timeout-minutes: 10
       with:
          namespace: ${{ env.KUBERNETES_NAMESPACE }}
          manifests: apply.yml
