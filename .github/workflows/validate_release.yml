@@ -3,22 +3,16 @@ name: "GitHub: Validate Release"
 on:
   workflow_call:
 
-permissions:
-  contents: read
-  discussions: read
-
 jobs:
   validate-release:
     name: 'GitHub: Validate Release'
     runs-on: ubuntu-latest
     steps:
-      - name: Dump GitHub context
-        env:
-            GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      
       - name: Validate Release Tag
-        run: echo "Release Tag needs to match 'v*.*.*-*'"
-
-      - name: Validate Release Type
-        run: echo "Release needs to be a 'prerelease'"
+        shell: bash
+        run: |
+          if [[ ! ${{ github.event.release.tag_name }} =~ ^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$ ]]; then
+            echo "::error::Release Tag needs to match 'v*.*.*-*'"
+            echo "More info: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string"
+            exit 1
+          fi
