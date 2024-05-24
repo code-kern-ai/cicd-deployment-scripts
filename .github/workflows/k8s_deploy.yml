@@ -32,7 +32,7 @@ jobs:
           username: "${{ env.ACR_LOGIN_USERNAME }}"
           password: "${{ env.ACR_LOGIN_PASSWORD }}"
       
-      - name: Build & Push
+      - name: Build & Push :${{ env.IMAGE_TAG }}
         uses: docker/build-push-action@v5
         with:
           cache-from: type=gha
@@ -41,7 +41,17 @@ jobs:
           tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
           push: true
           build-args: platform=linux/amd64
-  
+
+      - name: Build & Push :latest
+        uses: docker/build-push-action@v5
+        with:
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          file: ${{ env.DOCKERFILE }}
+          tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:latest
+          push: true
+          build-args: platform=linux/amd64
+
   k8-deploy:
     name: 'K8: Deploy'
     runs-on: ubuntu-latest
