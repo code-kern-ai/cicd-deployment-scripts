@@ -126,30 +126,57 @@ jobs:
         strategy: canary
         action: reject
 
-  gh-release:
-    name: 'GitHub: Release Operations'
+  gh-release-publish:
+    name: 'GitHub: Publish Release'
     runs-on: ubuntu-latest
     needs: [k8-deploy]
-    if: github.event_name == 'release'
+    if: github.event_name == 'release' && success()
     env:
       GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}
     steps:
-    - name: Publish Release
-      if: success()
-      run: |
-        gh release edit ${{ github.event.release.tag_name }} \
-          --prerelease=false \
-          --draft=false \
-          --repo ${{ github.repository }}
-        
-        echo "::notice::Release Published"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.TOKEN_GITHUB }}
+          repository: ${{ github.repository_owner }}/${{ github.event.repository.name }}
+          ref: refs/heads/dev
+      
+      - name: Upload Assets
+        run: |
+          zip -r ${{ github.event.release.tag_name }}.zip .
+          tar -czvf ${{ github.event.release.tag_name }}.tar.gz .
 
-    - name: Delete Release
-      if: failure() || cancelled()
-      run: |
-        gh release delete ${{ github.event.release.tag_name }} \
-          --cleanup-tag \
-          --yes \
-          --repo ${{ github.repository }}
-        
-        echo "::error::Release and Tag Deleted"
+          gh release upload ${{ github.event.release.tag_name }} \
+            --clobber \
+            --repo ${{ github.repository }} \
+            ${{ github.event.release.tag_name }}.zip \
+            ${{ github.event.release.tag_name }}.tar.gz
+          
+          echo "::notice::Assets Uploaded"
+
+      - name: Publish Release
+        run: |
+          gh release edit ${{ github.event.release.tag_name }} \
+            --prerelease=false \
+            --draft=false \
+            --latest \
+            --repo ${{ github.repository }}
+          
+          echo "::notice::Release Published"
+
+  gh-release-delete:
+    name: 'GitHub: Delete Prerelease'
+    runs-on: ubuntu-latest
+    needs: [k8-deploy]
+    if: github.event_name == 'release' && failure() || cancelled()
+    env:
+      GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+    steps:
+      - name: Delete Prerelease
+        run: |
+          gh release delete ${{ github.event.release.tag_name }} \
+            --cleanup-tag \
+            --yes \
+            --repo ${{ github.repository }}
+          
+          echo "::error::Prerelease and Tag Deleted"
