@@ -134,26 +134,6 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.TOKEN_GITHUB }}
-          repository: ${{ github.repository_owner }}/${{ github.event.repository.name }}
-          ref: refs/heads/dev
-      
-      - name: Upload Assets
-        run: |
-          zip -r ${{ github.event.release.tag_name }}.zip .
-          tar -czvf ${{ github.event.release.tag_name }}.tar.gz .
-
-          gh release upload ${{ github.event.release.tag_name }} \
-            --clobber \
-            --repo ${{ github.repository }} \
-            ${{ github.event.release.tag_name }}.zip \
-            ${{ github.event.release.tag_name }}.tar.gz
-          
-          echo "::notice::Assets Uploaded"
-
       - name: Publish Release
         run: |
           gh release edit ${{ github.event.release.tag_name }} \
