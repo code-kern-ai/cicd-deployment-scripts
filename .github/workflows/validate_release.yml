@@ -1,0 +1,24 @@
+name: "GitHub: Validate Release"
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  discussions: read
+
+jobs:
+  validate-release:
+    name: 'GitHub: Validate Release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        env:
+            GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      
+      - name: Validate Release Tag
+        run: echo "Release Tag needs to match 'v*.*.*-*'"
+
+      - name: Validate Release Type
+        run: echo "Release needs to be a 'prerelease'"
