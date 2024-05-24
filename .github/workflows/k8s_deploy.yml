@@ -99,6 +99,7 @@ jobs:
     - name: Generate Kustomization
       shell: bash
       run: |
+        set +e
         kubectl kustomize ${{ env.KUBERNETES_MANIFEST_PATH }} --output apply.yml
         kubectl diff --filename apply.yml
   
