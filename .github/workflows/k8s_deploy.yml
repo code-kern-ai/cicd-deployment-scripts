@@ -98,6 +98,8 @@ jobs:
     
     - name: Generate Kustomization
       shell: bash
+      env:
+        KUBECTL_EXTERNAL_DIFF: "colordiff -N -u"
       run: |
         kubectl kustomize ${{ env.KUBERNETES_MANIFEST_PATH }} --output apply.yml
         kubectl diff --filename apply.yml || true
