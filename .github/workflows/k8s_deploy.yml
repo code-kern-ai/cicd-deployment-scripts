@@ -90,7 +90,7 @@ jobs:
       shell: bash
       run: |
         kubectl kustomize ${{ env.KUBERNETES_MANIFEST_PATH }} --output apply.yml
-        cat apply.yml
+        kubectl diff --filename apply.yml
   
     - name: Generate Deployment
       uses: Azure/k8s-deploy@v5

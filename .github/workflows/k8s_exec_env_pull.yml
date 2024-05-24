@@ -1,4 +1,4 @@
-name: 'K8: Docker Pulls'
+name: 'K8: Execution Environments'
 
 on:
   workflow_call:

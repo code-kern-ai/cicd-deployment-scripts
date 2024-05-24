@@ -5,9 +5,8 @@ on:
     inputs:
       generate_jwks:
         description: 'Generate JWKS'
-        required: false
-        default: false
-        type: boolean
+        default: 'false'
+        type: string
 
 # Special permissions required for OIDC authentication
 permissions:
@@ -16,6 +15,14 @@ permissions:
   pull-requests: write
 
 jobs:
+  context-dump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
+    
   tofu-plan:
     name: 'OpenTofu Plan'
     runs-on: ubuntu-latest
@@ -23,14 +30,14 @@ jobs:
     env:
       ENVIRONMENT_NAME: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}
       #this is needed since we are running tofu with read-only permissions
-      ARM_SKIP_PROVIDER_REGISTRATION: true
+      # ARM_SKIP_PROVIDER_REGISTRATION: true
       ARM_CLIENT_ID: "${{ secrets.AZURE_CLIENT_ID }}"
       ARM_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
       ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
       ARM_USE_OIDC: true
       TF_DESTROY: "${{ vars.TF_DESTROY }}"
     outputs:
-      tfplanExitCode: ${{ steps.tf-plan.outputs.exitcode }}
+      tf-plan-exit-code: ${{ steps.tf-plan.outputs.exitcode }}
 
     steps:
     # Checkout the repository to the GitHub Actions runner
@@ -61,12 +68,11 @@ jobs:
       id: tf-plan
       run: |
         export exitcode=0
-
-        if [ -f vars-${{ env.ENVIRONMENT_NAME }}.tfvars ]; then
-          tofu plan ${{ env.TF_DESTROY }} -detailed-exitcode -var-file vars-${{ env.ENVIRONMENT_NAME }}.tfvars -out tfplan || export exitcode=$?
-        else
-          tofu plan ${{ env.TF_DESTROY }} -detailed-exitcode -out tfplan || export exitcode=$?
-        fi
+        
+        tofu plan ${{ env.TF_DESTROY }} \
+          -detailed-exitcode \
+          -var-file vars-${{ env.ENVIRONMENT_NAME }}.tfvars \
+          -out tfplan || export exitcode=$?
 
         echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
         
@@ -88,13 +94,13 @@ jobs:
   tofu-apply:
     name: 'OpenTofu Apply'
     needs: [tofu-plan]
-    if: github.event_name == 'push' && needs.tofu-plan.outputs.tfplanExitCode == 2
+    if: github.event_name == 'push' && needs.tofu-plan.outputs.tf-plan-exit-code == 2
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     env:
       ENVIRONMENT_NAME: ${{ github.ref_name }}
       #this is needed since we are running tofu with read-only permissions
-      ARM_SKIP_PROVIDER_REGISTRATION: true
+      # ARM_SKIP_PROVIDER_REGISTRATION: true
       ARM_CLIENT_ID: "${{ secrets.AZURE_CLIENT_ID }}"
       ARM_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
       ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"

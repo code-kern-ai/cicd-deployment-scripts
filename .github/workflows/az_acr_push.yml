@@ -41,7 +41,18 @@ jobs:
           tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform}}
           push: true
           build-args: platform=linux/${{ matrix.platform}}
-
+      
+      - name: Build & Push - Latest
+        uses: docker/build-push-action@v5
+        if: ${{ matrix.platform == 'amd64' }}
+        with:
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          file: 'Dockerfile'
+          tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:latest
+          push: true
+          build-args: platform=linux/amd64
+        
       - name: Build & Push - Replace branch
         if: ${{ github.ref != github.repository.default_branch }}
         uses: docker/build-push-action@v5
