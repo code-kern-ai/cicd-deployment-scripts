@@ -53,4 +53,10 @@ jobs:
   
     - name: Apply Kustomization
       shell: bash
-      run: kubectl apply --filename apply.yml --namespace ${{ env.KUBERNETES_NAMESPACE }}
+      env:
+        DRY_RUN: ${{ github.event_name == 'push' && 'none' || 'client' }}
+      run: |
+        kubectl apply \
+          --dry-run ${{ env.DRY_RUN }} \
+          --filename apply.yml \
+          --namespace ${{ env.KUBERNETES_NAMESPACE }}
