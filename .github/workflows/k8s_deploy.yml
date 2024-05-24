@@ -98,7 +98,9 @@ jobs:
     
     - name: Generate Kustomization
       shell: bash
-      run: kubectl diff --kustomize ${{ env.KUBERNETES_MANIFEST_PATH }} || true
+      run: |
+        kubectl kustomize ${{ env.KUBERNETES_MANIFEST_PATH }} --output apply.yml
+        kubectl diff --filename apply.yml || true
   
     - name: Generate Deployment
       uses: Azure/k8s-deploy@v5
