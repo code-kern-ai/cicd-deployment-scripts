@@ -32,7 +32,7 @@ jobs:
           username: "${{ env.ACR_LOGIN_USERNAME }}"
           password: "${{ env.ACR_LOGIN_PASSWORD }}"
       
-      - name: Build & Push
+      - name: Build & Push :<arch>
         uses: docker/build-push-action@v5
         with:
           cache-from: type=gha
@@ -41,19 +41,8 @@ jobs:
           tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform}}
           push: true
           build-args: platform=linux/${{ matrix.platform}}
-      
-      - name: Build & Push - Latest
-        uses: docker/build-push-action@v5
-        if: ${{ matrix.platform == 'amd64' }}
-        with:
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          file: 'Dockerfile'
-          tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:latest
-          push: true
-          build-args: platform=linux/amd64
         
-      - name: Build & Push - Replace branch
+      - name: Build & Push :<arch>-<branch>
         if: ${{ github.ref != github.repository.default_branch }}
         uses: docker/build-push-action@v5
         with:
@@ -64,7 +53,18 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: platform=linux/${{ matrix.platform}}
 
-      - name: Build & Push - GPU
+      - name: Build & Push :latest
+        uses: docker/build-push-action@v5
+        if: ${{ matrix.platform == 'amd64' }}
+        with:
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          file: 'Dockerfile'
+          tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:latest
+          push: true
+          build-args: platform=linux/amd64
+
+      - name: Build & Push :<arch>-gpu
         if: ${{ github.ref == github.repository.default_branch && hashFiles('gpu.Dockerflie') != '' }}
         uses: docker/build-push-action@v5
         with:
