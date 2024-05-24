@@ -11,8 +11,8 @@ jobs:
       - name: Validate Release Tag
         shell: bash
         run: |
-          if [[ ! ${{ github.event.release.tag_name }} =~ ^v(0|[1-9]*)\.(0|[1-9]*)\.(0|[1-9]*)(?:-((?:0|[1-9]*|*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]*|*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?\$ ]]; then
-            echo "Debug: https://regexr.com/?text=${{ github.event.release.tag_name }}&expression=^v(0|[1-9]*)\.(0|[1-9]*)\.(0|[1-9]*)(?:-((?:0|[1-9]*|*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]*|*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
+          if [[ ! ${{ github.event.release.tag_name }} =~ ^v(0|[1-9]*)\.(0|[1-9]*)\.(0|[1-9]*)(?:-((?:0|[1-9]*|*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]*|*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$ ]]; then
+            echo 'Debug: https://regexr.com/?text=${{ github.event.release.tag_name }}&expression=^v(0|[1-9]*)\.(0|[1-9]*)\.(0|[1-9]*)(?:-((?:0|[1-9]*|*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]*|*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
             echo "More info: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string"
             echo "::error::Release Tag needs to match 'v[0-9]+.[0-9]+'"
             exit 1
