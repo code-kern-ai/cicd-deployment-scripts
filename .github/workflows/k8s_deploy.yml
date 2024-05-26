@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     env:
+      APPLICATION_STARTUP_MESSAGE: "Application startup complete"
       KUBELOGIN_VERSION: "v0.0.25"
       KUBERNETES_CLUSTER_REPO_NAME: "${{ vars.KUBERNETES_CLUSTER_REPO_NAME }}"
       KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
@@ -37,6 +38,12 @@ jobs:
         repository: ${{ github.repository_owner }}/${{ env.KUBERNETES_CLUSTER_REPO_NAME }}
         ref: refs/heads/dev
 
+    - name: GitHub Configuration
+      run: git config --global url."https://oauth2:${{ secrets.TOKEN_GITHUB }}@github.com".insteadOf https://github.com
+
+    - name: Clone cicd-deployment-scripts
+      run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
+  
     # Install the latest version of Kubernetes CLI and configure the Kubernetes CLI configuration file with a Kubernetes Cloud user API token
     - name: Azure Cloud Login
       uses: Azure/login@v2
@@ -72,11 +79,19 @@ jobs:
       with:
          namespace: ${{ env.KUBERNETES_NAMESPACE }}
          manifests: apply.yml
-         pull-images: false
+         pull-images: true
          images: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
          strategy: canary
          action: deploy
          percentage: 20
+    
+    - name: Assert Deployment Success
+      shell: bash
+      run: |
+        bash cicd-deployment-scripts/k8s/assert_deploy_success.sh \
+          -n ${{ env.KUBERNETES_NAMESPACE }} \
+          -d ${{ github.event.repository.name }} \
+          -m ${{ env.APPLICATION_STARTUP_MESSAGE }}
  
     - name: Promote Deployment
       uses: Azure/k8s-deploy@v5
