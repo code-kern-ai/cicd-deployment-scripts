@@ -21,11 +21,11 @@ echo "Reading logs to determine application startup status for '$KUBERNETES_DEPL
 echo "Searching for message: '$APPLICATION_STARTUP_MESSAGE'"
 
 LOG_CONTENTS=$(kubectl logs deployment/${KUBERNETES_DEPLOYMENT_NAME} \
-    --container ${KUBERNETES_DEPLOYMENT_NAME} || echo "Waiting for application startuop ...")
+    || echo "Waiting for application startuop ...")
 
 while [[ "$LOG_CONTENTS" != *"$APPLICATION_STARTUP_MESSAGE"* ]]; do
     echo "Waiting for application startup..."
     sleep 3
     LOG_CONTENTS=$(kubectl logs deployment/${KUBERNETES_DEPLOYMENT_NAME} \
-        --container ${KUBERNETES_DEPLOYMENT_NAME} || echo "Waiting for application startuop ...")
+        || echo "Waiting for application startuop ...")
 done
