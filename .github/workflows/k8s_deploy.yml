@@ -70,6 +70,7 @@ jobs:
       env:
         KUBECTL_EXTERNAL_DIFF: "colordiff -N -u"
       run: |
+        apt-get install colordiff --yes
         kubectl kustomize ${{ env.KUBERNETES_MANIFEST_PATH }} --output apply.yml
         kubectl diff --filename apply.yml || true
   
