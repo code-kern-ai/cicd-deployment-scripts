@@ -15,14 +15,6 @@ permissions:
   pull-requests: write
 
 jobs:
-  context-dump:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJSON(github) }}
-        run: echo "$GITHUB_CONTEXT"
-    
   tofu-plan:
     name: 'OpenTofu Plan'
     runs-on: ubuntu-latest

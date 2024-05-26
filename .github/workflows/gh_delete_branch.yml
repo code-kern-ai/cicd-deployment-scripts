@@ -41,6 +41,12 @@ jobs:
         with:
           token: ${{ secrets.TOKEN_GITHUB }}
       
-      - name: Delete Branch
-        shell: bash
-        run: git push origin --delete ${{ github.ref }}
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      # - name: Delete Branch
+      #   shell: bash
+      #   run: git push origin --delete ${{ github.ref_name }}
+      
