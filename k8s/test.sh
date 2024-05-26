@@ -23,7 +23,7 @@ echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
 
 KUBERNETES_POD_EXISTING_IMAGE=$(kubectl get pod --output json \
     --selector app=${KUBERNETES_DEPLOYMENT_NAME} \
-    | jq -r '.items[] | .spec.containers[0].image')
+    | jq -r '.items[0] | .spec.containers[0].image')
 
 kubectl set image deployment/${KUBERNETES_DEPLOYMENT_NAME} ${KUBERNETES_DEPLOYMENT_NAME}=${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:test-${GITHUB_HEAD_REF}
 echo "::warning::using ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:test-${GITHUB_HEAD_REF}"
