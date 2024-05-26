@@ -29,3 +29,6 @@ while [[ "$LOG_CONTENTS" != *"$APPLICATION_STARTUP_MESSAGE"* ]]; do
     LOG_CONTENTS=$(kubectl logs deployment/${KUBERNETES_DEPLOYMENT_NAME} \
         || echo "Waiting for application startuop ...")
 done
+
+echo "Application startup successful:"
+echo "$LOG_CONTENTS"

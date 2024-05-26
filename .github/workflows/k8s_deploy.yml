@@ -86,6 +86,7 @@ jobs:
          percentage: 20
     
     - name: Assert Deployment Success
+      timeout-minutes: 5
       shell: bash
       run: |
         bash cicd-deployment-scripts/k8s/assert_deploy_success.sh \
