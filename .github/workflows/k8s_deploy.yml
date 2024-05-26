@@ -89,9 +89,9 @@ jobs:
       shell: bash
       run: |
         bash cicd-deployment-scripts/k8s/assert_deploy_success.sh \
-          -n ${{ env.KUBERNETES_NAMESPACE }} \
-          -d ${{ github.event.repository.name }} \
-          -m ${{ env.APPLICATION_STARTUP_MESSAGE }}
+          -n "${{ env.KUBERNETES_NAMESPACE }}" \
+          -d "${{ github.event.repository.name }}-canary" \
+          -m "${{ env.APPLICATION_STARTUP_MESSAGE }}"
  
     - name: Promote Deployment
       uses: Azure/k8s-deploy@v5
