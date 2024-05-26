@@ -26,5 +26,6 @@ LOG_CONTENTS=$(kubectl logs deployment/${KUBERNETES_DEPLOYMENT_NAME} \
 while [[ "$LOG_CONTENTS" != *"$APPLICATION_STARTUP_MESSAGE"* ]]; do
     echo "Waiting for application startup..."
     sleep 3
-    LOG_CONTENTS=$(kubectl logs deployment/${KUBERNETES_DEPLOYMENT_NAME} --head=100)
+    LOG_CONTENTS=$(kubectl logs deployment/${KUBERNETES_DEPLOYMENT_NAME} \
+        --container ${KUBERNETES_DEPLOYMENT_NAME} || echo "Waiting for application startuop ...")
 done
