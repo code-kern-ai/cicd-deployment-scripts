@@ -4,7 +4,7 @@ on:
   workflow_call:
 
 jobs:
-  validate-release:
+  gh-validate-release:
     name: 'GitHub: Validate Release'
     runs-on: ubuntu-latest
     steps:
