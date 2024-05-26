@@ -22,6 +22,7 @@ jobs:
     env:
       APPLICATION_STARTUP_MESSAGE: "Application startup complete"
       KUBELOGIN_VERSION: "v0.0.25"
+      DOCKERFILE: "${{ vars.DOCKERFILE }}"
       KUBERNETES_CLUSTER_REPO_NAME: "${{ vars.KUBERNETES_CLUSTER_REPO_NAME }}"
       KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
       KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
@@ -77,7 +78,7 @@ jobs:
   
     - name: Generate Deployment
       uses: Azure/k8s-deploy@v5
-      timeout-minutes: 10
+      timeout-minutes: ${{ startsWith(env.DOCKERFILE, 'gpu') && 20 || 5 }}
       with:
          namespace: ${{ env.KUBERNETES_NAMESPACE }}
          manifests: apply.yml

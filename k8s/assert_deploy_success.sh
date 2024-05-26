@@ -28,6 +28,12 @@ while [[ "$LOG_CONTENTS" != *"$APPLICATION_STARTUP_MESSAGE"* ]]; do
     sleep 3
     LOG_CONTENTS=$(kubectl logs deployment/${KUBERNETES_DEPLOYMENT_NAME} \
         || echo "Waiting for application startuop ...")
+    
+    if [[ "$LOG_CONTENTS" == *"ERROR"* ]]; then
+        echo "Application startup failed:"
+        echo "$LOG_CONTENTS"
+        exit 1
+    fi
 done
 
 echo "Application startup successful:"
