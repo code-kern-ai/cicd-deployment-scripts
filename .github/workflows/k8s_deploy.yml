@@ -29,7 +29,7 @@ jobs:
       KUBERNETES_MANIFEST_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}"
       AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
       AZURE_CONTAINER_REGISTRY: "${{ vars.AZURE_CONTAINER_REGISTRY }}"
-      IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || 'amd64' }}
+      IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || 'latest' }}
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
@@ -82,7 +82,7 @@ jobs:
       with:
          namespace: ${{ env.KUBERNETES_NAMESPACE }}
          manifests: apply.yml
-         pull-images: true
+         pull-images: false
          images: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
          strategy: canary
          action: deploy

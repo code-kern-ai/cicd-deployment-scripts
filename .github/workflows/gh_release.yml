@@ -1,0 +1,44 @@
+name: 'GitHub: Release'
+
+on:
+  workflow_call:
+
+# Special permissions required for OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+jobs:
+  gh-release-publish:
+    name: 'GitHub: Publish Release'
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && success()
+    env:
+      GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+    steps:
+      - name: Publish Release
+        run: |
+          gh release edit ${{ github.event.release.tag_name }} \
+            --prerelease=false \
+            --draft=false \
+            --latest \
+            --repo ${{ github.repository }}
+          
+          echo "::notice::Release Published"
+
+  gh-release-delete:
+    name: 'GitHub: Delete Prerelease'
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && failure() || cancelled()
+    env:
+      GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+    steps:
+      - name: Delete Prerelease
+        run: |
+          gh release delete ${{ github.event.release.tag_name }} \
+            --cleanup-tag \
+            --yes \
+            --repo ${{ github.repository }}
+          
+          echo "::error::Prerelease and Tag Deleted"
