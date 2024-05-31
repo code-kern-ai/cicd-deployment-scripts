@@ -47,16 +47,19 @@ jobs:
     
     - name: Generate Kustomization
       shell: bash
+      env:
+        KUBECTL_EXTERNAL_DIFF: "colordiff -N -u"
       run: |
+        sudo apt-get update 1>/dev/null
+        sudo apt-get install colordiff 1>/dev/null
         kubectl kustomize ${{ env.KUBERNETES_MANIFEST_PATH }} --output apply.yml
-        cat apply.yml
-  
+        kubectl diff --filename apply.yml || true
+
     - name: Apply Kustomization
       shell: bash
-      env:
-        DRY_RUN: ${{ github.event_name == 'push' && 'none' || 'client' }}
+      # env:
+      #   DRY_RUN: ${{ github.event_name == 'push' && 'none' || 'client' }}
       run: |
         kubectl apply \
-          --dry-run ${{ env.DRY_RUN }} \
           --filename apply.yml \
           --namespace ${{ env.KUBERNETES_NAMESPACE }}
