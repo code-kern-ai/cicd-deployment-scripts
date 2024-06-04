@@ -86,7 +86,7 @@ jobs:
   tofu-apply:
     name: 'OpenTofu Apply'
     needs: [tofu-plan]
-    if: github.event_name == 'push' && needs.tofu-plan.outputs.tf-plan-exit-code == 2
+    if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.tofu-plan.outputs.tf-plan-exit-code == 2 }}
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     env:
