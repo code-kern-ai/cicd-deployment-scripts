@@ -35,12 +35,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
-        token: ${{ secrets.TOKEN_GITHUB }}
+        token: ${{ secrets.GH_TOKEN }}
         repository: ${{ github.repository_owner }}/${{ env.KUBERNETES_CLUSTER_REPO_NAME }}
         ref: refs/heads/dev
 
     - name: GitHub Configuration
-      run: git config --global url."https://oauth2:${{ secrets.TOKEN_GITHUB }}@github.com".insteadOf https://github.com
+      run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
 
     - name: Clone cicd-deployment-scripts
       run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git

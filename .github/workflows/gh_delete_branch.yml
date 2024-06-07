@@ -39,7 +39,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.TOKEN_GITHUB }}
+          token: ${{ secrets.GH_TOKEN }}
       
       - name: Dump GitHub context
         env:

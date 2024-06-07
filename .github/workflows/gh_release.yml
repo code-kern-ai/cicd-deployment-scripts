@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && success()
     env:
-      GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
     steps:
       - name: Publish Release
         run: |
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && failure() || cancelled()
     env:
-      GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
     steps:
       - name: Delete Prerelease
         run: |
