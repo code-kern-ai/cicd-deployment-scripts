@@ -6,6 +6,10 @@ on:
       environment:
         required: true
         type: string
+    outputs:
+      deployment_status:
+        description: "The status of the deployment"
+        value: ${{ jobs.k8-deploy.outputs.deployment_status }}
       
 
 # Special permissions required for OIDC authentication
@@ -30,6 +34,8 @@ jobs:
       AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
       AZURE_CONTAINER_REGISTRY: "${{ vars.AZURE_CONTAINER_REGISTRY }}"
       IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || 'latest' }}
+    outputs:
+      deployment_status: ${{ steps.assert_deployment_success.outcome }}
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
@@ -89,6 +95,7 @@ jobs:
          percentage: 20
     
     - name: Assert Deployment Success
+      id: assert_deployment_success
       timeout-minutes: 5
       shell: bash
       run: |

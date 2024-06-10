@@ -2,6 +2,10 @@ name: 'GitHub: Release'
 
 on:
   workflow_call:
+    inputs:
+      deployment_status:
+        required: true
+        type: string
 
 # Special permissions required for OIDC authentication
 permissions:
@@ -13,7 +17,7 @@ jobs:
   gh-release-publish:
     name: 'GitHub: Publish Release'
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' && success()
+    if: inputs.deployment_status == 'success'
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
     steps:
@@ -30,7 +34,7 @@ jobs:
   gh-release-delete:
     name: 'GitHub: Delete Prerelease'
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' && failure() || cancelled()
+    if: inputs.deployment_status != 'success'
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
     steps:
