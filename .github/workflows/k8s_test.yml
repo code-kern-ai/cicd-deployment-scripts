@@ -31,10 +31,16 @@ jobs:
       KUBERNETES_MANIFEST_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}"
       AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
       AZURE_CONTAINER_REGISTRY: "${{ vars.AZURE_CONTAINER_REGISTRY }}"
+    outputs:
+      GH_REF_NAME: ${{ steps.branch_name.outputs.GH_REF_NAME }}
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v4
+    
+    - name: Configure branch name
+      id: branch_name
+      run: echo "GH_REF_NAME=${GITHUB_REF_NAME//\//-}" >> $GITHUB_OUTPUT
 
     - name: GitHub Configuration
       run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
@@ -69,7 +75,7 @@ jobs:
         bash cicd-deployment-scripts/k8s/test.sh \
           -n ${{ env.KUBERNETES_NAMESPACE }} \
           -d ${{ github.event.repository.name }} \
-          -t test-${{ github.head_ref }} \
+          -t test-${{ steps.branch_name.outputs.GH_REF_NAME }} \
           -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
           -c "${{ inputs.test_cmd }}"
 
@@ -78,4 +84,4 @@ jobs:
     needs: [k8-test]
     secrets: inherit
     with:
-      image_tag: "test-${{ github.head_ref }}"
+      image_tag: "test-${{ needs.k8-test.outputs.GH_REF_NAME }}"
