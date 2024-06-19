@@ -7,7 +7,7 @@ TEST_IMAGE_TAG=""
 AZURE_CONTAINER_REGISTRY=""
 TEST_CMD=""
 
-while getopts n:d:h:r:t: flag
+while getopts n:d:h:r:t:c: flag
 do
     case "${flag}" in
         n) KUBERNETES_NAMESPACE=${OPTARG};;
@@ -32,6 +32,7 @@ kubectl rollout status deployment ${KUBERNETES_DEPLOYMENT_NAME}
 
 set +e
 exitcode=0
+echo "::warning::running test command: kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- '$TEST_CMD'"
 kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- "$TEST_CMD"
 exitcode=$?
 set -e
