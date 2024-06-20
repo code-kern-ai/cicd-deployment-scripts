@@ -36,7 +36,7 @@ jobs:
 
       - name: Configure branch name
         id: branch_name
-        run: echo "GH_REF_NAME=$(echo '${{ github.ref_name }}' | sed s|\|-|g)" >> $GITHUB_OUTPUT
+        run: echo "GH_REF_NAME=$(echo ${{ github.ref_name }} | sed 's|/|-|g')" >> $GITHUB_OUTPUT
   
       - name: Build & Push ${{ github.event.repository.name }}:${{ matrix.platform}}
         uses: docker/build-push-action@v5
