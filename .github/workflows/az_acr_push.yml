@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Configure branch name
         id: branch_name
-        run: echo "GH_REF_NAME=${GITHUB_REF_NAME//\//-}" >> $GITHUB_OUTPUT
+        run: echo "GH_REF_NAME=${${{ github.ref_name }}//\//-}" >> $GITHUB_OUTPUT
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Log into registry
