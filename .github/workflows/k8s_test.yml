@@ -50,7 +50,7 @@ jobs:
 
     # Install the latest version of Kubernetes CLI and configure the Kubernetes CLI configuration file with a Kubernetes Cloud user API token
     - name: Azure Cloud Login
-      uses: Azure/login@v2
+      uses: azure/login@v2
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -78,10 +78,3 @@ jobs:
           -t test-${{ steps.branch_name.outputs.GH_REF_NAME }} \
           -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
           -c "${{ inputs.test_cmd }}"
-
-  call-az-acr-delete:
-    uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/az_acr_delete.yml@dev
-    needs: [k8-test]
-    secrets: inherit
-    with:
-      image_tag: "test-${{ needs.k8-test.outputs.GH_REF_NAME }}"
