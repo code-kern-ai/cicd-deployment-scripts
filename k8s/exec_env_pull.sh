@@ -17,6 +17,8 @@ done
 kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE
 echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
 
+kubectl rollout status deployment docker
+
 DOCKER_POD=$(kubectl get pods -l app=docker -o jsonpath='{.items[0].metadata.name}')
 
 PULL_IMAGE_NAMES=(
