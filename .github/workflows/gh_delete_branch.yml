@@ -11,7 +11,7 @@ jobs:
       image_tag: "test-${{ github.event.pull_request.head.ref }}"
 
   az-acr-delete:
-    name: 'Azure: Delete Branch Images'
+    name: 'ACR: Delete Branch Images'
     runs-on: ubuntu-latest
     environment: dev
     env:
@@ -33,9 +33,10 @@ jobs:
         uses: azure/cli@v2
         with:
           inlineScript: |
+            GH_REF_NAME=$(echo ${{ github.event.pull_request.head.ref }} | sed 's|/|-|g')
             az acr repository delete \
               --name ${{ env.AZURE_CONTAINER_REGISTRY }} \
-              --image ${{ github.event.repository.name }}:${{ matrix.platform}}-${{ github.head_ref }} \
+              --image ${{ github.event.repository.name }}:${{ matrix.platform}}-${GH_REF_NAME} \
               --yes
   
   gh-delete-branch:
@@ -47,11 +48,6 @@ jobs:
         with:
           token: ${{ secrets.GH_TOKEN }}
       
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJSON(github) }}
-        run: echo "$GITHUB_CONTEXT"
-
       - name: Delete Branch
         shell: bash
         run: git push origin --delete ${{ github.head_ref }}
