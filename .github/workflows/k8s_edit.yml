@@ -1,0 +1,84 @@
+name: 'K8: Edit'
+
+on:
+  workflow_call:
+
+# Special permissions required for OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+jobs:
+  k8-edit:
+    name: 'K8: Edit'
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+    env:
+      KUBELOGIN_VERSION: "v0.0.25"
+      KUBERNETES_CLUSTER_REPO_NAME: "${{ vars.KUBERNETES_CLUSTER_REPO_NAME }}"
+      KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
+      KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
+      KUBERNETES_MANIFEST_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}"
+      KUBERNETES_MANIFEST_FILE_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}/deployment.yml"
+      AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
+      AZURE_CONTAINER_REGISTRY: "${{ vars.AZURE_CONTAINER_REGISTRY }}"
+      IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || github.sha }}
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+        repository: ${{ github.repository_owner }}/${{ env.KUBERNETES_CLUSTER_REPO_NAME }}
+        ref: refs/heads/dev
+    
+    - name: GitHub Configuration
+      run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
+
+    - name: Clone cicd-deployment-scripts
+      run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
+
+    # Install the latest version of Kubernetes CLI and configure the Kubernetes CLI configuration file with a Kubernetes Cloud user API token
+    - name: Azure Cloud Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    # Use kubelogin to configure your kubeconfig for Azure auth
+    - name: Set up kubelogin for non-interactive login
+      uses: azure/use-kubelogin@v1
+      with:
+        kubelogin-version: ${{ env.KUBELOGIN_VERSION }}
+
+    - uses: azure/aks-set-context@v3
+      with:
+        resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
+        cluster-name: ${{ env.KUBERNETES_CLUSTER_NAME }}
+        admin: 'false'
+        use-kubelogin: 'true'
+    
+    - name: Run Edit
+      shell: bash
+      run: |
+        bash cicd-deployment-scripts/k8s/edit.sh \
+          -n ${{ env.KUBERNETES_NAMESPACE }} \
+          -d ${{ github.event.repository.name }} \
+          -f ${{ env.KUBERNETES_MANIFEST_FILE_PATH }} \
+          -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
+          -t ${{ env.IMAGE_TAG }}
+
+    - name: Commit changes
+      shell: bash
+      run: |
+        AUTOMATED_RELEASE_BRANCH="automated-release-${{ github.event_name == 'release' && 'prod' || 'dev' }}"
+        KUBERNETES_POD_NEW_IMAGE="${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}"
+        
+        git fetch origin
+        git checkout $AUTOMATED_RELEASE_BRANCH || git checkout -b $AUTOMATED_RELEASE_BRANCH
+        
+        git add ${{ env.KUBERNETES_MANIFEST_FILE_PATH }}
+        git commit -m "ci(${{ github.event.repository.name }}): $KUBERNETES_POD_NEW_IMAGE"
+        git push origin $AUTOMATED_RELEASE_BRANCH
