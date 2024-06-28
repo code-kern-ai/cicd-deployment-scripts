@@ -2,11 +2,6 @@ name: 'ACR: Docker Push'
 
 on:
   workflow_call:
-    # inputs:
-    #   test_tag:
-    #     description: 'Create test tag'
-    #     default: 'false'
-    #     type: string
 
 jobs:
   az-acr-push:
@@ -42,19 +37,7 @@ jobs:
       - name: Configure branch name
         id: branch_name
         run: echo "GH_REF_NAME=$(echo ${{ github.ref_name }} | sed 's|/|-|g')" >> $GITHUB_OUTPUT
-  
-      - name: Build & Push ${{ github.event.repository.name }}:${{ matrix.platform}}
-        uses: docker/build-push-action@v5
-        with:
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          file: 'Dockerfile'
-          tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform}}
-          push: true
-          build-args: |
-            platform=linux/${{ matrix.platform}}
-            label=dockerfile-path=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/Dockerfile
-        
+
       - name: Build & Push ${{ github.event.repository.name }}:${{ matrix.platform}}-${{ steps.branch_name.outputs.GH_REF_NAME }}
         if: ${{ github.ref != github.repository.default_branch }}
         uses: docker/build-push-action@v5
@@ -66,19 +49,6 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             platform=linux/${{ matrix.platform}}
-            label=dockerfile-path=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/Dockerfile
-
-      - name: Build & Push ${{ github.event.repository.name }}:latest
-        uses: docker/build-push-action@v5
-        if: ${{ matrix.platform == 'amd64' }}
-        with:
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          file: 'Dockerfile'
-          tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:latest
-          push: true
-          build-args: |
-            platform=linux/amd64
             label=dockerfile-path=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/Dockerfile
 
       - name: Build & Push ${{ github.event.repository.name }}:${{ matrix.platform}}-gpu
