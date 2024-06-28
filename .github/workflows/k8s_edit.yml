@@ -78,6 +78,8 @@ jobs:
           -f ${{ env.KUBERNETES_MANIFEST_FILE_PATH }} \
           -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
           -t ${{ env.IMAGE_TAG }}
+        
+        rm -rf cicd-deployment-scripts-self-hosted
 
         git add ${{ env.KUBERNETES_MANIFEST_FILE_PATH }}
         git commit -m "ci(${{ github.event.repository.name }}): $KUBERNETES_POD_NEW_IMAGE" || true
@@ -88,6 +90,6 @@ jobs:
           --head $AUTOMATED_RELEASE_BRANCH \
           --title "ci(${{ github.event.repository.name }}): $KUBERNETES_POD_NEW_IMAGE" \
           --body "Automated release for ${{ github.event.repository.name }}: $KUBERNETES_POD_NEW_IMAGE" \
-          --assignee ${{ github.repository_owner }}/devops-admin \
           --draft \
           --repo ${{ github.repository_owner }}/${{ env.KUBERNETES_CLUSTER_REPO_NAME }} || true
+          # --reviewer ${{ github.repository_owner }}/devops-admin \
