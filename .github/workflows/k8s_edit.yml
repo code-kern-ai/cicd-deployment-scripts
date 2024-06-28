@@ -68,7 +68,7 @@ jobs:
         
         git fetch origin
         git checkout $AUTOMATED_RELEASE_BRANCH || git checkout -b $AUTOMATED_RELEASE_BRANCH
-        
+
         bash cicd-deployment-scripts-self-hosted/k8s/edit.sh \
           -n ${{ env.KUBERNETES_NAMESPACE }} \
           -d ${{ github.event.repository.name }} \
@@ -77,7 +77,7 @@ jobs:
           -t ${{ env.IMAGE_TAG }}
 
         git add ${{ env.KUBERNETES_MANIFEST_FILE_PATH }}
-        git commit -m "ci(${{ github.event.repository.name }}): $KUBERNETES_POD_NEW_IMAGE"
+        git commit -m "ci(${{ github.event.repository.name }}): $KUBERNETES_POD_NEW_IMAGE" || true
         git push origin $AUTOMATED_RELEASE_BRANCH
         
         gh pr create \
