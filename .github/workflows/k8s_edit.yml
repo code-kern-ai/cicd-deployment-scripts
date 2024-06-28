@@ -70,7 +70,7 @@ jobs:
           -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
           -t ${{ env.IMAGE_TAG }}
 
-    - name: Commit changes
+    - name: Perform Git Operations
       shell: bash
       run: |
         AUTOMATED_RELEASE_BRANCH="automated-release-${{ github.event_name == 'release' && 'prod' || 'dev' }}"
@@ -82,3 +82,12 @@ jobs:
         git add ${{ env.KUBERNETES_MANIFEST_FILE_PATH }}
         git commit -m "ci(${{ github.event.repository.name }}): $KUBERNETES_POD_NEW_IMAGE"
         git push origin $AUTOMATED_RELEASE_BRANCH
+        
+        gh pr create \
+          --base dev \
+          --head $AUTOMATED_RELEASE_BRANCH \
+          --title "ci(${{ github.event.repository.name }}): $KUBERNETES_POD_NEW_IMAGE" \
+          --body "Automated release for ${{ github.event.repository.name }}: $KUBERNETES_POD_NEW_IMAGE" \
+          --assignee ${{ github.repository_owner }}/devops-admin \
+          --draft \
+          --repo ${{ github.repository_owner }}/${{ env.KUBERNETES_CLUSTER_REPO_NAME }} || true
