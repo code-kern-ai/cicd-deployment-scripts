@@ -12,7 +12,7 @@ permissions:
 jobs:
   k8-cluster-destroy:
     name: 'K8: Destroy Cluster Namespace'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, "${{ github.ref_name }}"]
     environment: ${{ github.ref_name }}
     env:
       KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"

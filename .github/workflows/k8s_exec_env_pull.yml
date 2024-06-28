@@ -12,7 +12,7 @@ permissions:
 jobs:
   k8-docker-pulls:
     name: 'K8: Docker Pulls'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, "${{ github.ref_name }}"]
     environment: ${{ github.ref_name }}
     env:
       KUBELOGIN_VERSION: "v0.0.25"

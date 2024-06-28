@@ -12,7 +12,7 @@ permissions:
 jobs:
   k8-apply:
     name: 'K8: Apply'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, "${{ github.event.ref_name }}"]
     environment: ${{ github.ref_name }}
     env:
       KUBELOGIN_VERSION: "v0.0.25"

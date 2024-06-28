@@ -21,7 +21,7 @@ jobs:
   
   k8-test:
     name: 'K8: Test'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, dev]
     needs: [call-az-acr-push]
     environment: dev
     env:

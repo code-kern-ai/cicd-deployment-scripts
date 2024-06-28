@@ -15,7 +15,7 @@ env:
 jobs:
   k8-edit:
     name: 'K8: Edit'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, "${{ github.event_name == 'release' && 'prod' || 'dev' }}"]
     environment: ${{ github.event_name == 'release' && 'prod' || 'dev' }}
     env:
       KUBELOGIN_VERSION: "v0.0.25"
