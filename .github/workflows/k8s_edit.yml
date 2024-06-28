@@ -67,7 +67,7 @@ jobs:
       shell: bash
       run: |
         AUTOMATED_RELEASE_BRANCH="automated-release-${{ github.event_name == 'release' && 'prod' || 'dev' }}"
-        KUBERNETES_POD_NEW_IMAGE="${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}"
+        KUBERNETES_POD_NEW_IMAGE="${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}"
         
         git fetch origin
         git checkout $AUTOMATED_RELEASE_BRANCH || git checkout -b $AUTOMATED_RELEASE_BRANCH
@@ -89,7 +89,7 @@ jobs:
           --base dev \
           --head $AUTOMATED_RELEASE_BRANCH \
           --title "ci(${{ github.event.repository.name }}): $KUBERNETES_POD_NEW_IMAGE" \
-          --body "Automated release for ${{ github.event.repository.name }}: $KUBERNETES_POD_NEW_IMAGE" \
+          --body "Automated release for ${{ github.event.repository.name }}: $KUBERNETES_POD_NEW_IMAGE:${{ env.IMAGE_TAG }}" \
           --draft \
           --repo ${{ github.repository_owner }}/${{ env.KUBERNETES_CLUSTER_REPO_NAME }} || true
           # --reviewer ${{ github.repository_owner }}/devops-admin \
