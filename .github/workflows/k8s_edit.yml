@@ -16,7 +16,7 @@ jobs:
   k8-edit:
     name: 'K8: Edit'
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name }}
+    environment: ${{ github.event_name == 'release' && 'prod' || 'dev' }}
     env:
       KUBELOGIN_VERSION: "v0.0.25"
       KUBERNETES_CLUSTER_REPO_NAME: "${{ vars.KUBERNETES_CLUSTER_REPO_NAME }}"
@@ -72,14 +72,14 @@ jobs:
         git fetch origin
         git checkout $AUTOMATED_RELEASE_BRANCH || git checkout -b $AUTOMATED_RELEASE_BRANCH
 
-        bash cicd-deployment-scripts-self-hosted/k8s/edit.sh \
+        bash cicd-deployment-scripts/k8s/edit.sh \
           -n ${{ env.KUBERNETES_NAMESPACE }} \
           -d ${{ github.event.repository.name }} \
           -f ${{ env.KUBERNETES_MANIFEST_FILE_PATH }} \
           -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
           -t ${{ env.IMAGE_TAG }}
         
-        rm -rf cicd-deployment-scripts-self-hosted
+        rm -rf cicd-deployment-scripts
 
         git add ${{ env.KUBERNETES_MANIFEST_FILE_PATH }}
         git commit -m "ci(${{ github.event.repository.name }}): $KUBERNETES_POD_NEW_IMAGE" || true
