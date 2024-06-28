@@ -39,7 +39,7 @@ jobs:
         run: echo "GH_REF_NAME=$(echo ${{ github.ref_name }} | sed 's|/|-|g')" >> $GITHUB_OUTPUT
 
       - name: Build & Push ${{ github.event.repository.name }}:${{ matrix.platform}}-${{ steps.branch_name.outputs.GH_REF_NAME }}
-        if: ${{ github.ref != github.repository.default_branch }}
+        if: ${{ github.ref_name != github.repository.default_branch }}
         uses: docker/build-push-action@v5
         with:
           push: true
@@ -52,7 +52,7 @@ jobs:
             label=dockerfile-path=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/Dockerfile
 
       - name: Build & Push ${{ github.event.repository.name }}:${{ matrix.platform}}-gpu
-        if: ${{ github.ref == github.repository.default_branch && hashFiles('gpu.Dockerflie') != '' }}
+        if: ${{ hashFiles('gpu.Dockerflie') != '' }}
         uses: docker/build-push-action@v5
         with:
           push: true
