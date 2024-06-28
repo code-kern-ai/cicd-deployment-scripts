@@ -60,17 +60,7 @@ jobs:
         admin: 'false'
         use-kubelogin: 'true'
     
-    - name: Run Edit
-      shell: bash
-      run: |
-        bash cicd-deployment-scripts/k8s/edit.sh \
-          -n ${{ env.KUBERNETES_NAMESPACE }} \
-          -d ${{ github.event.repository.name }} \
-          -f ${{ env.KUBERNETES_MANIFEST_FILE_PATH }} \
-          -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
-          -t ${{ env.IMAGE_TAG }}
-
-    - name: Perform Git Operations
+    - name: Perform Edit/Git Operations
       shell: bash
       run: |
         AUTOMATED_RELEASE_BRANCH="automated-release-${{ github.event_name == 'release' && 'prod' || 'dev' }}"
@@ -79,6 +69,13 @@ jobs:
         git fetch origin
         git checkout $AUTOMATED_RELEASE_BRANCH || git checkout -b $AUTOMATED_RELEASE_BRANCH
         
+        bash cicd-deployment-scripts-self-hosted/k8s/edit.sh \
+          -n ${{ env.KUBERNETES_NAMESPACE }} \
+          -d ${{ github.event.repository.name }} \
+          -f ${{ env.KUBERNETES_MANIFEST_FILE_PATH }} \
+          -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
+          -t ${{ env.IMAGE_TAG }}
+
         git add ${{ env.KUBERNETES_MANIFEST_FILE_PATH }}
         git commit -m "ci(${{ github.event.repository.name }}): $KUBERNETES_POD_NEW_IMAGE"
         git push origin $AUTOMATED_RELEASE_BRANCH
