@@ -16,29 +16,38 @@ jobs:
     secrets: inherit
 
   call-az-acr-release:
-    uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/az_acr_release.yml@dev
     needs: [call-gh-validate-release]
     if: always() && !failure()
+    uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/az_acr_release.yml@dev
     secrets: inherit
 
-  call-k8-deploy:
-    uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/k8s_deploy.yml@dev
+  # call-k8-deploy:
+  #   needs: [call-az-acr-release]
+  #   uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/k8s_deploy.yml@dev
+  #   if: always() && !failure()
+  #   secrets: inherit
+  #   with:
+  #     environment: ${{ github.event_name == 'release' && 'prod' || 'dev' }}
+
+  call-k8-edit:
     needs: [call-az-acr-release]
     if: always() && !failure()
+    uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/k8s_edit.yml@dev
     secrets: inherit
-    with:
-      environment: ${{ github.event_name == 'release' && 'prod' || 'dev' }}
 
   call-gh-release:
-    uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/gh_release.yml@dev
-    needs: [call-k8-deploy]
+    # needs: [call-k8-deploy]
+    needs: [call-k8-edit]
     if: always() && github.event_name == 'release'
+    uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/gh_release.yml@dev
     secrets: inherit
     with:
-      deployment_status: ${{ needs.call-k8-deploy.outputs.deployment_status }}
+      deployment_status: "success"
+      # deployment_status: ${{ needs.call-k8-deploy.outputs.deployment_status }}
 
   call-gh-delete-branch:
-    needs: [call-k8-deploy]
+    # needs: [call-k8-deploy]
+    needs: [call-k8-edit]
     if: github.event_name == 'pull_request' && github.event.pull_request.merged && !failure()
     uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/gh_delete_branch.yml@dev
     secrets: inherit
