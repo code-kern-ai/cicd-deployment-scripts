@@ -13,7 +13,7 @@ jobs:
       AZURE_CONTAINER_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY }}
       ACR_LOGIN_USERNAME: ${{ secrets.ACR_LOGIN_USERNAME }}
       ACR_LOGIN_PASSWORD: ${{ secrets.ACR_LOGIN_PASSWORD }}
-      IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || 'amd64' }}
+      IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || github.sha }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
