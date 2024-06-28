@@ -9,6 +9,9 @@ permissions:
   contents: read
   actions: read
 
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
 jobs:
   k8-edit:
     name: 'K8: Edit'
