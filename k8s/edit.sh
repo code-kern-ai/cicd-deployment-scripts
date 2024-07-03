@@ -1,25 +1,20 @@
 # !/bin/bash
 set -e
 
-KUBERNETES_NAMESPACE=""
 KUBERNETES_DEPLOYMENT_NAME=""
 KUBERNETES_MANIFEST_FILE_PATH=""
 AZURE_CONTAINER_REGISTRY=""
 IMAGE_TAG=""
 
-while getopts n:d:r:t:f: flag
+while getopts d:r:t:f: flag
 do
     case "${flag}" in
-        n) KUBERNETES_NAMESPACE=${OPTARG};;
         d) KUBERNETES_DEPLOYMENT_NAME=${OPTARG};;
         f) KUBERNETES_MANIFEST_FILE_PATH=${OPTARG};;
         r) AZURE_CONTAINER_REGISTRY=${OPTARG};;
         t) IMAGE_TAG=${OPTARG};;
     esac
 done
-
-kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE
-echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
 
 grep ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME} $KUBERNETES_MANIFEST_FILE_PATH | while read -r line ; do
     KUBERNETES_POD_EXISTING_TAG=$(echo $line | sed 's|image: ||g' | cut -d ':' -f 2)
