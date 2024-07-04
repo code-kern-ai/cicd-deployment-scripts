@@ -5,7 +5,7 @@ on:
     inputs:
       runs_on:
         description: 'Runner JSON string'
-        default: 'ubuntu-latest'
+        default: '"ubuntu-latest"'
         type: string
 
 # Special permissions required for OIDC authentication
