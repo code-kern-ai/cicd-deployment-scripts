@@ -41,7 +41,6 @@ jobs:
       uses: opentofu/setup-opentofu@v1
       with:
         github_token: ${{ secrets.GH_TOKEN }}
-        tofu_wrapper: false
 
     - name: GitHub Configuration
       run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
