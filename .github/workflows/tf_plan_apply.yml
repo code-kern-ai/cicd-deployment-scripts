@@ -39,8 +39,8 @@ jobs:
     # Install the latest version of the OpenTofu CLI
     - name: Setup OpenTofu
       uses: opentofu/setup-opentofu@v1
-      # with:
-      #   github_token: ${{ secrets.GH_TOKEN }}
+      with:
+        github_token: ${{ secrets.GH_TOKEN }}
 
     - name: GitHub Configuration
       run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
@@ -106,8 +106,8 @@ jobs:
     # Install the latest version of OpenTofu CLI and configure the OpenTofu CLI configuration file with a OpenTofu Cloud user API token
     - name: Setup OpenTofu
       uses: opentofu/setup-opentofu@v1
-      # with:
-      #   github_token: ${{ secrets.GH_TOKEN }}
+      with:
+        github_token: ${{ secrets.GH_TOKEN }}
 
     - name: GitHub Configuration
       run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
