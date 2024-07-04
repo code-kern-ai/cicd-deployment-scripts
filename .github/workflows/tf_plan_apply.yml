@@ -3,10 +3,6 @@ name: 'OpenTofu: Plan/Apply'
 on:
   workflow_call:
     inputs:
-      generate_jwks:
-        description: 'Generate JWKS'
-        default: 'false'
-        type: string
       runs_on:
         description: 'Runner JSON string'
         default: 'ubuntu-latest'
