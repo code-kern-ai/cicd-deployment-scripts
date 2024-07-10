@@ -6,8 +6,8 @@ on:
 jobs:
   az-fnapp-deploy:
     name: "Azure: Build & Deploy Function App"
-    runs-on: [self-hosted, dev]
-    environment: dev
+    runs-on: [self-hosted, "${{ github.event.pull_request.base.ref }}"]
+    environment: ${{ github.event.pull_request.base.ref }}
     if: ${{ vars.TF_DESTROY != '-destroy' }}
     env:
       AZURE_FUNCTIONAPP_NAME: ${{ vars.AZURE_FUNCTIONAPP_NAME }}
