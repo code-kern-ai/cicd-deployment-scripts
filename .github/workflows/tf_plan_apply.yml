@@ -7,6 +7,13 @@ on:
         description: 'Runner JSON string'
         default: '"ubuntu-latest"'
         type: string
+    outputs:
+      tf_plan_exit_code:
+        description: 'OpenTofu Plan exit code'
+        value: ${{ jobs.tofu-plan.outputs.tf_plan_exit_code }}
+      tf_destroy:
+        description: 'Destroy flag'
+        value: ${{ jobs.tofu-plan.outputs.tf_destroy }}
 
 # Special permissions required for OIDC authentication
 permissions:
@@ -29,7 +36,8 @@ jobs:
       ARM_USE_OIDC: true
       TF_DESTROY: "${{ vars.TF_DESTROY }}"
     outputs:
-      tf-plan-exit-code: ${{ steps.tf-plan.outputs.exitcode }}
+      tf_plan_exit_code: ${{ steps.tf-plan.outputs.exitcode }}
+      tf_destroy: ${{ steps.tf-plan.outputs.tf_destroy }}
 
     steps:
     # Checkout the repository to the GitHub Actions runner
@@ -68,6 +76,7 @@ jobs:
           -out tfplan || export exitcode=$?
 
         echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
+        echo "tf_destroy=${{ env.TF_DESTROY }}" >> $GITHUB_OUTPUT
         
         if [ $exitcode -eq 1 ]; then
           echo OpenTofu Plan Failed!
@@ -87,7 +96,7 @@ jobs:
   tofu-apply:
     name: 'OpenTofu Apply'
     needs: [tofu-plan]
-    if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.tofu-plan.outputs.tf-plan-exit-code == 2 }}
+    if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.tofu-plan.outputs.tf_plan_exit_code == 2 }}
     runs-on: ${{ fromJSON(inputs.runs_on) }}
     environment: ${{ github.ref_name }}
     env:
