@@ -7,7 +7,7 @@ jobs:
   az-fnapp-deploy:
     name: "Azure: Build & Deploy Function App"
     runs-on: ubuntu-latest
-    environment: ${{ github.event.pull_request.base.ref }}
+    environment: dev
     env:
       AZURE_FUNCTIONAPP_NAME: ${{ vars.AZURE_FUNCTIONAPP_NAME }}
       AZURE_FUNCTIONAPP_PACKAGE_PATH: ${{ vars.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
