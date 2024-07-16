@@ -32,7 +32,10 @@ jobs:
         ref: refs/heads/dev
     
     - name: GitHub Configuration
-      run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
+      run: |
+        git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
+        git config --global user.email "devtools@kern.ai"
+        git config --global user.name "GitHub Actions"
 
     - name: Clone cicd-deployment-scripts
       run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
