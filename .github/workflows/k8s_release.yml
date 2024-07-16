@@ -48,6 +48,6 @@ jobs:
   call-gh-delete-branch:
     # needs: [call-k8-deploy]
     needs: [call-k8-edit]
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged && !failure()
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged && !failure() && !cancelled()
     uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/gh_delete_branch.yml@dev
     secrets: inherit
