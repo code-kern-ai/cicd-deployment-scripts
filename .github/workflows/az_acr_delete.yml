@@ -36,4 +36,4 @@ jobs:
             az acr repository delete \
               --name ${{ env.AZURE_CONTAINER_REGISTRY }} \
               --image ${{ github.event.repository.name }}:${{ steps.branch_name.outputs.GH_REF_NAME }} \
-              --yes
+              --yes || true
