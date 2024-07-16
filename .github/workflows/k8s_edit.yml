@@ -32,10 +32,7 @@ jobs:
         ref: refs/heads/dev
     
     - name: GitHub Configuration
-      run: |
-        git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
-        git config --global user.email "devtools@kern.ai"
-        git config --global user.name "GitHub Actions"
+      run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
 
     - name: Clone cicd-deployment-scripts
       run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
@@ -56,6 +53,9 @@ jobs:
           -t ${{ env.IMAGE_TAG }}
         
         rm -rf cicd-deployment-scripts
+
+        git config --global user.email "devtools@kern.ai"
+        git config --global user.name "GitHub Actions"
 
         git add ${{ env.KUBERNETES_MANIFEST_FILE_PATH }}
         git commit -m "ci(${{ github.event.repository.name }}): $KUBERNETES_POD_NEW_IMAGE" || true
