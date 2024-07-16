@@ -15,7 +15,7 @@ env:
 jobs:
   k8-edit:
     name: 'K8: Edit'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, "${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}"]
     environment: ${{ github.event_name == 'release' && 'prod' || 'dev' }}
     env:
       KUBERNETES_CLUSTER_REPO_NAME: "${{ vars.KUBERNETES_CLUSTER_REPO_NAME }}"
