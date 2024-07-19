@@ -17,7 +17,7 @@ jobs:
       DEV_LOGIN_PASSWORD: ${{ secrets.DEV_LOGIN_PASSWORD }}
     strategy:
       matrix:
-        platform: [amd64, arm64]
+        platform: [amd64, arm64/v8]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

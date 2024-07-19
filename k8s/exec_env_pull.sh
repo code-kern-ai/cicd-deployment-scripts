@@ -34,5 +34,5 @@ for IMAGE_NAME in "${PULL_IMAGE_NAMES[@]}"; do
     echo "Pulling image: $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:$AZURE_IMAGE_TAG"
     kubectl exec $DOCKER_POD -c docker -- /bin/sh -c "docker pull $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:$AZURE_IMAGE_TAG"
     i=$((i+1))
-    echo "::notice::Pushed $i of $total_images images"
+    echo "::notice::Pulled $i of $total_images images"
 done

@@ -61,16 +61,16 @@ jobs:
         git commit -m "ci(${{ github.event.repository.name }}): $KUBERNETES_POD_NEW_IMAGE" || true
         git push origin $AUTOMATED_RELEASE_BRANCH
 
-        PR_TITLE="ci(${{ github.event.repository.name }}): $KUBERNETES_POD_NEW_IMAGE"
+        PR_TITLE="ci: $AUTOMATED_RELEASE_BRANCH"
         if [ ${{ github.event_name }} == 'release' ]; then
-          PR_TITLE="ci(${{ github.ref_name }}): $KUBERNETES_POD_NEW_IMAGE"
+          PR_TITLE="ci(${{ github.ref_name }}): $AUTOMATED_RELEASE_BRANCH"
         fi
         
         gh pr create \
           --base dev \
           --head $AUTOMATED_RELEASE_BRANCH \
           --title "$PR_TITLE" \
-          --body "Automated release for ${{ github.event.repository.name }}: $KUBERNETES_POD_NEW_IMAGE:${{ env.IMAGE_TAG }}" \
+          --body "Automated release for ${{ github.event.repository.name }}:\n- $KUBERNETES_POD_NEW_IMAGE:${{ env.IMAGE_TAG }}" \
           --draft \
           --repo ${{ github.repository_owner }}/${{ env.KUBERNETES_CLUSTER_REPO_NAME }} || true
           # --reviewer ${{ github.repository_owner }}/devops-admin \
