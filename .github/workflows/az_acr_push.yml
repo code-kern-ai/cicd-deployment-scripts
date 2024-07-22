@@ -24,10 +24,10 @@ jobs:
         with:
           submodules: 'true'
       
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64,arm
+      # - name: Set up QEMU
+      #   uses: docker/setup-qemu-action@v3
+      #   with:
+      #     platforms: arm64,arm
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -62,6 +62,7 @@ jobs:
           tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform }}-${{ steps.branch_name.outputs.GH_REF_NAME }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          platforms: linux/${{ matrix.platform }}
           build-args: |
             platform=linux/${{ matrix.platform }}
             label=dockerfile-path=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/Dockerfile
