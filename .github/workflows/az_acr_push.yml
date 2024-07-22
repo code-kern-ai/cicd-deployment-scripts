@@ -6,7 +6,7 @@ on:
 jobs:
   az-acr-push:
     name: "Docker: Build & Push"
-    runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-latest' || 'macos-14'}}
+    runs-on: ubuntu-latest
     environment: dev
     env:
       AZURE_CONTAINER_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY }}
@@ -27,7 +27,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
-          platforms: linux/${{ matrix.platform }}
+          platforms: linux/amd64,linux/arm64
 
       - name: Log into Azure registry
         uses: docker/login-action@v3
@@ -58,7 +58,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            platform=linux/${{ matrix.platform }}
+            platform=linux/amd64,linux/arm64
             label=dockerfile-path=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/Dockerfile
 
       - name: Build & Push ${{ github.event.repository.name }}:${{ matrix.platform }}-gpu
@@ -71,5 +71,5 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            platform=linux/${{ matrix.platform }}
+            platform=linux/amd64,linux/arm64
             label=dockerfile-path=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/gpu.Dockerfile
