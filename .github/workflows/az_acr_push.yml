@@ -46,28 +46,28 @@ jobs:
         id: branch_name
         run: echo "GH_REF_NAME=$(echo ${{ github.ref_name }} | sed 's|/|-|g')" >> $GITHUB_OUTPUT
 
-      - name: Build & Push ${{ github.event.repository.name }}:${{ matrix.platform}}-${{ steps.branch_name.outputs.GH_REF_NAME }}
+      - name: Build & Push ${{ github.event.repository.name }}:${{ matrix.platform == 'arm64/v8' && 'arm64' || 'amd64' }}-${{ steps.branch_name.outputs.GH_REF_NAME }}
         if: ${{ github.ref_name != github.repository.default_branch }}
         uses: docker/build-push-action@v5
         with:
           push: true
           file: 'Dockerfile'
-          tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform}}-${{ steps.branch_name.outputs.GH_REF_NAME }}
+          tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform == 'arm64/v8' && 'arm64' || 'amd64' }}-${{ steps.branch_name.outputs.GH_REF_NAME }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            platform=linux/${{ matrix.platform}}
+            platform=linux/${{ matrix.platform == 'arm64/v8' && 'arm64' || 'amd64' }}
             label=dockerfile-path=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/Dockerfile
 
-      - name: Build & Push ${{ github.event.repository.name }}:${{ matrix.platform}}-gpu
-        if: ${{ hashFiles('gpu.Dockerflie') != '' }}
+      - name: Build & Push ${{ github.event.repository.name }}:${{ matrix.platform == 'arm64/v8' && 'arm64' || 'amd64' }}-gpu
+        if: ${{ hashFiles('gpu.Dockerfile') != '' }}
         uses: docker/build-push-action@v5
         with:
           push: true
           file: 'gpu.Dockerfile'
-          tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform}}-gpu
+          tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform == 'arm64/v8' && 'arm64' || 'amd64' }}-gpu
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            platform=linux/${{ matrix.platform}}
+            platform=linux/${{ matrix.platform == 'arm64/v8' && 'arm64' || 'amd64' }}
             label=dockerfile-path=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/gpu.Dockerfile
