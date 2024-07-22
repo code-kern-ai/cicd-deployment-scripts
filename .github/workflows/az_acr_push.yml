@@ -56,7 +56,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            platform=linux/${{ matrix.platform == 'arm64/v8' && 'arm64' || 'amd64' }}
+            platform=linux/${{ matrix.platform }}
             label=dockerfile-path=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/Dockerfile
 
       - name: Build & Push ${{ github.event.repository.name }}:${{ matrix.platform == 'arm64/v8' && 'arm64' || 'amd64' }}-gpu
@@ -69,5 +69,5 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            platform=linux/${{ matrix.platform == 'arm64/v8' && 'arm64' || 'amd64' }}
+            platform=linux/${{ matrix.platform }}
             label=dockerfile-path=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/gpu.Dockerfile
