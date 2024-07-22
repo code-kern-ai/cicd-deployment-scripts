@@ -1,0 +1,100 @@
+name: 'K8: Database Rollback'
+
+on:
+  workflow_call:
+    inputs:
+      num_migrations:
+        description: 'Number of migrations to rollback'
+        required: true
+        default: 0
+        type: number
+
+# Special permissions required for OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+jobs:
+  k8-db-rollback:
+    name: 'K8: Database Rollback'
+    runs-on: [self-hosted, "${{ github.ref_name }}"]
+    environment: ${{ github.ref_name }}
+    env:
+      KUBELOGIN_VERSION: "v0.0.25"
+      KUBERNETES_CLUSTER_REPO_NAME: "${{ vars.KUBERNETES_CLUSTER_REPO_NAME }}"
+      KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
+      KUBERNETES_NAMESPACE: "${{ vars.KUBERNETES_NAMESPACE }}"
+      KUBERNETES_MANIFEST_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}"
+      AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
+      AZURE_CONTAINER_REGISTRY: "${{ vars.AZURE_CONTAINER_REGISTRY }}"
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: GitHub Configuration
+      run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
+
+    - name: Clone cicd-deployment-scripts
+      run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
+
+    - name: Azure Cloud Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Set up kubelogin for non-interactive login
+      uses: azure/use-kubelogin@v1
+      with:
+        kubelogin-version: ${{ env.KUBELOGIN_VERSION }}
+
+    - uses: azure/aks-set-context@v3
+      with:
+        resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
+        cluster-name: ${{ env.KUBERNETES_CLUSTER_NAME }}
+        admin: 'false'
+        use-kubelogin: 'true'
+    
+    - name: Generate K8 Rollback Job
+      shell: bash
+      run: |
+        cp \
+          cicd-deployment-scripts/k8s/assets/db_rollback.tmpl \
+          apps/${{ github.event.repository.name }}/${{ github.ref_name }}/db_rollback.yaml
+        source cicd-deployment-scripts/k8s/db_rollback.sh \
+          -e ${{ github.ref_name }} \
+          -d ${{ github.event.repository.name }} \
+          -n ${{ env.KUBERNETES_NAMESPACE }} \
+          -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
+          -t latest \
+          -m ${{ inputs.num_migrations }}
+        
+        generate_db_rollback_job
+
+    - name: Apply K8 Rollback Job
+      shell: bash
+      run: |
+        source cicd-deployment-scripts/k8s/db_rollback.sh \
+          -e ${{ github.ref_name }} \
+          -d ${{ github.event.repository.name }} \
+          -n ${{ env.KUBERNETES_NAMESPACE }} \
+          -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
+          -t latest \
+          -m ${{ inputs.num_migrations }}
+        
+        apply_db_rollback_job
+
+    - name: Delete K8 Rollback Job
+      shell: bash
+      run: |
+        source cicd-deployment-scripts/k8s/db_rollback.sh \
+          -e ${{ github.ref_name }} \
+          -d ${{ github.event.repository.name }} \
+          -n ${{ env.KUBERNETES_NAMESPACE }} \
+          -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
+          -t latest \
+          -m ${{ inputs.num_migrations }}
+        
+        delete_db_rollback_job

@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${KUBERNETES_DEPLOYMENT_NAME}-downgrade-${num_migrations}
+  namespace: ${KUBERNETES_NAMESPACE}
+spec:
+  template:
+    spec:
+      containers:
+      - name: ${KUBERNETES_DEPLOYMENT_NAME}
+        image: ${KUBERNETES_POD_IMAGE}
+        command:
+          - alembic
+          - downgrade
+          - -${num_migrations}
+        resources:
+          limits:
+            cpu: "400m"
+            memory: "256Mi"
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+      nodeSelector:
+        nodepool/name: scale16gp
+      restartPolicy: Never
+  backoffLimit: 4
