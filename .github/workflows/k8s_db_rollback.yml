@@ -3,11 +3,11 @@ name: 'K8: Database Rollback'
 on:
   workflow_call:
     inputs:
-      num_migrations:
-        description: 'Number of migrations to rollback'
-        required: true
-        default: 0
-        type: number
+      alembic_downgrade_rev:
+        description: 'Rev of migration to rollback to'
+        required: false
+        default: 'base'
+        type: string
 
 # Special permissions required for OIDC authentication
 permissions:
@@ -56,45 +56,14 @@ jobs:
         cluster-name: ${{ env.KUBERNETES_CLUSTER_NAME }}
         admin: 'false'
         use-kubelogin: 'true'
-    
-    - name: Generate K8 Rollback Job
-      shell: bash
-      run: |
-        cp \
-          cicd-deployment-scripts/k8s/assets/db_rollback.tmpl \
-          apps/${{ github.event.repository.name }}/${{ github.ref_name }}/db_rollback.yaml
-        source cicd-deployment-scripts/k8s/db_rollback.sh \
-          -e ${{ github.ref_name }} \
-          -d ${{ github.event.repository.name }} \
-          -n ${{ env.KUBERNETES_NAMESPACE }} \
-          -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
-          -t latest \
-          -m ${{ inputs.num_migrations }}
-        
-        generate_db_rollback_job
 
-    - name: Apply K8 Rollback Job
+    - name: Apply Alembic Rollback
       shell: bash
       run: |
-        source cicd-deployment-scripts/k8s/db_rollback.sh \
+        bash cicd-deployment-scripts/k8s/db_rollback.sh \
           -e ${{ github.ref_name }} \
           -d ${{ github.event.repository.name }} \
           -n ${{ env.KUBERNETES_NAMESPACE }} \
           -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
           -t latest \
-          -m ${{ inputs.num_migrations }}
-        
-        apply_db_rollback_job
-
-    - name: Delete K8 Rollback Job
-      shell: bash
-      run: |
-        source cicd-deployment-scripts/k8s/db_rollback.sh \
-          -e ${{ github.ref_name }} \
-          -d ${{ github.event.repository.name }} \
-          -n ${{ env.KUBERNETES_NAMESPACE }} \
-          -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
-          -t latest \
-          -m ${{ inputs.num_migrations }}
-        
-        delete_db_rollback_job
+          -a ${{ inputs.alembic_downgrade_rev }}
