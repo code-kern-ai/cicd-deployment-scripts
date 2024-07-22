@@ -21,6 +21,14 @@ done
 kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE
 echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
 
+set +e
+alembic_exitcode=0
+ALEMBIC_CURRENT_REVISION=$(kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- alembic current 2> /dev/null)
+alembic_exitcode=$?
+set -e
+
+echo "::notice::running test command: kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- '$TEST_CMD'"
+
 KUBERNETES_POD_EXISTING_IMAGE=$(kubectl get pod --output json \
     --selector app=${KUBERNETES_DEPLOYMENT_NAME} \
     | jq -r '.items[0] | .spec.containers[0].image')
@@ -39,5 +47,11 @@ set -e
 
 kubectl set image deployment/${KUBERNETES_DEPLOYMENT_NAME} ${KUBERNETES_DEPLOYMENT_NAME}=${KUBERNETES_POD_EXISTING_IMAGE}
 echo "::notice::using ${KUBERNETES_POD_EXISTING_IMAGE}"
+
+if [ alembic_exitcode -eq 0 ]; then
+    ALEMBIC_HEAD=${ALEMBIC_CURRENT_REVISION:0:12}
+    echo "::notice::downgrading to alembic revision: $ALEMBIC_HEAD"
+    kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- alembic downgrade $ALEMBIC_HEAD
+fi
 
 exit $exitcode
