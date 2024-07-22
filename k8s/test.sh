@@ -50,8 +50,16 @@ echo "::notice::using ${KUBERNETES_POD_EXISTING_IMAGE}"
 
 if [ alembic_exitcode -eq 0 ]; then
     ALEMBIC_HEAD=${ALEMBIC_CURRENT_REVISION:0:12}
-    echo "::notice::downgrading to alembic revision: $ALEMBIC_HEAD"
-    kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- alembic downgrade $ALEMBIC_HEAD
+    
+    ALEMBIC_UPDATED_REVISION=$(kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- alembic current)
+    ALEMBIC_UPDATED_HEAD=${ALEMBIC_UPDATED_REVISION:0:12}
+
+    if [ $ALEMBIC_HEAD = $ALEMBIC_UPDATED_HEAD ]; then
+        echo "::notice::skipping alembic downgrade"
+    else
+        echo "::notice::downgrading to alembic revision: $ALEMBIC_HEAD"
+        kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- alembic downgrade $ALEMBIC_HEAD
+    fi
 fi
 
 exit $exitcode
