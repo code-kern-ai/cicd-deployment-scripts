@@ -58,7 +58,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          file: 'Dockerfile'
+          file: ${{ hashFiles('Dockerfile.arm64') != '' && 'Dockerfile.arm64' || 'Dockerfile' }}
           tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform }}-${{ steps.branch_name.outputs.GH_REF_NAME }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
