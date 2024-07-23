@@ -38,6 +38,10 @@ echo "::warning::using ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}
 
 kubectl rollout status deployment ${KUBERNETES_DEPLOYMENT_NAME}
 
+if [ $alembic_exitcode -eq 0 ]; then
+    kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- alembic upgrade head
+fi
+
 set +e
 exitcode=0
 echo "::warning::running test command: kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- '$TEST_CMD'"
@@ -60,8 +64,6 @@ if [ $alembic_exitcode -eq 0 ] && [ $exitcode -ne 0 ]; then
         echo "::notice::downgrading to alembic revision: $ALEMBIC_HEAD"
         kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- alembic downgrade $ALEMBIC_HEAD
     fi
-elif [ $alembic_exitcode -eq 0 ] && [ $exitcode -eq 0 ]; then
-    echo "::notice::alembic upgrade completed successfully"
 fi
 
 exit $exitcode
