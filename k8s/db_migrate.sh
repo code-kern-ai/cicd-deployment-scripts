@@ -22,8 +22,11 @@ do
     esac
 done
 
+
+echo "::group::Kubernetes Context"
 kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE
 echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
+echo "::endgroup::"
 
 echo "::group::Migrating to revision: $alembic_upgrade_rev"
 

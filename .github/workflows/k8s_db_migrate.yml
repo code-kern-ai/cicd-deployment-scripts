@@ -26,6 +26,7 @@ jobs:
     runs-on: [self-hosted, "${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}"]
     environment: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}
     env:
+      ENVIRONMENT_NAME: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}
       KUBELOGIN_VERSION: "v0.0.25"
       KUBERNETES_CLUSTER_REPO_NAME: "${{ vars.KUBERNETES_CLUSTER_REPO_NAME }}"
       KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
@@ -69,7 +70,7 @@ jobs:
       shell: bash
       run: |
         bash cicd-deployment-scripts/k8s/db_migrate.sh \
-          -e ${{ github.ref_name }} \
+          -e ${{ env.ENVIRONMENT_NAME }} \
           -d ${{ github.event.repository.name }} \
           -p ${{ github.workspace }}/${{ env.KUBERNETES_CLUSTER_REPO_NAME }} \
           -n ${{ env.KUBERNETES_NAMESPACE }} \
