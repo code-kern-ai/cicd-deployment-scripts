@@ -1,12 +1,12 @@
-name: 'K8: Database Rollback'
+name: 'K8: Database Migrate'
 
 on:
   workflow_call:
     inputs:
-      alembic_downgrade_rev:
-        description: 'Rev of migration to rollback to'
+      alembic_upgrade_rev:
+        description: 'Rev of migration to migrate to'
         required: false
-        default: 'base'
+        default: 'head'
         type: string
       docker_image_tag:
         description: 'Docker Image Tag'
@@ -21,8 +21,8 @@ permissions:
   actions: read
 
 jobs:
-  k8-db-rollback:
-    name: 'K8: Database Rollback'
+  k8-db-migrate:
+    name: 'K8: Database Migrate'
     runs-on: [self-hosted, "${{ github.ref_name }}"]
     environment: ${{ github.ref_name }}
     env:
@@ -65,14 +65,14 @@ jobs:
         admin: 'false'
         use-kubelogin: 'true'
 
-    - name: Apply Alembic Rollback
+    - name: Apply Alembic Migrate
       shell: bash
       run: |
-        bash cicd-deployment-scripts/k8s/db_rollback.sh \
+        bash cicd-deployment-scripts/k8s/db_migrate.sh \
           -e ${{ github.ref_name }} \
           -d ${{ github.event.repository.name }} \
           -p ${{ github.workspace }}/${{ env.KUBERNETES_CLUSTER_REPO_NAME }} \
           -n ${{ env.KUBERNETES_NAMESPACE }} \
           -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
           -t ${{ inputs.docker_image_tag }} \
-          -a ${{ inputs.alembic_downgrade_rev }}
+          -a ${{ inputs.alembic_upgrade_rev }}

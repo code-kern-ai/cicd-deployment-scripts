@@ -18,17 +18,14 @@ do
     esac
 done
 
+echo "::group::Kubernetes Context"
 kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE
 echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
-
-set +e
-alembic_exitcode=0
-ALEMBIC_CURRENT_REVISION=$(kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- alembic current 2> /dev/null)
-alembic_exitcode=$?
-set -e
+echo "::endgroup::"
 
 echo "::notice::running test command: kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- '$TEST_CMD'"
 
+echo "::group::Upgrade deployment image"
 KUBERNETES_POD_EXISTING_IMAGE=$(kubectl get pod --output json \
     --selector app=${KUBERNETES_DEPLOYMENT_NAME} \
     | jq -r '.items[0] | .spec.containers[0].image')
@@ -37,33 +34,18 @@ kubectl set image deployment/${KUBERNETES_DEPLOYMENT_NAME} ${KUBERNETES_DEPLOYME
 echo "::warning::using ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}"
 
 kubectl rollout status deployment ${KUBERNETES_DEPLOYMENT_NAME}
+echo "::endgroup::"
 
-if [ $alembic_exitcode -eq 0 ]; then
-    kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- alembic upgrade head
-fi
-
+echo "::group::Running test command"
 set +e
 exitcode=0
 echo "::warning::running test command: kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- '$TEST_CMD'"
-kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- "$TEST_CMD"
+kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- ''$TEST_CMD''
 exitcode=$?
 set -e
+echo "::endgroup::"
 
 kubectl set image deployment/${KUBERNETES_DEPLOYMENT_NAME} ${KUBERNETES_DEPLOYMENT_NAME}=${KUBERNETES_POD_EXISTING_IMAGE}
 echo "::notice::using ${KUBERNETES_POD_EXISTING_IMAGE}"
-
-if [ $alembic_exitcode -eq 0 ] && [ $exitcode -ne 0 ]; then
-    ALEMBIC_HEAD=${ALEMBIC_CURRENT_REVISION:0:12}
-    
-    ALEMBIC_UPDATED_REVISION=$(kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- alembic current)
-    ALEMBIC_UPDATED_HEAD=${ALEMBIC_UPDATED_REVISION:0:12}
-
-    if [ $ALEMBIC_HEAD = $ALEMBIC_UPDATED_HEAD ]; then
-        echo "::notice::skipping alembic downgrade"
-    else
-        echo "::notice::downgrading to alembic revision: $ALEMBIC_HEAD"
-        kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- alembic downgrade $ALEMBIC_HEAD
-    fi
-fi
 
 exit $exitcode
