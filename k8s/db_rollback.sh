@@ -42,6 +42,7 @@ kubectl apply --filename $KUBERNETES_DEPLOYMENT_REPO_PATH/infrastructure/$ENVIRO
 
 echo "Waiting for migration job to complete ..."
 kubectl wait --for=condition=complete --timeout 60s job/$KUBERNETES_DEPLOYMENT_NAME-migrate
+kubectl logs job/$KUBERNETES_DEPLOYMENT_NAME-migrate
 echo "::endgroup::"
 
 echo "::group::Rolling out deployment"
