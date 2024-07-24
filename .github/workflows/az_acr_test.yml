@@ -2,6 +2,10 @@ name: 'ACR: Docker Push Test'
 
 on:
   workflow_call:
+    outputs:
+      GH_REF_NAME:
+        description: "Test Docker image tag"
+        value: ${{ jobs.az-acr-push.outputs.GH_REF_NAME }}
 
 jobs:
   az-acr-push:
@@ -12,6 +16,8 @@ jobs:
       AZURE_CONTAINER_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY }}
       ACR_LOGIN_USERNAME: ${{ secrets.ACR_LOGIN_USERNAME }}
       ACR_LOGIN_PASSWORD: ${{ secrets.ACR_LOGIN_PASSWORD }}
+    outputs:
+      GH_REF_NAME: test-${{ steps.branch_name.outputs.GH_REF_NAME }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
