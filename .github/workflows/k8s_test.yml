@@ -90,7 +90,7 @@ jobs:
   call-k8-db-downgrade:
     uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/k8s_db_downgrade.yml@dev
     needs: [call-az-acr-push-test, call-k8-db-upgrade, k8-test]
-    if: ${{ always() && (needs.call-k8-db-upgrade.outputs.ALEMBIC_CURRENT_REV != needs.call-k8-db-upgrade.outputs.ALEMBIC_UPGRADED_REV) && (github.event.repository.name == 'refinery-gateway' || github.event.repository.name == 'gates-gateway'  || github.event.repository.name == 'cognition-gateway' || github.event.repository.name == 'hosted-inference-api') }}
+    if: ${{ always() && !cancelled() && (needs.call-k8-db-upgrade.outputs.ALEMBIC_CURRENT_REV != needs.call-k8-db-upgrade.outputs.ALEMBIC_UPGRADED_REV) && (github.event.repository.name == 'refinery-gateway' || github.event.repository.name == 'gates-gateway'  || github.event.repository.name == 'cognition-gateway' || github.event.repository.name == 'hosted-inference-api') }}
     secrets: inherit
     with:
       alembic_downgrade_rev: ${{ needs.call-k8-db-upgrade.outputs.ALEMBIC_CURRENT_REV }}
