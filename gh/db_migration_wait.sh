@@ -15,26 +15,19 @@ do
 done
 
 
-RUNNING_DB_UPGRADE_WORKFLOW=""
-RUNNING_DB_UPGRADE_WORKFLOW_ID=$(gh run list \
-    --json conclusion,databaseId,headBranch,status,workflowName \
-    --jq ".[] | select(.workflowName==\"$WAIT_WORKFLOW_NAME\" and .status!=\"completed\" and .headBranch!=\"$ENVIRONMENT_NAME\" and .databaseId!=$CURRENT_WORKFLOW_DATABASE_ID) | .databaseId" \
-    --repo code-kern-ai/refinery-gateway)
+RUNNING_DB_UPGRADE_WORKFLOW_ID=""
 
-# while [ -z $RUNNING_DB_UPGRADE_WORKFLOW ]; do
-#     RUNNING_DB_UPGRADE_WORKFLOW=$(gh run list \
-#         --json conclusion,databaseId,headBranch,status,workflowName \
-#         --jq '.[] | select(.workflowName=="'$WAIT_WORKFLOW_NAME'" and .status!="completed" and .headBranch!="'$ENVIRONMENT_NAME'" and .databaseId!="'$CURRENT_WORKFLOW_DATABASE_ID'")' \
-#         --repo code-kern-ai/refinery-gateway)
-#     echo "Waiting for running db upgrade workflow to complete ..."
-#     if [ -z $RUNNING_DB_UPGRADE_WORKFLOW ]; then
-#         sleep 5
-#     fi
-# done
-if [ -z $RUNNING_DB_UPGRADE_WORKFLOW_ID ]; then
-    echo "No running db upgrade workflow found"
-    exit 0
-fi
 
-gh run watch $RUNNING_DB_UPGRADE_WORKFLOW_ID --repo code-kern-ai/refinery-gateway
+while [ -z $RUNNING_DB_UPGRADE_WORKFLOW_ID ]; do
+    RUNNING_DB_UPGRADE_WORKFLOW_ID=$(gh run list \
+        --json conclusion,databaseId,headBranch,status,workflowName \
+        --jq ".[] | select(.workflowName==\"$WAIT_WORKFLOW_NAME\" and .status!=\"completed\" and .headBranch!=\"$ENVIRONMENT_NAME\" and .databaseId!=$CURRENT_WORKFLOW_DATABASE_ID) | .databaseId" \
+        --repo code-kern-ai/refinery-gateway)
+    
+    echo "Waiting for running db upgrade workflow to complete ..."
+    if [ -z $RUNNING_DB_UPGRADE_WORKFLOW_ID ]; then
+        gh run watch $RUNNING_DB_UPGRADE_WORKFLOW_ID --repo code-kern-ai/refinery-gateway 1> /dev/null
+    fi
+done
+
 echo "::notice::Running db upgrade workflow completed"
