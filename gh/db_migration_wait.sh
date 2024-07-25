@@ -24,8 +24,12 @@ while [ -n "$RUNNING_DB_UPGRADE_WORKFLOW_ID" ]; do
         --jq ".[] | select(.workflowName==\"$WAIT_WORKFLOW_NAME\" and .status!=\"completed\" and .headBranch!=\"$ENVIRONMENT_NAME\" and .databaseId!=$CURRENT_WORKFLOW_DATABASE_ID) | .databaseId" \
         --repo code-kern-ai/refinery-gateway)
     
-    echo "Waiting for running db upgrade workflow to complete ..."
     if [ -n "$RUNNING_DB_UPGRADE_WORKFLOW_ID" ]; then
+        RUNNING_DB_UPGRADE_WORKFLOW_URL=$(gh run list \
+            --json databaseId,url \
+            --jq ".[] | select(.databaseId==$RUNNING_DB_UPGRADE_WORKFLOW_ID) | .url" \
+            --repo code-kern-ai/refinery-gateway)
+        echo "Waiting for running db upgrade workflow to complete: $RUNNING_DB_UPGRADE_WORKFLOW_URL"
         gh run watch $RUNNING_DB_UPGRADE_WORKFLOW_ID --repo code-kern-ai/refinery-gateway 1> /dev/null
     fi
 done
