@@ -32,7 +32,7 @@ RUNNING_DB_UPGRADE_WORKFLOW_ID=$(gh run list \
 #     fi
 # done
 if [ -z $RUNNING_DB_UPGRADE_WORKFLOW_ID ]; then
-    echo "::notice::No running db upgrade workflow found"
+    echo "No running db upgrade workflow found"
     exit 0
 fi
 
