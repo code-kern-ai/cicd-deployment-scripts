@@ -89,5 +89,5 @@ jobs:
     if: ${{ failure() && (github.event.repository.name == 'refinery-gateway' || github.event.repository.name == 'gates-gateway'  || github.event.repository.name == 'cognition-gateway') }}
     secrets: inherit
     with:
-      alembic_downgrade_rev: ${{ needs.call-k8-db-upgrade.outputs.ALEMBIC_CURRENT_REV }}
+      alembic_downgrade_rev: ${{ needs.call-k8-db-upgrade.outputs.ALEMBIC_CURRENT_REV }}
       docker_image_tag: ${{ needs.call-az-acr-push-test.outputs.GH_REF_NAME }}
