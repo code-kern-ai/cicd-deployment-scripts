@@ -29,7 +29,7 @@ if [ $KUBERNETES_DEPLOYMENT_NAME = "cognition-gateway" ]; then
     IMAGE_TAG_EXISTS=$(docker manifest inspect ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${IMAGE_TAG} 2> /dev/null)
     set -e
     if [ -z "$IMAGE_TAG_EXISTS" ]; then
-        echo "Image tag not found: ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${IMAGE_TAG}"
+        echo "::notice::No migrations to apply for image tag ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${IMAGE_TAG}"
         exit 0
     fi
 fi
