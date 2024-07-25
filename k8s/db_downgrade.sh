@@ -51,11 +51,3 @@ kubectl wait --for=condition=complete --timeout 60s job/$KUBERNETES_DEPLOYMENT_N
 kubectl logs job/$KUBERNETES_DEPLOYMENT_NAME-migrate
 kubectl delete job/$KUBERNETES_DEPLOYMENT_NAME-migrate
 echo "::endgroup::"
-
-
-echo "::group::Rolling out deployments"
-kubectl rollout restart deployment/$KUBERNETES_DEPLOYMENT_NAME
-kubectl rollout status deployment/$KUBERNETES_DEPLOYMENT_NAME
-kubectl rollout restart deployment/cognition-gateway
-kubectl rollout status deployment/cognition-gateway
-echo "::endgroup::"

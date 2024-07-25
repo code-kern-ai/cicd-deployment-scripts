@@ -65,11 +65,3 @@ ALEMBIC_UPGRADED_REV=$(kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} 
 echo "ALEMBIC_UPGRADED_REV=${ALEMBIC_UPGRADED_REV:0:12}" >> $GITHUB_OUTPUT
 echo "Alembic upgraded revision: $ALEMBIC_UPGRADED_REV"
 echo "::endgroup::"
-
-
-echo "::group::Rolling out deployments"
-kubectl rollout restart deployment/$KUBERNETES_DEPLOYMENT_NAME
-kubectl rollout status deployment/$KUBERNETES_DEPLOYMENT_NAME
-kubectl rollout restart deployment/cognition-gateway
-kubectl rollout status deployment/cognition-gateway
-echo "::endgroup::"
