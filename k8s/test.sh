@@ -23,7 +23,6 @@ kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE
 echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
 echo "::endgroup::"
 
-echo "::notice::running test command: kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- '$TEST_CMD'"
 
 echo "::group::Upgrade deployment image"
 KUBERNETES_POD_EXISTING_IMAGE=$(kubectl get pod --output json \
@@ -31,21 +30,23 @@ KUBERNETES_POD_EXISTING_IMAGE=$(kubectl get pod --output json \
     | jq -r '.items[0] | .spec.containers[0].image')
 
 kubectl set image deployment/${KUBERNETES_DEPLOYMENT_NAME} ${KUBERNETES_DEPLOYMENT_NAME}=${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}
-echo "::warning::using ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}"
-
 kubectl rollout status deployment ${KUBERNETES_DEPLOYMENT_NAME}
 echo "::endgroup::"
 
-echo "::group::Running test command"
+
+echo "::warning::using ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}"
+
+
+echo "::group::Running test command: kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- '$TEST_CMD'"
 set +e
 exitcode=0
-echo "::warning::running test command: kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- '$TEST_CMD'"
 kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- ''$TEST_CMD''
 exitcode=$?
 set -e
 echo "::endgroup::"
 
 kubectl set image deployment/${KUBERNETES_DEPLOYMENT_NAME} ${KUBERNETES_DEPLOYMENT_NAME}=${KUBERNETES_POD_EXISTING_IMAGE}
+
 echo "::notice::using ${KUBERNETES_POD_EXISTING_IMAGE}"
 
 exit $exitcode

@@ -1,12 +1,12 @@
-name: 'K8: Database Migrate'
+name: 'K8: Database Downgrade'
 
 on:
   workflow_call:
     inputs:
-      alembic_upgrade_rev:
-        description: 'Rev of migration to migrate to'
+      alembic_downgrade_rev:
+        description: 'Rev of migration to rollback to'
         required: false
-        default: 'head'
+        default: 'base'
         type: string
       docker_image_tag:
         description: 'Docker Image Tag'
@@ -21,12 +21,11 @@ permissions:
   actions: read
 
 jobs:
-  k8-db-migrate:
-    name: 'K8: Database Migrate'
-    runs-on: [self-hosted, "${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}"]
-    environment: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}
+  k8-db-downgrade:
+    name: 'K8: Database Downgrade'
+    runs-on: [self-hosted, "${{ github.ref_name }}"]
+    environment: ${{ github.ref_name }}
     env:
-      ENVIRONMENT_NAME: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}
       KUBELOGIN_VERSION: "v0.0.25"
       KUBERNETES_CLUSTER_REPO_NAME: "${{ vars.KUBERNETES_CLUSTER_REPO_NAME }}"
       KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
@@ -66,14 +65,14 @@ jobs:
         admin: 'false'
         use-kubelogin: 'true'
 
-    - name: Apply Alembic Migrate
+    - name: Apply Alembic Rollback
       shell: bash
       run: |
-        bash cicd-deployment-scripts/k8s/db_migrate.sh \
-          -e ${{ env.ENVIRONMENT_NAME }} \
+        bash cicd-deployment-scripts/k8s/db_downgrade.sh \
+          -e ${{ github.ref_name }} \
           -d ${{ github.event.repository.name }} \
           -p ${{ github.workspace }}/${{ env.KUBERNETES_CLUSTER_REPO_NAME }} \
           -n ${{ env.KUBERNETES_NAMESPACE }} \
           -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
           -t ${{ inputs.docker_image_tag }} \
-          -a ${{ inputs.alembic_upgrade_rev }}
+          -a ${{ inputs.alembic_downgrade_rev }}

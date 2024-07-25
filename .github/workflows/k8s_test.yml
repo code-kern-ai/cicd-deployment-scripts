@@ -19,17 +19,20 @@ jobs:
     uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/az_acr_test.yml@dev
     secrets: inherit
   
-  call-k8-db-migrate:
-    uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/k8s_db_migrate.yml@dev
+  call-k8-db-upgrade:
+    uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/k8s_db_upgrade.yml@dev
     needs: [call-az-acr-push-test]
+    if: ${{ github.event.repository.name == 'refinery-gateway' || github.event.repository.name == 'gates-gateway'  || github.event.repository.name == 'cognition-gateway' }}
     secrets: inherit
     with:
+      alembic_downgrade_rev: 'head'
       docker_image_tag: ${{ needs.call-az-acr-push-test.outputs.GH_REF_NAME }}
 
   k8-test:
     name: 'K8: Test'
     runs-on: [self-hosted, dev]
-    needs: [call-az-acr-push-test, call-k8-db-migrate]
+    needs: [call-az-acr-push-test, call-k8-db-upgrade]
+    if: !failure()
     environment: dev
     env:
       KUBELOGIN_VERSION: "v0.0.25"
@@ -79,3 +82,12 @@ jobs:
           -t ${{ needs.call-az-acr-push-test.outputs.GH_REF_NAME }} \
           -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
           -c "${{ inputs.test_cmd }}"
+
+  call-k8-db-downgrade:
+    uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/k8s_db_downgrade.yml@dev
+    needs: [call-az-acr-push-test, call-k8-db-upgrade, k8-test]
+    if: ${{ failure() && (github.event.repository.name == 'refinery-gateway' || github.event.repository.name == 'gates-gateway'  || github.event.repository.name == 'cognition-gateway') }}
+    secrets: inherit
+    with:
+      alembic_downgrade_rev: ${{ needs.call-k8-db-upgrade.outputs.ALEMBIC_CURRENT_REV }}
+      docker_image_tag: ${{ needs.call-az-acr-push-test.outputs.GH_REF_NAME }}

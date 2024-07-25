@@ -1,18 +1,25 @@
-name: 'K8: Database Rollback'
+name: 'K8: Database Upgrade'
 
 on:
   workflow_call:
     inputs:
-      alembic_downgrade_rev:
-        description: 'Rev of migration to rollback to'
+      alembic_upgrade_rev:
+        description: 'Rev of migration to migrate to'
         required: false
-        default: 'base'
+        default: 'head'
         type: string
       docker_image_tag:
         description: 'Docker Image Tag'
         required: false
         default: 'latest'
         type: string
+    outputs:
+      alembic_current_rev:
+        description: 'Current Alembic Rev'
+        value: ${{ jobs.k8-db-upgrade.outputs.ALEMBIC_CURRENT_REV }}
+      alembic_upgraded_rev:
+        description: 'Upgraded Alembic Rev'
+        value: ${{ jobs.k8-db-upgrade.outputs.ALEMBIC_UPGRADED_REV }}
 
 # Special permissions required for OIDC authentication
 permissions:
@@ -21,11 +28,12 @@ permissions:
   actions: read
 
 jobs:
-  k8-db-rollback:
-    name: 'K8: Database Rollback'
-    runs-on: [self-hosted, "${{ github.ref_name }}"]
-    environment: ${{ github.ref_name }}
+  k8-db-upgrade:
+    name: 'K8: Database Upgrade'
+    runs-on: [self-hosted, "${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}"]
+    environment: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}
     env:
+      ENVIRONMENT_NAME: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}
       KUBELOGIN_VERSION: "v0.0.25"
       KUBERNETES_CLUSTER_REPO_NAME: "${{ vars.KUBERNETES_CLUSTER_REPO_NAME }}"
       KUBERNETES_CLUSTER_NAME: "${{ vars.KUBERNETES_CLUSTER_NAME }}"
@@ -33,6 +41,9 @@ jobs:
       KUBERNETES_MANIFEST_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}"
       AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
       AZURE_CONTAINER_REGISTRY: "${{ vars.AZURE_CONTAINER_REGISTRY }}"
+    outputs:
+      ALEMBIC_CURRENT_REV: ${{ steps.alembic_command.outputs.ALEMBIC_CURRENT_REV }}
+      ALEMBIC_UPGRADED_REV: ${{ steps.alembic_command.outputs.ALEMBIC_UPGRADED_REV }}
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -65,14 +76,15 @@ jobs:
         admin: 'false'
         use-kubelogin: 'true'
 
-    - name: Apply Alembic Rollback
+    - name: Apply Alembic Migrate
       shell: bash
+      id: alembic_command
       run: |
-        bash cicd-deployment-scripts/k8s/db_rollback.sh \
-          -e ${{ github.ref_name }} \
+        bash cicd-deployment-scripts/k8s/db_upgrade.sh \
+          -e ${{ env.ENVIRONMENT_NAME }} \
           -d ${{ github.event.repository.name }} \
           -p ${{ github.workspace }}/${{ env.KUBERNETES_CLUSTER_REPO_NAME }} \
           -n ${{ env.KUBERNETES_NAMESPACE }} \
           -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
           -t ${{ inputs.docker_image_tag }} \
-          -a ${{ inputs.alembic_downgrade_rev }}
+          -a ${{ inputs.alembic_upgrade_rev }}
