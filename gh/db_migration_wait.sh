@@ -18,7 +18,7 @@ done
 RUNNING_DB_UPGRADE_WORKFLOW=""
 RUNNING_DB_UPGRADE_WORKFLOW_ID=$(gh run list \
     --json conclusion,databaseId,headBranch,status,workflowName \
-    --jq ".[] | select(.workflowName==\"$WAIT_WORKFLOW_NAME\" and .status!=\"completed\" and .headBranch!=\"$ENVIRONMENT_NAME\" and .databaseId!=\"$CURRENT_WORKFLOW_DATABASE_ID\") | .databaseId" \
+    --jq ".[] | select(.workflowName==\"$WAIT_WORKFLOW_NAME\" and .status!=\"completed\" and .headBranch!=\"$ENVIRONMENT_NAME\" and .databaseId!=$CURRENT_WORKFLOW_DATABASE_ID) | .databaseId" \
     --repo code-kern-ai/refinery-gateway)
 
 # while [ -z $RUNNING_DB_UPGRADE_WORKFLOW ]; do
