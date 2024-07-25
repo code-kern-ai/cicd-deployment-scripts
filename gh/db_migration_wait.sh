@@ -25,7 +25,7 @@ while [ -z $RUNNING_DB_UPGRADE_WORKFLOW_ID ]; do
         --repo code-kern-ai/refinery-gateway)
     
     echo "Waiting for running db upgrade workflow to complete ..."
-    if [ -z $RUNNING_DB_UPGRADE_WORKFLOW_ID ]; then
+    if [ -n $RUNNING_DB_UPGRADE_WORKFLOW_ID ]; then
         gh run watch $RUNNING_DB_UPGRADE_WORKFLOW_ID --repo code-kern-ai/refinery-gateway 1> /dev/null
     fi
 done
