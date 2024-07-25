@@ -28,4 +28,4 @@ jobs:
           bash cicd-deployment-scripts/gh/db_migration_wait.sh \
             -e "dev" \
             -w "K8: Test" \
-            -i ${{ github.run_id }}
+            -i "${{ github.run_id }}"
