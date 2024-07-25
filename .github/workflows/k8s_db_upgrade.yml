@@ -80,7 +80,7 @@ jobs:
       shell: bash
       id: alembic_command
       run: |
-        echo $(cat cicd-deployment-scripts/k8s/db_upgrade.sh)
+        envsubst < cicd-deployment-scripts/k8s/db_upgrade.sh
         bash cicd-deployment-scripts/k8s/db_upgrade.sh \
           -e ${{ env.ENVIRONMENT_NAME }} \
           -d ${{ github.event.repository.name }} \
