@@ -1,0 +1,31 @@
+name: "GitHub: Database Migration Wait"
+
+on:
+  workflow_call:
+
+# Special permissions required for OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+jobs:
+  gh-db-migration-wait:
+    name: 'GitHub: Database Migration Wait'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+    steps:
+      - name: GitHub Configuration
+        run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
+  
+      - name: Clone cicd-deployment-scripts
+        run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
+  
+      - name: Database Migration Wait
+        shell: bash
+        run: |
+          bash cicd-deployment-scripts/gh/db_migration_wait.sh \
+            -e "dev" \
+            -w "K8: Test" \
+            -i ${{ github.run_id }}
