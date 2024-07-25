@@ -15,10 +15,10 @@ do
 done
 
 
-RUNNING_DB_UPGRADE_WORKFLOW_ID=""
+RUNNING_DB_UPGRADE_WORKFLOW_ID=null
 
 
-while [ -z $RUNNING_DB_UPGRADE_WORKFLOW_ID ]; do
+while [ -n $RUNNING_DB_UPGRADE_WORKFLOW_ID ]; do
     RUNNING_DB_UPGRADE_WORKFLOW_ID=$(gh run list \
         --json conclusion,databaseId,headBranch,status,workflowName \
         --jq ".[] | select(.workflowName==\"$WAIT_WORKFLOW_NAME\" and .status!=\"completed\" and .headBranch!=\"$ENVIRONMENT_NAME\" and .databaseId!=$CURRENT_WORKFLOW_DATABASE_ID) | .databaseId" \
