@@ -25,7 +25,7 @@ jobs:
     if: ${{ github.event.repository.name == 'refinery-gateway' || github.event.repository.name == 'gates-gateway'  || github.event.repository.name == 'cognition-gateway' }}
     secrets: inherit
     with:
-      alembic_downgrade_rev: 'head'
+      alembic_upgrade_rev: 'head'
       docker_image_tag: ${{ needs.call-az-acr-push-test.outputs.GH_REF_NAME }}
 
   k8-test:
