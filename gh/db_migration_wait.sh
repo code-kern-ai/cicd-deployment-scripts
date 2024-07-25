@@ -31,4 +31,10 @@ RUNNING_DB_UPGRADE_WORKFLOW_ID=$(gh run list \
 #         sleep 5
 #     fi
 # done
+if [ -z $RUNNING_DB_UPGRADE_WORKFLOW_ID ]; then
+    echo "::notice::No running db upgrade workflow found"
+    exit 0
+fi
+
 gh run watch $RUNNING_DB_UPGRADE_WORKFLOW_ID --repo code-kern-ai/refinery-gateway
+echo "::notice::Running db upgrade workflow completed"
