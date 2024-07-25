@@ -43,9 +43,9 @@ exitcode=0
 kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- ''$TEST_CMD''
 exitcode=$?
 set -e
+kubectl set image deployment/${KUBERNETES_DEPLOYMENT_NAME} ${KUBERNETES_DEPLOYMENT_NAME}=${KUBERNETES_POD_EXISTING_IMAGE}
 echo "::endgroup::"
 
-kubectl set image deployment/${KUBERNETES_DEPLOYMENT_NAME} ${KUBERNETES_DEPLOYMENT_NAME}=${KUBERNETES_POD_EXISTING_IMAGE}
 
 echo "::notice::using ${KUBERNETES_POD_EXISTING_IMAGE}"
 
