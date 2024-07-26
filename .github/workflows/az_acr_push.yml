@@ -76,6 +76,7 @@ jobs:
           tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform }}-gpu
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          platforms: linux/${{ matrix.platform }}
           build-args: |
             platform=linux/${{ matrix.platform }}
             label=dockerfile-path=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/gpu.Dockerfile
