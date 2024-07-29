@@ -23,7 +23,7 @@ do
     esac
 done
 
-if [ $KUBERNETES_DEPLOYMENT_NAME = "cognition-gateway" ]; then
+if [ $KUBERNETES_DEPLOYMENT_NAME != "refinery-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "gates-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "hosted-inference-api" ]; then
     KUBERNETES_DEPLOYMENT_NAME="refinery-gateway"
     set +e
     IMAGE_TAG_EXISTS=$(az acr repository show --name ${AZURE_CONTAINER_REGISTRY} --image ${KUBERNETES_DEPLOYMENT_NAME}:${IMAGE_TAG} 2> /dev/null)

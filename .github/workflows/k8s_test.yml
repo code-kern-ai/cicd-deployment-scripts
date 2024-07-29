@@ -26,7 +26,7 @@ jobs:
   call-k8-db-upgrade:
     uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/k8s_db_upgrade.yml@dev
     needs: [call-az-acr-push-test, call-gh-db-migration-wait]
-    if: ${{ github.event.repository.name == 'refinery-gateway' || github.event.repository.name == 'gates-gateway'  || github.event.repository.name == 'cognition-gateway' || github.event.repository.name == 'hosted-inference-api' }}
+    if: ${{ vars.ENABLE_ALEMBIC_MIGRATIONS == 'true' }}
     secrets: inherit
     with:
       alembic_upgrade_rev: 'head'
@@ -45,6 +45,7 @@ jobs:
       KUBERNETES_MANIFEST_PATH: "${{ vars.KUBERNETES_MANIFEST_PATH }}"
       AZURE_RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}"
       AZURE_CONTAINER_REGISTRY: "${{ vars.AZURE_CONTAINER_REGISTRY }}"
+      ENABLE_ALEMBIC_MIGRATIONS: "${{ vars.ENABLE_ALEMBIC_MIGRATIONS }}"
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
@@ -85,12 +86,13 @@ jobs:
           -d ${{ github.event.repository.name }} \
           -t ${{ needs.call-az-acr-push-test.outputs.GH_REF_NAME }} \
           -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
-          -c "${{ inputs.test_cmd }}"
+          -c "${{ inputs.test_cmd }}" \
+          -a "${{ env.ENABLE_ALEMBIC_MIGRATIONS }}"
 
   call-k8-db-downgrade:
     uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/k8s_db_downgrade.yml@dev
     needs: [call-az-acr-push-test, call-k8-db-upgrade, k8-test]
-    if: ${{ always() && !cancelled() && (needs.call-k8-db-upgrade.outputs.ALEMBIC_CURRENT_REV != needs.call-k8-db-upgrade.outputs.ALEMBIC_UPGRADED_REV) && (github.event.repository.name == 'refinery-gateway' || github.event.repository.name == 'gates-gateway'  || github.event.repository.name == 'cognition-gateway' || github.event.repository.name == 'hosted-inference-api') }}
+    if: ${{ always() && !cancelled() && (needs.call-k8-db-upgrade.outputs.ALEMBIC_CURRENT_REV != needs.call-k8-db-upgrade.outputs.ALEMBIC_UPGRADED_REV) && vars.ENABLE_ALEMBIC_MIGRATIONS == 'true' }}
     secrets: inherit
     with:
       alembic_downgrade_rev: ${{ needs.call-k8-db-upgrade.outputs.ALEMBIC_CURRENT_REV }}
