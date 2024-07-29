@@ -30,7 +30,7 @@ while [ -n "$RUNNING_DB_UPGRADE_WORKFLOW_ID" ]; do
             --jq ".[] | select(.databaseId==$RUNNING_DB_UPGRADE_WORKFLOW_ID) | .url" \
             --repo code-kern-ai/refinery-gateway)
         echo "Waiting for running db upgrade workflow to complete: $RUNNING_DB_UPGRADE_WORKFLOW_URL"
-        gh run watch $RUNNING_DB_UPGRADE_WORKFLOW_ID --repo code-kern-ai/refinery-gateway 1> /dev/null
+        gh run watch $RUNNING_DB_UPGRADE_WORKFLOW_ID --interval 10 --repo code-kern-ai/refinery-gateway 1> /dev/null
     fi
 done
 
