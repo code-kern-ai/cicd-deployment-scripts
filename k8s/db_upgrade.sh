@@ -61,7 +61,24 @@ echo "::endgroup::"
 echo "::group::Apply Kubernetes Job"
 kubectl apply --filename $KUBERNETES_DEPLOYMENT_REPO_PATH/infrastructure/$ENVIRONMENT_NAME/job/$KUBERNETES_DEPLOYMENT_NAME-migrate.yml
 echo "Waiting for migration job to complete ..."
-kubectl wait --for=condition=complete --timeout 60s job/$KUBERNETES_DEPLOYMENT_NAME-migrate
+
+set +e
+# wait for completion as background process - capture PID
+kubectl wait --for=condition=complete --timeout 60s job/$KUBERNETES_DEPLOYMENT_NAME-migrate &
+completion_pid=$!
+
+# wait for failure as background process - capture PID
+kubectl wait --for=condition=failed --timeout 60s job/$KUBERNETES_DEPLOYMENT_NAME-migrate && exit 1 &
+failure_pid=$! 
+
+# capture exit code of the first subprocess to exit
+wait -n $completion_pid $failure_pid
+
+# store exit code in variable
+exit_code=$?
+
+set -e
+
 kubectl logs job/$KUBERNETES_DEPLOYMENT_NAME-migrate
 kubectl delete job/$KUBERNETES_DEPLOYMENT_NAME-migrate
 echo "::endgroup::"
@@ -72,3 +89,5 @@ ALEMBIC_UPGRADED_REV=$(kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} 
 echo "ALEMBIC_UPGRADED_REV=${ALEMBIC_UPGRADED_REV:0:12}" >> $GITHUB_OUTPUT
 echo "Alembic upgraded revision: $ALEMBIC_UPGRADED_REV"
 echo "::endgroup::"
+
+exit $exit_code
