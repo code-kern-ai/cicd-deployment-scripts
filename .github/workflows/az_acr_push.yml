@@ -68,7 +68,7 @@ jobs:
             label=dockerfile-path=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/Dockerfile
 
       - name: Build & Push ${{ github.event.repository.name }}:${{ matrix.platform }}-gpu
-        if: ${{ hashFiles('gpu.Dockerfile') != '' }}
+        if: ${{ hashFiles('gpu.Dockerfile') != '' && matrix.platform == 'amd64' }}
         uses: docker/build-push-action@v5
         with:
           push: true
