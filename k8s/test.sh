@@ -39,10 +39,13 @@ REFINERY_POD_EXISTING_IMAGE=$(kubectl get pod --output json \
 if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
     echo "::group::Preparing alembic migrations for test"
     if [ $KUBERNETES_DEPLOYMENT_NAME != "refinery-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "gates-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "hosted-inference-api" ]; then
-        kubectl set image deployment/${REFINERY_DEPLOYMENT_NAME} \
-            ${REFINERY_DEPLOYMENT_NAME}-migrate=${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} \
-            ${REFINERY_DEPLOYMENT_NAME}=${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}
-        kubectl rollout status deployment ${REFINERY_DEPLOYMENT_NAME}
+        IMAGE_TAG_EXISTS=$(az acr repository show --name ${AZURE_CONTAINER_REGISTRY} --image ${REFINERY_DEPLOYMENT_NAME}:${IMAGE_TAG} 2> /dev/null)
+        if [ -n "$IMAGE_TAG_EXISTS" ]; then
+            kubectl set image deployment/${REFINERY_DEPLOYMENT_NAME} \
+                ${REFINERY_DEPLOYMENT_NAME}-migrate=${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} \
+                ${REFINERY_DEPLOYMENT_NAME}=${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}
+            kubectl rollout status deployment ${REFINERY_DEPLOYMENT_NAME}
+        fi
     else
         kubectl set image deployment/${KUBERNETES_DEPLOYMENT_NAME} ${KUBERNETES_DEPLOYMENT_NAME}-migrate=${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}
     fi
