@@ -35,7 +35,7 @@ jobs:
   k8-test:
     name: 'K8: Test'
     runs-on: [self-hosted, dev]
-    needs: [call-az-acr-push-test]
+    needs: [call-az-acr-push-test, call-gh-wait-workflow]
     if: ${{ !failure() && !cancelled() }}
     environment: dev
     env:
