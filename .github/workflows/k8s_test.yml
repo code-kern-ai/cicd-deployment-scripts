@@ -19,9 +19,9 @@ jobs:
     uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/az_acr_test.yml@dev
     secrets: inherit
   
-  call-gh-wait-workflow:
-    uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/gh_wait_workflow.yml@dev
-    secrets: inherit
+  # call-gh-wait-workflow:
+  #   uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/gh_wait_workflow.yml@dev
+  #   secrets: inherit
   
   # call-k8-db-upgrade:
   #   uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/k8s_db_upgrade.yml@dev
@@ -35,7 +35,7 @@ jobs:
   k8-test:
     name: 'K8: Test'
     runs-on: [self-hosted, dev]
-    needs: [call-az-acr-push-test, call-gh-wait-workflow]
+    needs: [call-az-acr-push-test]
     if: ${{ !failure() && !cancelled() }}
     environment: dev
     env:
