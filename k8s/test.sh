@@ -34,7 +34,7 @@ REFINERY_DEPLOYMENT_NAME="refinery-gateway"
 REFINERY_POD_EXISTING_IMAGE=$(kubectl get pod --output json \
     --selector app=${REFINERY_DEPLOYMENT_NAME} \
     | jq -r '.items[0] | .spec.containers[0].image')
-REFINERY_IMAGE_TAG_EXISTS=$(az acr repository show --name ${AZURE_CONTAINER_REGISTRY} --image ${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} 2> /dev/null)
+REFINERY_IMAGE_TAG_EXISTS=$(az acr repository show --name ${AZURE_CONTAINER_REGISTRY} --image ${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} 2> /dev/null || true)
 
 
 if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
