@@ -34,13 +34,13 @@ REFINERY_DEPLOYMENT_NAME="refinery-gateway"
 REFINERY_POD_EXISTING_IMAGE=$(kubectl get pod --output json \
     --selector app=${REFINERY_DEPLOYMENT_NAME} \
     | jq -r '.items[0] | .spec.containers[0].image')
-IMAGE_TAG_EXISTS=$(az acr repository show --name ${AZURE_CONTAINER_REGISTRY} --image ${REFINERY_DEPLOYMENT_NAME}:${IMAGE_TAG} 2> /dev/null)
+REFINERY_IMAGE_TAG_EXISTS=$(az acr repository show --name ${AZURE_CONTAINER_REGISTRY} --image ${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} 2> /dev/null)
 
 
 if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
     echo "::group::Preparing alembic migrations for test"
     if [ $KUBERNETES_DEPLOYMENT_NAME != "refinery-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "gates-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "hosted-inference-api" ]; then
-        if [ -n "$IMAGE_TAG_EXISTS" ]; then
+        if [ -n "$REFINERY_IMAGE_TAG_EXISTS" ]; then
             kubectl set image deployment/${REFINERY_DEPLOYMENT_NAME} \
                 ${REFINERY_DEPLOYMENT_NAME}-migrate=${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} \
                 ${REFINERY_DEPLOYMENT_NAME}=${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}
@@ -73,7 +73,7 @@ echo "::endgroup::"
 if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
     echo "::group::Reverting alembic migrations for test"
     if [ $KUBERNETES_DEPLOYMENT_NAME != "refinery-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "gates-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "hosted-inference-api" ]; then
-        if [ -n "$IMAGE_TAG_EXISTS" ]; then
+        if [ -n "$REFINERY_IMAGE_TAG_EXISTS" ]; then
             kubectl set image deployment/${REFINERY_DEPLOYMENT_NAME} \
                 ${REFINERY_DEPLOYMENT_NAME}-migrate=${REFINERY_POD_EXISTING_IMAGE} \
                 ${REFINERY_DEPLOYMENT_NAME}=${REFINERY_POD_EXISTING_IMAGE}
