@@ -45,6 +45,7 @@ if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
                 ${REFINERY_DEPLOYMENT_NAME}-migrate=${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} \
                 ${REFINERY_DEPLOYMENT_NAME}=${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}
             kubectl rollout status deployment ${REFINERY_DEPLOYMENT_NAME}
+            echo "::warning::using ${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}"
         fi
     else
         kubectl set image deployment/${KUBERNETES_DEPLOYMENT_NAME} ${KUBERNETES_DEPLOYMENT_NAME}-migrate=${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}
@@ -58,7 +59,7 @@ kubectl rollout status deployment ${KUBERNETES_DEPLOYMENT_NAME}
 echo "::endgroup::"
 
 
-echo "::warning::using ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}"
+echo "::notice::using ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}"
 
 
 echo "::group::Running test command: kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c $KUBERNETES_DEPLOYMENT_NAME -- '$TEST_CMD'"
@@ -78,6 +79,7 @@ if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
                 ${REFINERY_DEPLOYMENT_NAME}-migrate=${REFINERY_POD_EXISTING_IMAGE} \
                 ${REFINERY_DEPLOYMENT_NAME}=${REFINERY_POD_EXISTING_IMAGE}
             kubectl rollout status deployment ${REFINERY_DEPLOYMENT_NAME}
+            echo "::warning::using ${REFINERY_POD_EXISTING_IMAGE}"
         fi
     else
         kubectl set image deployment/${KUBERNETES_DEPLOYMENT_NAME} ${KUBERNETES_DEPLOYMENT_NAME}-migrate=${REFINERY_POD_EXISTING_IMAGE}
