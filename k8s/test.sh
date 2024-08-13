@@ -55,7 +55,11 @@ __safe_migration_rollout() {
 
     if [ "$exitcode" != "0" ]; then
         echo "::error::Alembic migration failure. See logs for details"
-        kubectl logs deployment/$deploy -c $deploy-migrate
+        failed_pod_name=$(kubectl get pod \
+            --selector app=$deploy \
+            --field-selector status.phase!=Running \
+            --output jsonpath='{.items[?(@.metadata.labels.app=="'$deploy'")].metadata.name}')
+        kubectl logs $failed_pod_name -c $deploy-migrate
         if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
             downgrade_alembic_migrations
         fi
