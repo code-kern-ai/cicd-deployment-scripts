@@ -40,8 +40,25 @@ REFINERY_POD_EXISTING_IMAGE=$(kubectl get pod --output json \
 
 REFINERY_IMAGE_TAG_EXISTS=$(az acr repository show --name ${AZURE_CONTAINER_REGISTRY} --image ${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} 2> /dev/null || true)
 
+__safe_migration_rollout() {
+    deploy=$1
 
-if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
+    set +e
+    exitcode=0
+    kubectl rollout status deployment $deploy --timeout 2m 2> /dev/null
+    exitcode=$?
+    set -e
+
+    if [ "$exitcode" != "0" ]; then
+        kubectl logs deployment/$deploy -c $deploy-migrate
+        if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
+            downgrade_alembic_migrations
+        fi
+        exit $exitcode
+    fi
+}
+
+upgrade_alembic_migrations() {
     echo "::group::Upgrade alembic migrations for test"
     if [ $KUBERNETES_DEPLOYMENT_NAME != "refinery-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "gates-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "hosted-inference-api" ]; then
         if [ -n "$REFINERY_IMAGE_TAG_EXISTS" ]; then
@@ -51,7 +68,7 @@ if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
             kubectl set image deployment/${REFINERY_DEPLOYMENT_NAME} \
                 ${REFINERY_DEPLOYMENT_NAME}-migrate=${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} \
                 ${REFINERY_DEPLOYMENT_NAME}=${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} 1> /dev/null
-            kubectl rollout status deployment ${REFINERY_DEPLOYMENT_NAME}
+            __safe_migration_rollout ${REFINERY_DEPLOYMENT_NAME}
             echo "::warning::using ${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}"
             _REFINERY_ALEMBIC_VERSION=$(kubectl exec -i deployment/${REFINERY_DEPLOYMENT_NAME} -c ${REFINERY_DEPLOYMENT_NAME} -- alembic current)
             echo "::warning::upgraded $REFINERY_DEPLOYMENT_NAME alembic version: $_REFINERY_ALEMBIC_VERSION"
@@ -63,12 +80,40 @@ if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
         kubectl set image deployment/${KUBERNETES_DEPLOYMENT_NAME} \
             ${KUBERNETES_DEPLOYMENT_NAME}-migrate=${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} \
             ${KUBERNETES_DEPLOYMENT_NAME}=${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} 1> /dev/null
-        kubectl rollout status deployment ${KUBERNETES_DEPLOYMENT_NAME}
+        __safe_migration_rollout ${KUBERNETES_DEPLOYMENT_NAME}
         echo "::warning::using ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}"
         _KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION=$(kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c ${KUBERNETES_DEPLOYMENT_NAME} -- alembic current)
         echo "::warning::upgraded $KUBERNETES_DEPLOYMENT_NAME alembic version: $_KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION"
     fi
     echo "::endgroup::"
+}
+
+downgrade_alembic_migrations() {
+    echo "::group::Downgrade alembic migrations"
+    if [ $KUBERNETES_DEPLOYMENT_NAME != "refinery-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "gates-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "hosted-inference-api" ]; then
+        if [ -n "$REFINERY_IMAGE_TAG_EXISTS" ]; then
+            kubectl exec -i deployment/${REFINERY_DEPLOYMENT_NAME} -c ${REFINERY_DEPLOYMENT_NAME} -- alembic downgrade $REFINERY_ALEMBIC_VERSION
+            echo "::warning::downgraded $REFINERY_DEPLOYMENT_NAME alembic version to $REFINERY_ALEMBIC_VERSION"
+            kubectl set image deployment/${REFINERY_DEPLOYMENT_NAME} \
+                ${REFINERY_DEPLOYMENT_NAME}-migrate=${REFINERY_POD_EXISTING_IMAGE} \
+                ${REFINERY_DEPLOYMENT_NAME}=${REFINERY_POD_EXISTING_IMAGE}
+            __safe_migration_rollout ${REFINERY_DEPLOYMENT_NAME}
+            echo "::warning::using ${REFINERY_POD_EXISTING_IMAGE}"
+        fi
+    else
+        kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c ${KUBERNETES_DEPLOYMENT_NAME} -- alembic downgrade $KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION
+        echo "::warning::downgraded $KUBERNETES_DEPLOYMENT_NAME alembic version to $KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION"
+        kubectl set image deployment/${KUBERNETES_DEPLOYMENT_NAME} \
+            ${KUBERNETES_DEPLOYMENT_NAME}-migrate=${KUBERNETES_POD_EXISTING_IMAGE} \
+            ${KUBERNETES_DEPLOYMENT_NAME}=${KUBERNETES_POD_EXISTING_IMAGE}
+        __safe_migration_rollout ${KUBERNETES_DEPLOYMENT_NAME}
+        echo "::warning::using ${KUBERNETES_POD_EXISTING_IMAGE}"
+    fi
+    echo "::endgroup::"
+}
+
+if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
+    upgrade_alembic_migrations
 fi
 
 echo "::group::Set test image: ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}"
@@ -86,27 +131,7 @@ set -e
 echo "::endgroup::"
 
 if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
-    echo "::group::Downgrade alembic migrations"
-    if [ $KUBERNETES_DEPLOYMENT_NAME != "refinery-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "gates-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "hosted-inference-api" ]; then
-        if [ -n "$REFINERY_IMAGE_TAG_EXISTS" ]; then
-            kubectl exec -i deployment/${REFINERY_DEPLOYMENT_NAME} -c ${REFINERY_DEPLOYMENT_NAME} -- alembic downgrade $REFINERY_ALEMBIC_VERSION
-            echo "::warning::downgraded $REFINERY_DEPLOYMENT_NAME alembic version to $REFINERY_ALEMBIC_VERSION"
-            kubectl set image deployment/${REFINERY_DEPLOYMENT_NAME} \
-                ${REFINERY_DEPLOYMENT_NAME}-migrate=${REFINERY_POD_EXISTING_IMAGE} \
-                ${REFINERY_DEPLOYMENT_NAME}=${REFINERY_POD_EXISTING_IMAGE}
-            kubectl rollout status deployment ${REFINERY_DEPLOYMENT_NAME}
-            echo "::warning::using ${REFINERY_POD_EXISTING_IMAGE}"
-        fi
-    else
-        kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c ${KUBERNETES_DEPLOYMENT_NAME} -- alembic downgrade $KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION
-        echo "::warning::downgraded $KUBERNETES_DEPLOYMENT_NAME alembic version to $KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION"
-        kubectl set image deployment/${KUBERNETES_DEPLOYMENT_NAME} \
-            ${KUBERNETES_DEPLOYMENT_NAME}-migrate=${KUBERNETES_POD_EXISTING_IMAGE} \
-            ${KUBERNETES_DEPLOYMENT_NAME}=${KUBERNETES_POD_EXISTING_IMAGE}
-        kubectl rollout status deployment ${KUBERNETES_DEPLOYMENT_NAME}
-        echo "::warning::using ${KUBERNETES_POD_EXISTING_IMAGE}"
-    fi
-    echo "::endgroup::"
+    downgrade_alembic_migrations
 fi
 
 echo "::group::Revert test image: ${KUBERNETES_POD_EXISTING_IMAGE}"
