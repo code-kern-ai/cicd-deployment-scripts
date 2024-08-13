@@ -1,4 +1,8 @@
 # !/bin/bash
+
+trap "exit 1" TERM
+export TOP_PID=$$
+
 set -e
 
 AZURE_CONTAINER_REGISTRY=""
@@ -55,8 +59,8 @@ __safe_migration_rollout() {
         if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
             downgrade_alembic_migrations
         fi
+        kill -s TERM $TOP_PID
     fi
-    return $exitcode
 }
 
 upgrade_alembic_migrations() {
@@ -70,9 +74,6 @@ upgrade_alembic_migrations() {
                 ${REFINERY_DEPLOYMENT_NAME}-migrate=${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} \
                 ${REFINERY_DEPLOYMENT_NAME}=${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} 1> /dev/null
             __safe_migration_rollout ${REFINERY_DEPLOYMENT_NAME}
-            if [ "$?" != "0" ]; then
-                exit 1
-            fi
             echo "::warning::using ${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}"
             _REFINERY_ALEMBIC_VERSION=$(kubectl exec -i deployment/${REFINERY_DEPLOYMENT_NAME} -c ${REFINERY_DEPLOYMENT_NAME} -- alembic current)
             echo "::warning::upgraded $REFINERY_DEPLOYMENT_NAME alembic version: $_REFINERY_ALEMBIC_VERSION"
@@ -85,9 +86,6 @@ upgrade_alembic_migrations() {
             ${KUBERNETES_DEPLOYMENT_NAME}-migrate=${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} \
             ${KUBERNETES_DEPLOYMENT_NAME}=${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} 1> /dev/null
         __safe_migration_rollout ${KUBERNETES_DEPLOYMENT_NAME}
-        if [ "$?" != "0" ]; then
-            exit 1
-        fi
         echo "::warning::using ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}"
         _KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION=$(kubectl exec -i deployment/${KUBERNETES_DEPLOYMENT_NAME} -c ${KUBERNETES_DEPLOYMENT_NAME} -- alembic current)
         echo "::warning::upgraded $KUBERNETES_DEPLOYMENT_NAME alembic version: $_KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION"
@@ -126,9 +124,6 @@ fi
 echo "::group::Set test image: ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}"
 kubectl set image deployment/${KUBERNETES_DEPLOYMENT_NAME} ${KUBERNETES_DEPLOYMENT_NAME}=${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} 1> /dev/null
 __safe_migration_rollout ${KUBERNETES_DEPLOYMENT_NAME}
-if [ "$?" != "0" ]; then
-    exit 1
-fi
 echo "::notice::using ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}"
 echo "::endgroup::"
 
