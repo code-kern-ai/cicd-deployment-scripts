@@ -1,11 +1,11 @@
-name: 'ACR: Delete Docker Image'
+name: 'ACR: Delete Docker Images'
 
 on:
   workflow_call:
 
 jobs:
   az-acr-delete-test:
-    name: "ACR: Delete Test Image"
+    name: "Docker: Delete Test Tags"
     runs-on: ubuntu-latest
     environment: dev
     env:
@@ -34,7 +34,7 @@ jobs:
               --yes || true
 
   az-acr-delete-matrix:
-    name: 'ACR: Delete Branch Images'
+    name: 'Docker: Delete Branch Tags'
     runs-on: ubuntu-latest
     environment: dev
     env:
