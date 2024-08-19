@@ -9,8 +9,8 @@ GITHUB_ACTIONS_WORKFLOWS_DIR = os.path.join(
     CICD_DEPLOYMENT_SCRIPTS_DIR, ".github", "workflows"
 )
 DOCS_JSON_FILE = os.path.join(CICD_DEPLOYMENT_SCRIPTS_DIR, "docs", "docs.json")
-DOCS_MANUAL_JSON_FILE = os.path.join(
-    CICD_DEPLOYMENT_SCRIPTS_DIR, "docs", "docs_manual.json"
+DOCS_INPUT = os.path.join(
+    CICD_DEPLOYMENT_SCRIPTS_DIR, "docs", "docs_input.json"
 )
 README_TEMPLATE = """
 # cicd-deployment-scripts
@@ -27,7 +27,7 @@ Scripts used for Kern AI CI/CD efforts.
 """
 
 
-with open(DOCS_MANUAL_JSON_FILE, "r") as file:
+with open(DOCS_INPUT, "r") as file:
     docs_manual = json.load(file)
 
 
