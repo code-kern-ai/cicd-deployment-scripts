@@ -51,8 +51,6 @@ jobs:
           -f ${{ env.KUBERNETES_MANIFEST_FILE_PATH }} \
           -r ${{ env.AZURE_CONTAINER_REGISTRY }} \
           -t ${{ env.IMAGE_TAG }}
-        
-        rm -rf cicd-deployment-scripts
 
         git config --global user.email "devtools@kern.ai"
         git config --global user.name "GitHub Actions"
@@ -65,12 +63,12 @@ jobs:
         if [ ${{ github.event_name }} == 'release' ]; then
           PR_TITLE="ci(${{ github.ref_name }}): $AUTOMATED_RELEASE_BRANCH"
         fi
-        
-        gh pr create \
-          --base dev \
-          --head $AUTOMATED_RELEASE_BRANCH \
-          --title "$PR_TITLE" \
-          --body "Automated release for ${{ github.event.repository.name }}:\n- $KUBERNETES_POD_NEW_IMAGE:${{ env.IMAGE_TAG }}" \
-          --draft \
-          --repo ${{ github.repository_owner }}/${{ env.KUBERNETES_CLUSTER_REPO_NAME }} || true
-          # --reviewer ${{ github.repository_owner }}/devops-admin \
+
+        bash cicd-deployment-scripts/gh/pr_create.sh \
+          -b ${{ github.event_name == 'release' && 'prod' || 'dev' }} \
+          -h "$AUTOMATED_RELEASE_BRANCH" \
+          -t "$PR_TITLE" \
+          -o "${{ github.repository_owner }}" \
+          -r "${{ github.event.repository.name }}" \
+          -p "$KUBERNETES_POD_NEW_IMAGE" \
+          -k "${{ env.KUBERNETES_CLUSTER_REPO_NAME }}" \
