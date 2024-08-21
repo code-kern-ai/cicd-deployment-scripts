@@ -1,4 +1,4 @@
-name: 'K8: Inference Reload Config'
+name: 'K8: Reload Inference Config'
 
 on:
   workflow_call:
@@ -10,8 +10,8 @@ permissions:
   actions: read
 
 jobs:
-  k8-inference-reload-config:
-    name: 'K8: Inference - Reload Last Config'
+  k8-reload-inference-config:
+    name: 'K8: Reload Last Inference Config'
     runs-on: [self-hosted, "${{ github.event.pull_request.base.ref }}"]
     environment: dev
     env:
