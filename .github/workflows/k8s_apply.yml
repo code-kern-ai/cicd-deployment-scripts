@@ -26,6 +26,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: GitHub Configuration
+      run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
+
+    - name: Clone cicd-deployment-scripts
+      run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
+
     - name: Azure Cloud Login
       uses: azure/login@v2
       with:
@@ -57,9 +63,18 @@ jobs:
 
     - name: Apply Kustomization
       shell: bash
-      # env:
-      #   DRY_RUN: ${{ github.event_name == 'push' && 'none' || 'client' }}
       run: |
         kubectl apply \
           --filename apply.yml \
           --namespace ${{ env.KUBERNETES_NAMESPACE }}
+
+    - name: Assert Deploy Success
+      shell: bash
+      run: |
+        bash cicd-deployment-scripts/k8s/assert_deploy_success.sh \
+          -n ${{ env.KUBERNETES_NAMESPACE }} \
+          -p ${{ github.event.pull_request.number }}
+
+    - name: Revert on failure
+      if: failure()
+      run: echo "::error::Deployment failed, revert this PR" && exit 1
