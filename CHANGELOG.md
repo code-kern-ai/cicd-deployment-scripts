@@ -1,5 +1,28 @@
 # Changelog
 
+## [2.1.0](https://github.com/code-kern-ai/cicd-deployment-scripts/compare/v2.0.0...v2.1.0) (2024-08-22)
+
+
+### Features
+
+* assert deployment success ([e116f6a](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/e116f6ae4fbe1d3d96fa386f398857a83ef65c43))
+* print incoming PR urls ([f2fbe10](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/f2fbe10e924175bdf67e8289732aeabb3ede05ac))
+
+
+### Bug Fixes
+
+* add GH_TOKEN env var to k8s apply ([4305e44](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/4305e4495483e1c3db50a4c086620632840cff23))
+* arm64 platform builds ([c2718ad](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/c2718ad848f9acbb5dc428bf207768b629acca37))
+
+
+### Performance Improvements
+
+* add dev registry login to az acr release ([f4c506b](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/f4c506b221d9cdcbb3d125edf61f7b5770076893))
+* add k8s reload secrets workflow ([9e4be6e](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/9e4be6efadc50efa013aa8ae9e22c36b35a29a5e))
+* improve automated release PR creation ([c55989f](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/c55989fad6ee0d940d7288d42248155c98549ba5))
+* include SHA in automated release commit message ([12f41c3](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/12f41c32941dac70daea1ca73b0dcd8ac9ec6bcc))
+* rename k8s_inference_reload_config to k8s_reload_inference_config ([cfce586](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/cfce5868dd6c10cc59439aa3265ef5de319c9927))
+
 ## 2.0.0 (2024-08-19)
 
 
