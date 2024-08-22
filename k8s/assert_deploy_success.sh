@@ -2,39 +2,41 @@
 set -e
 
 KUBERNETES_NAMESPACE=""
-KUBERNETES_DEPLOYMENT_NAME=""
-APPLICATION_STARTUP_MESSAGE="Application startup complete"
+PR_NUMBER=""
+DEPLOY_SUCCESSFUL=true
 
-while getopts n:d:m: flag
+while getopts n:p: flag
 do
     case "${flag}" in
         n) KUBERNETES_NAMESPACE=${OPTARG};;
-        d) KUBERNETES_DEPLOYMENT_NAME=${OPTARG};;
-        m) APPLICATION_STARTUP_MESSAGE=${OPTARG};;
+        p) PR_NUMBER=${OPTARG};;
     esac
 done
 
 kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE
 echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
 
-echo "Reading logs to determine application startup status for '$KUBERNETES_DEPLOYMENT_NAME'"
-echo "Searching for message: '$APPLICATION_STARTUP_MESSAGE'"
-
-LOG_CONTENTS=$(kubectl logs deployment/${KUBERNETES_DEPLOYMENT_NAME} \
-    || echo "Waiting for application startuop ...")
-
-while [[ "$LOG_CONTENTS" != *"$APPLICATION_STARTUP_MESSAGE"* ]]; do
-    echo "Waiting for application startup..."
-    sleep 3
-    LOG_CONTENTS=$(kubectl logs deployment/${KUBERNETES_DEPLOYMENT_NAME} \
-        || echo "Waiting for application startuop ...")
-    
-    if [[ "$LOG_CONTENTS" == *"ERROR"* ]]; then
-        echo "Application startup failed:"
-        echo "$LOG_CONTENTS"
-        exit 1
+UPDATED_FILES=$(gh pr diff $PR_NUMBER --name-only)
+while IFS= read -r file; do
+    if [[ $file != apps/* ]]; then
+        continue
     fi
-done
 
-echo "Application startup successful:"
-echo "$LOG_CONTENTS"
+    deploy=$(echo "$file" | cut -d/ -f 2)
+
+    set +e
+    kubectl rollout status deploy $deploy --timeout 30s
+    if [ $? -ne 0 ]; then
+        echo "::error::Deployment $deploy failed to rollout"
+        DEPLOY_SUCCESSFUL=false
+    fi
+    set -e
+    
+done <<< "$UPDATED_FILES"
+
+if [ $DEPLOY_SUCCESSFUL = true ]; then
+    echo "::notice::Automated release successful"
+else
+    echo "::error::Automated release failed"
+    exit 1
+fi
