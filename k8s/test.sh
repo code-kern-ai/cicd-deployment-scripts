@@ -59,7 +59,7 @@ __safe_migration_rollout() {
             --selector app=$deploy \
             --field-selector status.phase!=Running \
             --output jsonpath='{.items[?(@.metadata.labels.app=="'$deploy'")].metadata.name}')
-        kubectl logs $failed_pod_name -c $deploy-migrate
+        kubectl logs $failed_pod_name -c $deploy-migrate || true
         if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
             downgrade_alembic_migrations
         fi
