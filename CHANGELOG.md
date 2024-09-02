@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.1](https://github.com/code-kern-ai/cicd-deployment-scripts/compare/v2.1.0...v2.1.1) (2024-09-02)
+
+
+### Bug Fixes
+
+* add third party deployments to reload secrets ([4bf3462](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/4bf34624db0ae46dd53c6ee0adddde9372ab2d77))
+* safe exit on missing logs in k8s_test ([46d76ae](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/46d76aeb8e86a25acc880330f8de5b38f775ff8f))
+
 ## [2.1.0](https://github.com/code-kern-ai/cicd-deployment-scripts/compare/v2.0.0...v2.1.0) (2024-08-22)
 
 
