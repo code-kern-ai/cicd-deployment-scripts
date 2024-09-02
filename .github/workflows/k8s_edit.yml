@@ -44,7 +44,16 @@ jobs:
         KUBERNETES_POD_NEW_IMAGE="${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}"
         
         git fetch origin
-        git checkout $AUTOMATED_RELEASE_BRANCH || git checkout -b $AUTOMATED_RELEASE_BRANCH
+        AUTOMATED_RELEASE_BRANCH_EXISTS=$(git rev-parse --verify refs/heads/$AUTOMATED_RELEASE_BRANCH 2>/dev/null || true)
+        if [ -n "$AUTOMATED_RELEASE_BRANCH_EXISTS" ]; then
+          echo "Branch $AUTOMATED_RELEASE_BRANCH already exists"
+          git checkout $AUTOMATED_RELEASE_BRANCH
+        else
+          echo "Creating branch $AUTOMATED_RELEASE_BRANCH off ${{ env.KUBERNETES_CLUSTER_REPO_NAME }}@$(git log -1 --format='%H')"
+          git checkout -b $AUTOMATED_RELEASE_BRANCH
+        fi
+        
+        # git checkout $AUTOMATED_RELEASE_BRANCH || git checkout -b $AUTOMATED_RELEASE_BRANCH
 
         bash cicd-deployment-scripts/k8s/edit.sh \
           -d ${{ github.event.repository.name }} \
