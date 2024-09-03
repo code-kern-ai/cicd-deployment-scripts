@@ -25,7 +25,7 @@ while IFS= read -r file; do
     deploy=$(echo "$file" | cut -d/ -f 2)
 
     set +e
-    kubectl rollout status deploy $deploy --timeout 30s
+    kubectl rollout status deploy $deploy --timeout 5m
     if [ $? -ne 0 ]; then
         echo "::error::Deployment $deploy failed to rollout"
         DEPLOY_SUCCESSFUL=false
