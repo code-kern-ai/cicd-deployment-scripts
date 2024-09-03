@@ -48,12 +48,12 @@ jobs:
         if [ -n "$AUTOMATED_RELEASE_BRANCH_EXISTS" ]; then
           echo "Branch $AUTOMATED_RELEASE_BRANCH already exists"
           git checkout $AUTOMATED_RELEASE_BRANCH
+          git pull origin $AUTOMATED_RELEASE_BRANCH
         else
           echo "Creating branch $AUTOMATED_RELEASE_BRANCH off ${{ env.KUBERNETES_CLUSTER_REPO_NAME }}@$(git log -1 --format='%H')"
           git checkout -b $AUTOMATED_RELEASE_BRANCH
         fi
         
-        git pull origin $AUTOMATED_RELEASE_BRANCH
         # git checkout $AUTOMATED_RELEASE_BRANCH || git checkout -b $AUTOMATED_RELEASE_BRANCH
 
         bash cicd-deployment-scripts/k8s/edit.sh \
