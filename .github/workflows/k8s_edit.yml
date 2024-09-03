@@ -53,6 +53,7 @@ jobs:
           git checkout -b $AUTOMATED_RELEASE_BRANCH
         fi
         
+        git pull origin $AUTOMATED_RELEASE_BRANCH
         # git checkout $AUTOMATED_RELEASE_BRANCH || git checkout -b $AUTOMATED_RELEASE_BRANCH
 
         bash cicd-deployment-scripts/k8s/edit.sh \
