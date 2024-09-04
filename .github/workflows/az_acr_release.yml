@@ -52,8 +52,8 @@ jobs:
         if: ${{ github.event_name != 'release' }}
         uses: docker/build-push-action@v5
         with:
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:dockercache
+          cache-to: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:dockercache,mode=max,image-manifest=true
           platforms: linux/amd64
           file: ${{ env.DOCKERFILE }}
           tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:amd64
@@ -66,8 +66,8 @@ jobs:
         if: ${{ github.event_name != 'release' }}
         uses: docker/build-push-action@v5
         with:
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:dockercache
+          cache-to: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:dockercache,mode=max,image-manifest=true
           platforms: linux/arm64
           file: ${{ env.DOCKERFILE }}
           tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:arm64
@@ -79,8 +79,8 @@ jobs:
       - name: Build & Push ${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
         uses: docker/build-push-action@v5
         with:
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:dockercache
+          cache-to: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:dockercache,mode=max,image-manifest=true
           platforms: linux/amd64
           file: ${{ env.DOCKERFILE }}
           tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
@@ -92,8 +92,8 @@ jobs:
       - name: Build & Push ${{ github.event.repository.name }}:latest
         uses: docker/build-push-action@v5
         with:
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:dockercache
+          cache-to: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:dockercache,mode=max,image-manifest=true
           platforms: linux/amd64
           file: ${{ env.DOCKERFILE }}
           tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:latest
