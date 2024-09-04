@@ -60,8 +60,8 @@ jobs:
           push: true
           file: ${{ (matrix.platform == 'arm64' && hashFiles('Dockerfile.arm64') != '') && 'Dockerfile.arm64' || 'Dockerfile' }}
           tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform }}-${{ steps.branch_name.outputs.GH_REF_NAME }}
-          cache-from: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:dockercache
-          cache-to: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:dockercache,mode=max,image-manifest=true
+          cache-from: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform }}-${{ steps.branch_name.outputs.GH_REF_NAME }}
+          cache-to: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform }}-${{ steps.branch_name.outputs.GH_REF_NAME }},mode=max,image-manifest=true
           platforms: linux/${{ matrix.platform }}
           build-args: |
             platform=linux/${{ matrix.platform }}
@@ -74,8 +74,8 @@ jobs:
           push: true
           file: 'gpu.Dockerfile'
           tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform }}-gpu
-          cache-from: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:dockercache
-          cache-to: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:dockercache,mode=max,image-manifest=true
+          cache-from: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform }}-gpu
+          cache-to: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ matrix.platform }}-gpu,mode=max,image-manifest=true
           platforms: linux/${{ matrix.platform }}
           build-args: |
             platform=linux/${{ matrix.platform }}
