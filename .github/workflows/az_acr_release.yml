@@ -79,8 +79,8 @@ jobs:
       - name: Build & Push ${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
         uses: docker/build-push-action@v5
         with:
-          cache-from: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
-          cache-to: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }},mode=max,image-manifest=true
+          cache-from: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:latest
+          cache-to: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:latest,mode=max,image-manifest=true
           platforms: linux/amd64
           file: ${{ env.DOCKERFILE }}
           tags: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
