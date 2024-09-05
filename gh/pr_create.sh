@@ -26,11 +26,19 @@ EXISTING_PR_NUMBER=""
 EXISTING_PR_BODY=$(gh pr list --base $BASE_REF --head $HEAD_REF --json body --jq '.[].body')
 
 if [ -z "$EXISTING_PR_BODY" ]; then
-    PR_BODY=$(cat <<EOF
+    if [[ $REPOSITORY_PR_NUMBER =~ ^v(0|[1-9]*)\.(0|[1-9]*)\.(0|[1-9]*) ]]; then
+        PR_BODY=$(cat <<EOF
+Automated $BASE_REF release for:
+- https://github.com/$REPOSITORY_OWNER/$REPOSITORY_NAME/releases/tag/$REPOSITORY_PR_NUMBER
+EOF
+)
+    else
+        PR_BODY=$(cat <<EOF
 Automated $BASE_REF release for:
 - https://github.com/$REPOSITORY_OWNER/$REPOSITORY_NAME/pull/$REPOSITORY_PR_NUMBER
 EOF
 )
+
     gh pr create \
         --base $BASE_REF \
         --head $HEAD_REF \

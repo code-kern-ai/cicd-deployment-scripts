@@ -74,7 +74,6 @@ jobs:
 
     - name: Assert Deploy Success
       shell: bash
-      if: env.ENVIRONMENT_NAME == 'dev'
       run: |
         bash cicd-deployment-scripts/k8s/assert_deploy_success.sh \
           -n ${{ env.KUBERNETES_NAMESPACE }} \

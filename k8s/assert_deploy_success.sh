@@ -16,7 +16,7 @@ done
 kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE
 echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
 
-UPDATED_FILES=$(gh pr diff $PR_NUMBER --name-only)
+UPDATED_FILES=$(gh pr diff $PR_NUMBER --name-only || git diff $(git tag --sort version:refname | tail -n 2 | head -n 1) $(git tag --sort version:refname | tail -n 1) --name-only)
 while IFS= read -r file; do
     if [[ $file != apps/* ]]; then
         continue
