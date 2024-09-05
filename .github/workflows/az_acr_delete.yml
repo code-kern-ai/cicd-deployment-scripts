@@ -69,4 +69,9 @@ jobs:
               --name ${{ env.AZURE_CONTAINER_REGISTRY }} \
               --image ${{ github.event.repository.name }}:${{ matrix.platform}}-${{ steps.branch_name.outputs.GH_REF_NAME }} \
               --yes
+
+            az acr repository delete \
+              --name ${{ env.AZURE_CONTAINER_REGISTRY }} \
+              --image ${{ github.event.repository.name }}:${{ matrix.platform}}-${{ steps.branch_name.outputs.GH_REF_NAME }}-cache \
+              --yes || true
   
