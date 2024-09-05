@@ -1,5 +1,29 @@
 # Changelog
 
+## [2.1.2](https://github.com/code-kern-ai/cicd-deployment-scripts/compare/v2.1.1...v2.1.2) (2024-09-05)
+
+
+### Bug Fixes
+
+* add -cache suffix to docker cache ([ba7bdfd](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/ba7bdfd05b1e56e0da8cfb63b81a3eefd0bda4ab))
+* az acr delete cache ([6c196cc](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/6c196cc4ecb254003acd9e67d5a56fbe1ede907a))
+* az acr delete cache ([b7d9572](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/b7d957255edf5fa9f7fa264f8176ede961476070))
+* cache-from and to ([a1c4202](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/a1c4202c0354338f79e0e95a60508942d6d75c05))
+* deployment success assertion for releases ([1600f40](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/1600f40f414ec138dd8f916559cce55a1405fbe0))
+* k8s_edit environment ([62c87a9](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/62c87a9c04fc456714c7b5ec6a64d121bac25119))
+* set fetch-depth to 0 for K8: Edit ([21e74c5](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/21e74c5646dcf8941afc2af8b76d3e8f0592416d))
+* update edit script ([8ef891e](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/8ef891e30c78bb5874e7b59e6ed81c67c551dbd8))
+* use fetch-depth ([22b9282](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/22b928249a6c42fb1a25f763c2cf7c6db8008dbd))
+
+
+### Performance Improvements
+
+* cache to/from repository ([1ad553d](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/1ad553d30d63ad9019596aeb6f854086ccfe72ac))
+* make acr release cache from latest ([41c2799](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/41c2799d6019f4e745529400d4f57f3f30ad2de3))
+* pr_create PR number on workflow_dispatch ([435ff5b](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/435ff5bcd894676ac79e6a846cfc2ecf0368b36a))
+* set automated-release PR base to dev ([d521434](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/d521434e0e7d983db769f995581b930401dd12d7))
+* tag instead of pr_create PR number on workflow_dispatch ([3ecf6d1](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/3ecf6d192fc16db35e31b0c7a78bcd40504686f3))
+
 ## [2.1.1](https://github.com/code-kern-ai/cicd-deployment-scripts/compare/v2.1.0...v2.1.1) (2024-09-02)
 
 
