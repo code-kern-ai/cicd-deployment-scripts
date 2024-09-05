@@ -29,7 +29,7 @@ jobs:
       with:
         token: ${{ secrets.GH_TOKEN }}
         repository: ${{ github.repository_owner }}/${{ env.KUBERNETES_CLUSTER_REPO_NAME }}
-        ref: refs/heads/dev
+        fetch-depth: 0
     
     - name: GitHub Configuration
       run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
