@@ -32,6 +32,11 @@ jobs:
               --name ${{ env.AZURE_CONTAINER_REGISTRY }} \
               --image ${{ github.event.repository.name }}:${{ steps.branch_name.outputs.GH_REF_NAME }} \
               --yes || true
+            
+            az acr repository delete \
+              --name ${{ env.AZURE_CONTAINER_REGISTRY }} \
+              --image ${{ github.event.repository.name }}:${{ steps.branch_name.outputs.GH_REF_NAME }}-cache \
+              --yes || true
 
   az-acr-delete-matrix:
     name: 'Docker: Delete Branch Tags'
