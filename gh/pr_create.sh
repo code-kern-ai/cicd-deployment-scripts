@@ -38,6 +38,7 @@ Automated $BASE_REF release for:
 - https://github.com/$REPOSITORY_OWNER/$REPOSITORY_NAME/pull/$REPOSITORY_PR_NUMBER
 EOF
 )
+    fi
 
     gh pr create \
         --base $BASE_REF \

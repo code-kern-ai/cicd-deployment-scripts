@@ -66,7 +66,7 @@ jobs:
         fi
 
         bash cicd-deployment-scripts/gh/pr_create.sh \
-          -b ${{ github.event_name == 'release' && 'prod' || 'dev' }} \
+          -b dev \
           -h "$AUTOMATED_RELEASE_BRANCH" \
           -t "$PR_TITLE" \
           -o "${{ github.repository_owner }}" \
