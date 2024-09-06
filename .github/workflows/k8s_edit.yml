@@ -71,5 +71,5 @@ jobs:
           -t "$PR_TITLE" \
           -o "${{ github.repository_owner }}" \
           -r "${{ github.event.repository.name }}" \
-          -n "${{ github.event_name == 'release' && github.event.release.tag_name || github.event.pull_request.number }}" \
+          -n "${{ github.event.pull_request.number }}" \
           -k "${{ env.KUBERNETES_CLUSTER_REPO_NAME }}" \
