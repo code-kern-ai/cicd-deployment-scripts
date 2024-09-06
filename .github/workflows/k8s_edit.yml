@@ -62,7 +62,7 @@ jobs:
 
         PR_TITLE="ci: $AUTOMATED_RELEASE_BRANCH"
         if [ ${{ github.event_name }} == 'release' ]; then
-          PR_TITLE="ci(${{ github.ref_name }}): $AUTOMATED_RELEASE_BRANCH"
+          PR_TITLE="ci(release): $AUTOMATED_RELEASE_BRANCH"
         fi
 
         bash cicd-deployment-scripts/gh/pr_create.sh \
