@@ -53,6 +53,7 @@ kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE
 echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
 kubectl apply --kustomize infrastructure/test
 __safe_migration_rollout test-postgres
+kubectl exec -i deployment/test-postgres -- sh -c "psql -U postgres -c '$(cat infrastructure/test/deployment/assets/init.sql)'" || true
 echo "::endgroup::"
 
 
