@@ -53,8 +53,6 @@ kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE
 echo "Context set to namespace: \"$KUBERNETES_NAMESPACE\""
 kubectl apply --kustomize infrastructure/test
 __safe_migration_rollout test-postgres
-kubectl apply --kustomize apps/refinery-gateway/test
-__safe_migration_rollout test-${KUBERNETES_DEPLOYMENT_NAME}
 echo "::endgroup::"
 
 
@@ -75,6 +73,9 @@ upgrade_alembic_migrations() {
     echo "::group::Upgrade alembic migrations for test"
     if [ $KUBERNETES_DEPLOYMENT_NAME != "refinery-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "gates-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "hosted-inference-api" ]; then
         if [ -n "$REFINERY_IMAGE_TAG_EXISTS" ]; then
+            kubectl apply --kustomize apps/${REFINERY_DEPLOYMENT_NAME}/test
+            __safe_migration_rollout test-${REFINERY_DEPLOYMENT_NAME}
+
             REFINERY_ALEMBIC_VERSION=$(kubectl exec -i deployment/test-${REFINERY_DEPLOYMENT_NAME} -c test-${REFINERY_DEPLOYMENT_NAME} -- alembic current)
             REFINERY_ALEMBIC_VERSION=${REFINERY_ALEMBIC_VERSION:0:12}
             echo "::warning::current $REFINERY_DEPLOYMENT_NAME alembic version: $REFINERY_ALEMBIC_VERSION"
@@ -87,6 +88,9 @@ upgrade_alembic_migrations() {
             echo "::warning::upgraded $REFINERY_DEPLOYMENT_NAME alembic version: $_REFINERY_ALEMBIC_VERSION"
         fi
     else
+        kubectl apply --kustomize apps/${KUBERNETES_DEPLOYMENT_NAME}/test
+        __safe_migration_rollout test-${KUBERNETES_DEPLOYMENT_NAME}
+
         KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION=$(kubectl exec -i deployment/test-${KUBERNETES_DEPLOYMENT_NAME} -c test-${KUBERNETES_DEPLOYMENT_NAME} -- alembic current)
         KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION=${KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION:0:12}
         echo "::warning::current $KUBERNETES_DEPLOYMENT_NAME alembic version: $KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION"
@@ -106,21 +110,13 @@ downgrade_alembic_migrations() {
     if [ $KUBERNETES_DEPLOYMENT_NAME != "refinery-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "gates-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "hosted-inference-api" ]; then
         if [ -n "$REFINERY_IMAGE_TAG_EXISTS" ]; then
             kubectl exec -i deployment/test-${REFINERY_DEPLOYMENT_NAME} -c test-${REFINERY_DEPLOYMENT_NAME} -- alembic downgrade $REFINERY_ALEMBIC_VERSION
-            echo "::warning::downgraded $REFINERY_DEPLOYMENT_NAME alembic version to $REFINERY_ALEMBIC_VERSION"
-            kubectl set image deployment/test-${REFINERY_DEPLOYMENT_NAME} \
-                test-${REFINERY_DEPLOYMENT_NAME}-migrate=${REFINERY_POD_EXISTING_IMAGE} \
-                test-${REFINERY_DEPLOYMENT_NAME}=${REFINERY_POD_EXISTING_IMAGE}
-            __safe_migration_rollout test-${REFINERY_DEPLOYMENT_NAME}
-            echo "::warning::using ${REFINERY_POD_EXISTING_IMAGE}"
+            echo "::warning::downgraded test-$REFINERY_DEPLOYMENT_NAME alembic version to $REFINERY_ALEMBIC_VERSION"
+            kubectl delete --kustomize apps/${REFINERY_DEPLOYMENT_NAME}/test
         fi
     else
         kubectl exec -i deployment/test-${KUBERNETES_DEPLOYMENT_NAME} -c test-${KUBERNETES_DEPLOYMENT_NAME} -- alembic downgrade $KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION
-        echo "::warning::downgraded $KUBERNETES_DEPLOYMENT_NAME alembic version to $KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION"
-        kubectl set image deployment/test-${KUBERNETES_DEPLOYMENT_NAME} \
-            test-${KUBERNETES_DEPLOYMENT_NAME}-migrate=${KUBERNETES_POD_EXISTING_IMAGE} \
-            test-${KUBERNETES_DEPLOYMENT_NAME}=${KUBERNETES_POD_EXISTING_IMAGE}
-        __safe_migration_rollout test-${KUBERNETES_DEPLOYMENT_NAME}
-        echo "::warning::using ${KUBERNETES_POD_EXISTING_IMAGE}"
+        echo "::warning::downgraded test-$KUBERNETES_DEPLOYMENT_NAME alembic version to $KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION"
+        kubectl delete --kustomize apps/${KUBERNETES_DEPLOYMENT_NAME}/test
     fi
     echo "::endgroup::"
 }
@@ -148,8 +144,6 @@ if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
 fi
 
 echo "::group::Delete Test Infrastructure"
-kubectl delete --kustomize apps/${KUBERNETES_DEPLOYMENT_NAME}/test
-kubectl delete --kustomize apps/refinery-gateway/test
 kubectl delete --kustomize infrastructure/test
 echo "::endgroup::"
 
