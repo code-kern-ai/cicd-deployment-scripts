@@ -76,6 +76,7 @@ upgrade_alembic_migrations() {
         if [ -n "$REFINERY_IMAGE_TAG_EXISTS" ]; then
             kubectl apply --kustomize apps/${REFINERY_DEPLOYMENT_NAME}/test
             __safe_migration_rollout test-${REFINERY_DEPLOYMENT_NAME}
+            echo "Applied test-${REFINERY_DEPLOYMENT_NAME} deployment"
 
             REFINERY_ALEMBIC_VERSION=$(kubectl exec -i deployment/test-${REFINERY_DEPLOYMENT_NAME} -c test-${REFINERY_DEPLOYMENT_NAME} -- alembic current)
             REFINERY_ALEMBIC_VERSION=${REFINERY_ALEMBIC_VERSION:0:12}
@@ -91,6 +92,7 @@ upgrade_alembic_migrations() {
     else
         kubectl apply --kustomize apps/${KUBERNETES_DEPLOYMENT_NAME}/test
         __safe_migration_rollout test-${KUBERNETES_DEPLOYMENT_NAME}
+        echo "Applied test-${KUBERNETES_DEPLOYMENT_NAME} deployment"
 
         KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION=$(kubectl exec -i deployment/test-${KUBERNETES_DEPLOYMENT_NAME} -c test-${KUBERNETES_DEPLOYMENT_NAME} -- alembic current)
         KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION=${KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION:0:12}
@@ -110,13 +112,17 @@ downgrade_alembic_migrations() {
     echo "::group::Downgrade alembic migrations"
     if [ $KUBERNETES_DEPLOYMENT_NAME != "refinery-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "gates-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "hosted-inference-api" ]; then
         if [ -n "$REFINERY_IMAGE_TAG_EXISTS" ]; then
+            set +e
             kubectl exec -i deployment/test-${REFINERY_DEPLOYMENT_NAME} -c test-${REFINERY_DEPLOYMENT_NAME} -- alembic downgrade $REFINERY_ALEMBIC_VERSION
             echo "::warning::downgraded test-$REFINERY_DEPLOYMENT_NAME alembic version to $REFINERY_ALEMBIC_VERSION"
+            set -e
             kubectl delete --kustomize apps/${REFINERY_DEPLOYMENT_NAME}/test
         fi
     else
+        set +e
         kubectl exec -i deployment/test-${KUBERNETES_DEPLOYMENT_NAME} -c test-${KUBERNETES_DEPLOYMENT_NAME} -- alembic downgrade $KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION
         echo "::warning::downgraded test-$KUBERNETES_DEPLOYMENT_NAME alembic version to $KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION"
+        set -e
         kubectl delete --kustomize apps/${KUBERNETES_DEPLOYMENT_NAME}/test
     fi
     echo "::endgroup::"
