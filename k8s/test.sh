@@ -114,14 +114,22 @@ downgrade_alembic_migrations() {
         if [ -n "$REFINERY_IMAGE_TAG_EXISTS" ]; then
             set +e
             kubectl exec -i deployment/test-${REFINERY_DEPLOYMENT_NAME} -c test-${REFINERY_DEPLOYMENT_NAME} -- alembic downgrade $REFINERY_ALEMBIC_VERSION
-            echo "::warning::downgraded test-$REFINERY_DEPLOYMENT_NAME alembic version to $REFINERY_ALEMBIC_VERSION"
+            if [ "$?" != "0" ]; then
+                echo "::error::Alembic downgrade failed. Please update your code to support downgrading the current alembic version"
+            else
+                echo "::notice::downgraded test-$REFINERY_DEPLOYMENT_NAME alembic version to $REFINERY_ALEMBIC_VERSION"
+            fi
             set -e
             kubectl delete --kustomize apps/${REFINERY_DEPLOYMENT_NAME}/test
         fi
     else
         set +e
         kubectl exec -i deployment/test-${KUBERNETES_DEPLOYMENT_NAME} -c test-${KUBERNETES_DEPLOYMENT_NAME} -- alembic downgrade $KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION
-        echo "::warning::downgraded test-$KUBERNETES_DEPLOYMENT_NAME alembic version to $KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION"
+        if [ "$?" != "0" ]; then
+            echo "::error::Alembic downgrade failed. Please update your code to support downgrading the current alembic version"
+        else
+            echo "::notice::downgraded test-$KUBERNETES_DEPLOYMENT_NAME alembic version to $REFINERY_ALEMBIC_VERSION"
+        fi
         set -e
         kubectl delete --kustomize apps/${KUBERNETES_DEPLOYMENT_NAME}/test
     fi
