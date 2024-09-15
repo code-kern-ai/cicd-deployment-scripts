@@ -86,7 +86,7 @@ jobs:
       shell: bash
       run: |
         cd ${{ env.KUBERNETES_CLUSTER_REPO_NAME }}
-        bash cicd-deployment-scripts/k8s/test.sh \
+        bash ../cicd-deployment-scripts/k8s/test.sh \
           -n ${{ env.KUBERNETES_NAMESPACE }} \
           -d ${{ github.event.repository.name }} \
           -t ${{ needs.call-az-acr-push-test.outputs.GH_REF_NAME }} \
