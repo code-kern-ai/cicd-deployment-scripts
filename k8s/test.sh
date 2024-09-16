@@ -64,35 +64,27 @@ echo "::endgroup::"
 REFINERY_ALEMBIC_VERSION=""
 KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION=""
 
-KUBERNETES_POD_EXISTING_IMAGE=$(kubectl get pod --output json \
-    --selector app=${KUBERNETES_DEPLOYMENT_NAME} \
-    | jq -r '.items[0] | .spec.containers[0].image')
-
-REFINERY_POD_EXISTING_IMAGE=$(kubectl get pod --output json \
-    --selector app=${REFINERY_DEPLOYMENT_NAME} \
-    | jq -r '.items[0] | .spec.containers[0].image')
-
 REFINERY_IMAGE_TAG_EXISTS=$(az acr repository show --name ${AZURE_CONTAINER_REGISTRY} --image ${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} 2> /dev/null || true)
 
 upgrade_alembic_migrations() {
     echo "::group::Upgrade alembic migrations for test"
     if [ $KUBERNETES_DEPLOYMENT_NAME != "refinery-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "gates-gateway" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "hosted-inference-api" ]; then
-        if [ -n "$REFINERY_IMAGE_TAG_EXISTS" ]; then
-            kubectl apply --kustomize apps/${REFINERY_DEPLOYMENT_NAME}/test
-            __safe_migration_rollout test-${REFINERY_DEPLOYMENT_NAME}
-            echo "Applied test-${REFINERY_DEPLOYMENT_NAME} deployment"
+        kubectl apply --kustomize apps/${REFINERY_DEPLOYMENT_NAME}/test
+        __safe_migration_rollout test-${REFINERY_DEPLOYMENT_NAME}
+        echo "Applied test-${REFINERY_DEPLOYMENT_NAME} deployment"
 
-            REFINERY_ALEMBIC_VERSION=$(kubectl exec -i deployment/test-${REFINERY_DEPLOYMENT_NAME} -c test-${REFINERY_DEPLOYMENT_NAME} -- alembic current)
-            REFINERY_ALEMBIC_VERSION=${REFINERY_ALEMBIC_VERSION:0:12}
-            echo "::warning::current $REFINERY_DEPLOYMENT_NAME alembic version: $REFINERY_ALEMBIC_VERSION"
+        REFINERY_ALEMBIC_VERSION=$(kubectl exec -i deployment/test-${REFINERY_DEPLOYMENT_NAME} -c test-${REFINERY_DEPLOYMENT_NAME} -- alembic current)
+        REFINERY_ALEMBIC_VERSION=${REFINERY_ALEMBIC_VERSION:0:12}
+        echo "::warning::current $REFINERY_DEPLOYMENT_NAME alembic version: $REFINERY_ALEMBIC_VERSION"
+        if [ -n "$REFINERY_IMAGE_TAG_EXISTS" ]; then
             kubectl set image deployment/test-${REFINERY_DEPLOYMENT_NAME} \
                 test-${REFINERY_DEPLOYMENT_NAME}-migrate=${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} \
                 test-${REFINERY_DEPLOYMENT_NAME}=${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} 1> /dev/null
             __safe_migration_rollout test-${REFINERY_DEPLOYMENT_NAME}
             echo "::warning::using ${AZURE_CONTAINER_REGISTRY}/${REFINERY_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}"
-            _REFINERY_ALEMBIC_VERSION=$(kubectl exec -i deployment/test-${REFINERY_DEPLOYMENT_NAME} -c test-${REFINERY_DEPLOYMENT_NAME} -- alembic current)
-            echo "::warning::upgraded $REFINERY_DEPLOYMENT_NAME alembic version: $_REFINERY_ALEMBIC_VERSION"
         fi
+        _REFINERY_ALEMBIC_VERSION=$(kubectl exec -i deployment/test-${REFINERY_DEPLOYMENT_NAME} -c test-${REFINERY_DEPLOYMENT_NAME} -- alembic current)
+        echo "::warning::upgraded $REFINERY_DEPLOYMENT_NAME alembic version: $_REFINERY_ALEMBIC_VERSION"
     else
         kubectl apply --kustomize apps/${KUBERNETES_DEPLOYMENT_NAME}/test
         __safe_migration_rollout test-${KUBERNETES_DEPLOYMENT_NAME}
@@ -127,8 +119,8 @@ downgrade_alembic_migrations() {
                 echo "::notice::downgraded test-$REFINERY_DEPLOYMENT_NAME alembic version to $REFINERY_ALEMBIC_VERSION"
             fi
             set -e
-            kubectl delete --kustomize apps/${REFINERY_DEPLOYMENT_NAME}/test
         fi
+        kubectl delete --kustomize apps/${REFINERY_DEPLOYMENT_NAME}/test
     else
         set +e
         kubectl exec -i deployment/test-${KUBERNETES_DEPLOYMENT_NAME} -c test-${KUBERNETES_DEPLOYMENT_NAME} -- alembic downgrade $KUBERNETES_DEPLOYMENT_ALEMBIC_VERSION
@@ -151,6 +143,9 @@ if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
 fi
 
 echo "::group::Set test image: ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}"
+kubectl apply --kustomize apps/${KUBERNETES_DEPLOYMENT_NAME}/test
+__safe_migration_rollout test-${KUBERNETES_DEPLOYMENT_NAME}
+echo "Applied test-${KUBERNETES_DEPLOYMENT_NAME} deployment"
 kubectl set image deployment/test-${KUBERNETES_DEPLOYMENT_NAME} test-${KUBERNETES_DEPLOYMENT_NAME}=${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG} 1> /dev/null
 __safe_migration_rollout test-${KUBERNETES_DEPLOYMENT_NAME}
 echo "::notice::using ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}"
@@ -169,6 +164,7 @@ if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
 fi
 
 echo "::group::Delete Test Infrastructure"
+kubectl delete --kustomize apps/${KUBERNETES_DEPLOYMENT_NAME}/test
 kubectl delete --kustomize infrastructure/test
 echo "::endgroup::"
 
