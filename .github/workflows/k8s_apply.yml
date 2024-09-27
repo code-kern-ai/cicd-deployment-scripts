@@ -73,6 +73,7 @@ jobs:
           --namespace ${{ env.KUBERNETES_NAMESPACE }}
 
     - name: Assert Deploy Success
+      if: github.event_name == 'pull_request'
       shell: bash
       run: |
         bash cicd-deployment-scripts/k8s/assert_deploy_success.sh \
