@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.1.3](https://github.com/code-kern-ai/cicd-deployment-scripts/compare/v2.1.2...v2.1.3) (2024-09-27)
+
+
+### Bug Fixes
+
+* add db init to k8_test ([48eadb7](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/48eadb782a124b838739873e26ee6941c9b52ea7))
+* align to namespaces other than cluster-cognition ([44c70cf](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/44c70cff537d49d4cd7e4f31a2e9e8f59ad82095))
+* clone k8 cluster repo in k8 test ([8984573](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/8984573b07a476cb98482fc6e8a66ce9a38bab3c))
+* clone k8 cluster repo in k8 test ([84082f4](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/84082f4d5ac4d461ea9ebecc6f496dd447ffdd02))
+* delete test resources on refinery-gateway tests ([e9c4a62](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/e9c4a62f4d866d82727772223675fee4d6975fef))
+* only run k8 apply on PRs ([bff2622](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/bff2622aab6b44a5c1eab3a1d60a776cbdc358e8))
+* skip deployment success assertion on workflow_dispatch ([d06c684](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/d06c684e2b73d04c8be31c7b749d814e63479df2))
+* test services other than refinery-gateway ([89899fa](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/89899fa55ab8e6b5d321298c90db11dff406eefc))
+* wait for pg_isready ([321eaba](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/321eaba05eb0dcbfe84a2187a204659eb5f78dd2))
+
+
+### Performance Improvements
+
+* DB migration tests ([d7ca6f2](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/d7ca6f2274d9f78edf17d9047dfc4c53aa250661))
+* fail test on downgrade failure ([86a5e2c](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/86a5e2c9090f74ea374c632576dc9b7c8fbf9158))
+* more descriptive error message in k8 test ([6b19626](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/6b1962692af5f707f41de04633142c138c491a23))
+
 ## [2.1.2](https://github.com/code-kern-ai/cicd-deployment-scripts/compare/v2.1.1...v2.1.2) (2024-09-05)
 
 
