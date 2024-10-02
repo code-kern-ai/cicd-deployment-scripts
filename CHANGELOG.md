@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.0.0](https://github.com/code-kern-ai/cicd-deployment-scripts/compare/v2.1.3...v3.0.0) (2024-10-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* delete unused workflows
+
+### Features
+
+* add Docker Hub to az acr release ([3dbf81c](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/3dbf81c02447f76abe823de91844f38ebd7fce1e))
+* delete unused workflows ([91901dd](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/91901dd43bf371cc0e8320eb6feae2b286a8492a))
+* introduce K8 delete workflow ([189fb5a](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/189fb5ae0cf904436820b9849b2a103258259a1c))
+
 ## [2.1.3](https://github.com/code-kern-ai/cicd-deployment-scripts/compare/v2.1.2...v2.1.3) (2024-09-27)
 
 
