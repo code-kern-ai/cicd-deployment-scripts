@@ -33,7 +33,7 @@ jobs:
   #     docker_image_tag: ${{ needs.call-az-acr-push-test.outputs.GH_REF_NAME }}
 
   k8-test:
-    name: 'K8: Test'
+    name: 'K8: Test Cluster Deployment'
     runs-on: [self-hosted, dev]
     needs: [call-az-acr-push-test]
     if: ${{ !failure() && !cancelled() }}
@@ -82,7 +82,7 @@ jobs:
         admin: 'false'
         use-kubelogin: 'true'
     
-    - name: Run Test
+    - name: Test Cluster Deployment
       shell: bash
       run: |
         cd ${{ env.KUBERNETES_CLUSTER_REPO_NAME }}
