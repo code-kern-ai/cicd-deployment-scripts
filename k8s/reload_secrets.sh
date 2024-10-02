@@ -16,14 +16,11 @@ declare -A secret_rename_mapping=( \
     ["cognition-gateway"]="cg-gateway" \
     ["cognition-pdf2md"]="cg-gateway" \
     ["cognition-task-master"]="cg-task-master" \
-    ["gates-gateway"]="gt-gateway" \
     ["kratos"]="kratos" \
     ["oathkeeper"]="oathkeeper" \
     ["object-storage"]="obj-storage" \
     ["platform-monitoring"]="plfm-monitor" \
-    ["refinery-commercial-proxy"]="rf-comm-proxy" \
     ["refinery-config"]="rf-config" \
-    ["refinery-doc-ock"]="rf-doc-ock" \
     ["refinery-embedder"]="rf-embedder" \
     ["refinery-gateway"]="rf-gateway" \
     ["refinery-gateway-proxy"]="rf-gw-proxy" \
@@ -33,7 +30,6 @@ declare -A secret_rename_mapping=( \
     ["refinery-updater"]="rf-updater" \
     ["refinery-weak-supervisor"]="rf-weak-supvsr" \
     ["refinery-websocket"]="rf-websocket" \
-    ["refinery-zero-shot"]="rf-zero-shot" \
 )
 
 kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE

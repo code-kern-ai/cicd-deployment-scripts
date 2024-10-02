@@ -13,27 +13,24 @@ do
 done
 
 declare -A secret_rename_mapping=( \
+    ["admin-dashboard"]="none" \
     ["cognition-gateway"]="cg-gateway" \
     ["cognition-pdf2md"]="cg-gateway" \
     ["cognition-task-master"]="cg-task-master" \
-    ["gates-gateway"]="gt-gateway" \
-    ["kratos"]="kratos" \
-    ["oathkeeper"]="oathkeeper" \
-    ["object-storage"]="obj-storage" \
-    ["platform-monitoring"]="plfm-monitor" \
-    ["refinery-commercial-proxy"]="rf-comm-proxy" \
+    ["cognition-ui"]="none" \
+    ["refinery-authorizer"]="none" \
     ["refinery-config"]="rf-config" \
-    ["refinery-doc-ock"]="rf-doc-ock" \
     ["refinery-embedder"]="rf-embedder" \
+    ["refinery-entry"]="none" \
     ["refinery-gateway"]="rf-gateway" \
     ["refinery-gateway-proxy"]="rf-gw-proxy" \
     ["refinery-model-provider"]="rf-mdl-prvd" \
     ["refinery-neural-search"]="rf-nrl-search" \
     ["refinery-tokenizer"]="rf-tokenizer" \
+    ["refinery-ui"]="none" \
     ["refinery-updater"]="rf-updater" \
     ["refinery-weak-supervisor"]="rf-weak-supvsr" \
     ["refinery-websocket"]="rf-websocket" \
-    ["refinery-zero-shot"]="rf-zero-shot" \
 )
 
 kubectl config set-context --current --namespace=$KUBERNETES_NAMESPACE
@@ -44,4 +41,7 @@ KUBERNETES_SECRET_NAME=${secret_rename_mapping[$KUBERNETES_DEPLOYMENT_NAME]}
 
 kubectl delete deployment $KUBERNETES_DEPLOYMENT_NAME
 kubectl delete service $KUBERNETES_SERVICE_NAME
-kubectl delete secret $KUBERNETES_SECRET_NAME
+
+if [ "$KUBERNETES_SECRET_NAME" != "none" ]; then
+    kubectl delete secret $KUBERNETES_SECRET_NAME
+fi
