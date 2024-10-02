@@ -85,7 +85,7 @@ jobs:
             platform=linux/arm64
             label=dockerfile-path=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/Dockerfile
       
-      - name: Build & Push ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
+      - name: Build & Push ${{ github.event.repository.name }}:${{ env.IMAGE_TAG }} (Azure)
         uses: docker/build-push-action@v5
         with:
           cache-from: type=registry,ref=${{ env.AZURE_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:latest-cache
@@ -98,7 +98,7 @@ jobs:
             platform=linux/amd64
             label=dockerfile-path=https://github.com/${{ github.repository }}/blob/${{ github.sha }}/${{ env.DOCKERFILE }}
 
-      - name: Build & Push ${{ env.DOCKERHUB_CONTAINER_REGISTRY }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
+      - name: Build & Push ${{ github.event.repository.name }}:${{ env.IMAGE_TAG }} (Docker Hub)
         uses: docker/build-push-action@v5
         if: ${{ github.event_name == 'release' }}
         with:
