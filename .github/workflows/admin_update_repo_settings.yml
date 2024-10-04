@@ -17,9 +17,14 @@ jobs:
     name: 'GitHub: Update Repo Settings'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
       - name: Update Repository Settings
         run: |
-          bash admin/update_repo_settings.sh \
+          bash ./admin/update_repo_settings.sh \
             -e ${{ github.ref_name }}
           
           echo "::notice::Release Published"
