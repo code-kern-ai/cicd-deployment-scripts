@@ -1,4 +1,4 @@
-name: 'Admin: Update GitHub Repositories Settings'
+name: 'GitHub: Admin Repositories Settings'
 
 on:
   workflow_dispatch:
@@ -25,6 +25,7 @@ jobs:
       - name: Update Repository Settings
         run: |
           bash ./admin/update_repo_settings.sh \
+            -o ${{ github.repository_owner }} \
             -e ${{ github.ref_name }}
           
           echo "::notice::Release Published"

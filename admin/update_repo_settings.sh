@@ -9,10 +9,11 @@ DEVOPS_ADMIN_GITHUB_TEAM_ID=10188507
 
 ENVIRONMENT_NAME="dev"
 
-while getopts o: flag
+while getopts o:e: flag
 do
     case "${flag}" in
         o) REPOSITORY_OWNER=${OPTARG};;
+        e) ENVIRONMENT_NAME=${OPTARG};;
     esac
 done
 
@@ -28,7 +29,8 @@ RULESET_CONTENT=$(echo $(sed \
 
 
 function get_ruleset_by_name() {
-    RULESET_NAME=${1}
+    REPOSITORY_NAME=${1}
+    RULESET_NAME=${2}
     
     echo $(gh api \
         -H "Accept: application/vnd.github+json" \
@@ -89,7 +91,7 @@ for REPOSITORY_NAME in ${REPO_LIST_TF_MODULE[@]}; do
         continue
     fi
 
-    ruleset_id=$(get_ruleset_by_name ${ENVIRONMENT_NAME})
+    ruleset_id=$(get_ruleset_by_name ${REPOSITORY_NAME} ${ENVIRONMENT_NAME})
     if [ -z "${ruleset_id}" ]; then
         echo "Creating ruleset for ${REPOSITORY_NAME}/${ENVIRONMENT_NAME}"
         create_ruleset ${REPOSITORY_NAME}
@@ -103,9 +105,9 @@ echo "::endgroup::"
 
 
 echo "::group::app-tf-iac repository rulesets"
-COMBINED_ARRAY=(${REPO_LIST_APP_IAC[@]} ${REPO_LIST_TF_IAC[@]}})
+COMBINED_ARRAY=(${REPO_LIST_APP_IAC[@]} ${REPO_LIST_TF_IAC[@]})
 for REPOSITORY_NAME in ${COMBINED_ARRAY[@]}; do
-    ruleset_id=$(get_ruleset_by_name ${ENVIRONMENT_NAME})
+    ruleset_id=$(get_ruleset_by_name ${REPOSITORY_NAME} ${ENVIRONMENT_NAME})
     if [ -z "${ruleset_id}" ]; then
         echo "Creating ruleset for ${REPOSITORY_NAME}/${ENVIRONMENT_NAME}"
         create_ruleset ${REPOSITORY_NAME}
