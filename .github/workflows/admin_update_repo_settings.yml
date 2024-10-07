@@ -33,6 +33,7 @@ jobs:
   admin-update-tf-module-rulesets:
     name: 'GitHub: Update tf-module Rulesets'
     runs-on: ubuntu-latest
+    if: ${{ github.ref_name != 'prod' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
