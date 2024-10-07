@@ -13,8 +13,8 @@ env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
 jobs:
-  admin-update-repo-settings:
-    name: 'GitHub: Update Repo Settings'
+  admin-update-general-repo-settings:
+    name: 'GitHub: Update General Repository Settings'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -22,10 +22,44 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
-      - name: Update Repository Settings
+      - name: Update General Repository Settings
         run: |
-          bash ./admin/update_repo_settings.sh \
-            -o ${{ github.repository_owner }} \
-            -e ${{ github.ref_name }}
+          source ./admin/update_repo_settings.sh
+
+          update_repo_general_settings ${{ github.repository_owner }} 
           
-          echo "::notice::Release Published"
+          echo "::notice::General Settings Updated"
+
+  admin-update-tf-module-rulesets:
+    name: 'GitHub: Update tf-module Rulesets'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Update tf-module Rulesets
+        run: |
+          source ./admin/update_repo_settings.sh
+
+          update_tf_module_rulesets ${{ github.repository_owner }} ${{ github.ref_name }}
+          
+          echo "::notice::tf-module ${{ github.ref_name }} Rulesets Updated"
+
+  admin-update-tf-iac-rulesets:
+    name: 'GitHub: Update tf-iac Rulesets'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Update tf-iac Rulesets
+        run: |
+          source ./admin/update_repo_settings.sh
+
+          update_tf_iac_rulesets ${{ github.repository_owner }} ${{ github.ref_name }}
+          
+          echo "::notice::tf-iac ${{ github.ref_name }} Rulesets Updated"
