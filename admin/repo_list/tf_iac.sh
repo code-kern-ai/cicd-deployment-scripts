@@ -7,7 +7,6 @@ export REPO_LIST_TF_IAC=(
     tf-azure-admin
     tf-azure-container-registry
     tf-azure-core
-    tf-azure-do2az-migration
     tf-azure-fnapp-github-runner-monitor
     tf-azure-github-runner
     tf-azure-k8-cluster
