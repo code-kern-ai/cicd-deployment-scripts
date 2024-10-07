@@ -16,6 +16,8 @@ jobs:
   admin-update-general-repo-settings:
     name: 'GitHub: Update General Repository Settings'
     runs-on: ubuntu-latest
+    # Since these are general settings, they only need to be applied once
+    if: ${{ github.ref_name == 'dev' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
