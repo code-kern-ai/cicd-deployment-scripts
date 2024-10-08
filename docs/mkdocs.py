@@ -3,7 +3,7 @@ import yaml
 import json
 
 CICD_DEPLOYMENT_SCRIPTS_DIR = (
-    "/Users/andhrelja/Local/Kubernetes/cicd-deployment-scripts"
+    "/Users/andhrelja/DevOps/Infrastructure/cicd-deployment-scripts"
 )
 GITHUB_ACTIONS_WORKFLOWS_DIR = os.path.join(
     CICD_DEPLOYMENT_SCRIPTS_DIR, ".github", "workflows"
