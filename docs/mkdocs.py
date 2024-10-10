@@ -143,7 +143,7 @@ Triggers:
 """
     gh_actions = []
     for workflow_file_name, workflow in workflow_info.items():
-        toc += f"- [{workflow['name']}](#{workflow["name"].lower().replace(' ', '-')})\n"
+        toc += f"- [{workflow['name']}](#{workflow["name"].lower().replace('/', '').replace(':', '').replace(' ', '-')})\n"
 
         workflow_name = workflow["name"]
         workflow_triggers = "\n- ".join(workflow["trigger"])

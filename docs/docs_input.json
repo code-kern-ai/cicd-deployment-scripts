@@ -148,6 +148,16 @@
     ],
     "troubleshooting": []
   },
+  "k8s_reload_secrets.yml": {
+    "trigger": [
+      "workflow_dispatch"
+    ],
+    "description": [
+      "recreates a secret in the Kubernetes cluster with the latest value from Azure Key Vault, specified by the workflow input (deployment name)",
+      "restarts a deployment in the Kubernetes cluster, specified by the workflow input (deployment name)"
+    ],
+    "troubleshooting": []
+  },
   "k8s_release.yml": {
     "trigger": [
       "pull_request_closed",
