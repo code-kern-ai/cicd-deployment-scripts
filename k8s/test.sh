@@ -138,7 +138,7 @@ until kubectl exec -i deployment/test-postgres -- sh -c pg_isready; do
     echo "Waiting for postgres to be ready..."
     sleep 3
 done
-kubectl exec -i deployment/test-postgres -- sh -c "psql -U postgres -c 'DROP DATABASE IF EXISTS refinery;"
+kubectl exec -i deployment/test-postgres -- sh -c "psql -U postgres -c 'DROP DATABASE IF EXISTS refinery;'"
 kubectl exec -i deployment/test-postgres -- sh -c "psql -U postgres -c '$(cat infrastructure/test/deployment/assets/init.sql)'"
 echo "::endgroup::"
 
