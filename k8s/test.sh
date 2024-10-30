@@ -138,12 +138,17 @@ until kubectl exec -i deployment/test-postgres -- sh -c pg_isready; do
     echo "Waiting for postgres to be ready..."
     sleep 3
 done
+kubectl exec -i deployment/test-postgres -- sh -c "psql -U postgres -c 'DROP DATABASE IF EXISTS refinery;"
 kubectl exec -i deployment/test-postgres -- sh -c "psql -U postgres -c '$(cat infrastructure/test/deployment/assets/init.sql)'"
 echo "::endgroup::"
 
 
 if [ "$ENABLE_ALEMBIC_MIGRATIONS" = "true" ]; then
     upgrade_alembic_migrations
+else
+    kubectl apply --kustomize apps/${KUBERNETES_DEPLOYMENT_NAME}/test
+    __safe_migration_rollout test-${KUBERNETES_DEPLOYMENT_NAME}
+    echo "Applied test-${KUBERNETES_DEPLOYMENT_NAME} deployment"
 fi
 
 echo "::group::Set test image: ${AZURE_CONTAINER_REGISTRY}/${KUBERNETES_DEPLOYMENT_NAME}:${TEST_IMAGE_TAG}"
