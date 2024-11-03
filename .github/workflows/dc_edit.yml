@@ -1,0 +1,73 @@
+name: 'DC: Edit'
+
+on:
+  workflow_call:
+
+# Special permissions required for OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+jobs:
+  dc-edit:
+    name: 'Docker Compose: Edit Service'
+    runs-on: [self-hosted, "${{ github.event_name == 'release' && 'prod' || github.event.pull_request.base.ref }}"]
+    environment: ${{ github.event_name == 'release' && 'prod' || github.event.pull_request.base.ref }}
+    env:
+      ENVIRONMENT_NAME: ${{ github.event_name == 'release' && 'prod' || github.event.pull_request.base.ref }}
+      DEPLOYMENT_REPO_NAME: ${{ vars.DEPLOYMENT_REPO_NAME }}
+      CONTAINER_REGISTRY: "${{ vars.CONTAINER_REGISTRY }}"
+      IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || 'dev' }}
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+        repository: ${{ github.repository_owner }}/${{ env.DEPLOYMENT_REPO_NAME }}
+        fetch-depth: 0
+    
+    - name: GitHub Configuration
+      run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
+
+    - name: Clone cicd-deployment-scripts
+      run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
+
+    - name: Perform Edit/Git Operations
+      shell: bash
+      run: |
+        AUTOMATED_RELEASE_BRANCH="automated-release-${{ github.event_name == 'release' && 'prod' || 'dev' }}"
+        
+        git checkout $AUTOMATED_RELEASE_BRANCH || git checkout -b $AUTOMATED_RELEASE_BRANCH
+        git push origin $AUTOMATED_RELEASE_BRANCH && git pull origin $AUTOMATED_RELEASE_BRANCH
+
+        bash cicd-deployment-scripts/dc/edit.sh \
+          -e ${{ env.ENVIRONMENT_NAME }} \
+          -r ${{ env.CONTAINER_REGISTRY }} \
+          -s ${{ github.event.repository.name }} \
+          -t ${{ env.IMAGE_TAG }}
+
+        git config --global user.email "devtools@kern.ai"
+        git config --global user.name "GitHub Actions"
+
+        git add .env.${{ env.ENVIRONMENT_NAME }}
+        git commit -m "ci(${{ github.event.repository.name }}): ${{ env.IMAGE_TAG }}" || true
+        git push origin $AUTOMATED_RELEASE_BRANCH
+
+        PR_TITLE="ci: $AUTOMATED_RELEASE_BRANCH"
+        if [ ${{ github.event_name }} == 'release' ]; then
+          PR_TITLE="ci(release): $AUTOMATED_RELEASE_BRANCH"
+        fi
+
+        bash cicd-deployment-scripts/gh/pr_create.sh \
+          -b dev \
+          -h "$AUTOMATED_RELEASE_BRANCH" \
+          -t "$PR_TITLE" \
+          -o "${{ github.repository_owner }}" \
+          -r "${{ github.event.repository.name }}" \
+          -n "${{ github.event.pull_request.number }}" \
+          -k "${{ env.DEPLOYMENT_REPO_NAME }}" \
