@@ -23,7 +23,7 @@ jobs:
 
   call-dc-edit:
     needs: [call-gh-validate-release] # [call-az-acr-release]
-    if: always() && !failure()
+    if: always() && !failure() && github.event_name == 'release'
     uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/dc_edit.yml@dev
     secrets: inherit
 
