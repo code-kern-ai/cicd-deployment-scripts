@@ -20,7 +20,6 @@ declare -A secret_rename_mapping=( \
     ["oathkeeper"]="oathkeeper" \
     ["object-storage"]="obj-storage" \
     ["platform-monitoring"]="plfm-monitor" \
-    ["refinery-config"]="rf-config" \
     ["refinery-embedder"]="rf-embedder" \
     ["refinery-gateway"]="rf-gateway" \
     ["refinery-gateway-proxy"]="rf-gw-proxy" \
