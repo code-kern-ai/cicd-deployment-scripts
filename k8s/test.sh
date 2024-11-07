@@ -171,7 +171,7 @@ fi
 
 echo "::group::Delete Test Infrastructure"
 # skip deleting resources deployed by test-refinery-gatway
-if [ $KUBERNETES_DEPLOYMENT_NAME != "refinery-config" ] && [ $KUBERNETES_DEPLOYMENT_NAME != "refinery-websocket" ]; then
+if [ $KUBERNETES_DEPLOYMENT_NAME != "refinery-websocket" ]; then
     kubectl delete --kustomize apps/${KUBERNETES_DEPLOYMENT_NAME}/test
 fi
 kubectl delete --kustomize infrastructure/test

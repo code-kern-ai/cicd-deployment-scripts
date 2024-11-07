@@ -19,7 +19,6 @@ declare -A secret_rename_mapping=( \
     ["cognition-task-master"]="cg-task-master" \
     ["cognition-ui"]="none" \
     ["refinery-authorizer"]="none" \
-    ["refinery-config"]="rf-config" \
     ["refinery-embedder"]="rf-embedder" \
     ["refinery-entry"]="none" \
     ["refinery-gateway"]="rf-gateway" \

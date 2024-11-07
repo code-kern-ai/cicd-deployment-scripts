@@ -5,15 +5,7 @@ APP_REPOS=(
     cognition-pdf2md
     cognition-task-master
     cognition-ui
-    ecosystem-welcome-screen
-    gates-gateway
-    gates-runtime
-    gates-ui
-    platform-monitoring
     refinery-authorizer
-    refinery-commercial-proxy
-    refinery-config
-    refinery-doc-ock
     refinery-embedder
     refinery-entry
     refinery-gateway
@@ -25,7 +17,6 @@ APP_REPOS=(
     refinery-updater
     refinery-weak-supervisor
     refinery-websocket
-    refinery-zero-shot
     refinery-ac-exec-env
     refinery-lf-exec-env
     refinery-ml-exec-env

@@ -9,18 +9,10 @@ export REPO_LIST_APP_IAC=(
     tf-azure-cognition-pdf2md
     tf-azure-cognition-task-master
     tf-azure-cognition-ui
-    tf-azure-ecosystem-welcome-screen
     tf-azure-external-data-mapper
-    tf-azure-gates-gateway
-    tf-azure-gates-runtime
-    tf-azure-gates-ui
     tf-azure-hosted-inference-api
-    tf-azure-platform-monitoring
     tf-azure-refinery-ac-exec-env
     tf-azure-refinery-authorizer
-    tf-azure-refinery-commercial-proxy
-    tf-azure-refinery-config
-    tf-azure-refinery-doc-ock
     tf-azure-refinery-embedder
     tf-azure-refinery-entry
     tf-azure-refinery-gateway
@@ -35,5 +27,4 @@ export REPO_LIST_APP_IAC=(
     tf-azure-refinery-updater
     tf-azure-refinery-weak-supervisor
     tf-azure-refinery-websocket
-    tf-azure-refinery-zero-shot
 )
