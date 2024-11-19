@@ -21,7 +21,6 @@ export REPO_LIST_APP_IAC=(
     tf-azure-refinery-ml-exec-env
     tf-azure-refinery-model-provider
     tf-azure-refinery-neural-search
-    tf-azure-refinery-record-ide-env
     tf-azure-refinery-tokenizer
     tf-azure-refinery-ui
     tf-azure-refinery-updater

@@ -20,7 +20,6 @@ APP_REPOS=(
     refinery-ac-exec-env
     refinery-lf-exec-env
     refinery-ml-exec-env
-    refinery-record-ide-env
 )
 
 for repo in ${APP_REPOS[@]}; do
