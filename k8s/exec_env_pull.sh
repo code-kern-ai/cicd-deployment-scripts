@@ -25,7 +25,6 @@ PULL_IMAGE_NAMES=(
     "refinery-ac-exec-env"
     "refinery-lf-exec-env"
     "refinery-ml-exec-env"
-    "refinery-record-ide-env"
 )
 total_images=${#PULL_IMAGE_NAMES[@]}
 
