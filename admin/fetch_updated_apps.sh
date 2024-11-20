@@ -72,6 +72,6 @@ function fetch_updated_apps() {
             | jq -r "${JQ_QUERY}" >> diff.json
     done
 
-    jq --slurp '.[] | sort_by(.app)' diff.json > __diff.json
+    jq --slurp '. | sort_by(.app)' diff.json > __diff.json
     mv __diff.json diff.json
 }
