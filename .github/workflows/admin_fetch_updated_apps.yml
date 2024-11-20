@@ -34,10 +34,11 @@ jobs:
           cp .env.${{ github.ref_name }} .env
 
           fetch_updated_apps ${{ github.repository_owner }}
-
-          jq '.' diff.json
           
           echo "::notice::Updated Apps Fetched"
+      
+      - name: Print JSON diff
+        run: jq '.' diff.json
 
         # Save plan to artifacts  
       - name: Publish JSON diff
