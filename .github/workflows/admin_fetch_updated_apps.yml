@@ -20,11 +20,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          repository: "${{ github.repository_owner }}/cicd-deployment-scripts"
+          ref: ${{ github.ref_name }}
+      
+      - name: GitHub Configuration
+        run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
+
+      - name: Clone cicd-deployment-scripts
+        run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
 
       - name: Fetch Updated Apps
         run: |
-          source ./admin/fetch_updated_apps.sh
+          source ./cicd-deployment-scripts/admin/fetch_updated_apps.sh
 
           fetch_updated_apps ${{ github.repository_owner }}
 
