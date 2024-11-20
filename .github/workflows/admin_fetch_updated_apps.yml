@@ -27,6 +27,8 @@ jobs:
           source ./admin/fetch_updated_apps.sh
 
           fetch_updated_apps ${{ github.repository_owner }}
+
+          jq '.' diff.json
           
           echo "::notice::Updated Apps Fetched"
 
