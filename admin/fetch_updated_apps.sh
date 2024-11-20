@@ -12,7 +12,7 @@ export THIRD_PARTY_SERVICES=(
 
 
 function get_docker_compose_services() {
-    for service in $(docker compose config --services); do
+    for service in $(docker --log-level ERROR compose config --services); do
         is_third_party_service="false"
         for tps in ${THIRD_PARTY_SERVICES[@]}; do
             if [[ "${service}" == "${tps}" ]]; then
