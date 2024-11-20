@@ -31,6 +31,7 @@ jobs:
       - name: Fetch Updated Apps
         run: |
           source ./cicd-deployment-scripts/admin/fetch_updated_apps.sh
+          cp .env.${{ github.ref_name }} .env
 
           fetch_updated_apps ${{ github.repository_owner }}
 
