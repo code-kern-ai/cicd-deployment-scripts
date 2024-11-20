@@ -20,7 +20,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository }}
+          repository: "${{ github.repository_owner }}/cicd-deployment-scripts"
 
       - name: Fetch Updated Apps
         run: |
@@ -29,3 +29,10 @@ jobs:
           fetch_updated_apps ${{ github.repository_owner }}
           
           echo "::notice::Updated Apps Fetched"
+
+        # Save plan to artifacts  
+      - name: Publish JSON diff
+        uses: actions/upload-artifact@v4
+        with:
+            name: diff.json
+            path: diff.json
