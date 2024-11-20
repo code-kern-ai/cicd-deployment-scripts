@@ -1,0 +1,31 @@
+name: 'GitHub: Fetch Updated Apps'
+
+on:
+  workflow_call:
+
+# Special permissions required for OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+jobs:
+  admin-fetch-updated-apps:
+    name: 'GitHub: Fetch Updated Apps'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+
+      - name: Fetch Updated Apps
+        run: |
+          source ./admin/fetch_updated_apps.sh
+
+          fetch_updated_apps ${{ github.repository_owner }}
+          
+          echo "::notice::Updated Apps Fetched"
