@@ -2,6 +2,7 @@
 
 export THIRD_PARTY_SERVICES=(
     caddy
+    hosted-inference-api-migrate
     postgres-migrate
     kratos-migrate
     kratos
