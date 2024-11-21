@@ -38,7 +38,7 @@ jobs:
           echo "::notice::Updated Apps Fetched"
       
       - name: Print JSON diff
-        run: jq '.' diff.json
+        run: jq -C '.' diff.json
 
         # Save plan to artifacts  
       - name: Publish JSON diff
