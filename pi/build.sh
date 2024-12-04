@@ -11,7 +11,7 @@ do
     esac
 done
 
-UPDATED_FILES=$(gh pr diff $PR_NUMBER --name-only)
+UPDATED_FILES=$(git diff --name-only)
 while IFS= read -r file; do
     if [[ $file != requirements/* ]] || [[ $file != *.in ]]; then
         continue

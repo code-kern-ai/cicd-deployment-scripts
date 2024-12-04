@@ -28,7 +28,7 @@ jobs:
         run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
 
       - name: Clone cicd-deployment-scripts
-        run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git
+        run: git clone https://github.com/code-kern-ai/cicd-deployment-scripts.git && git checkout parent-images
       
       - name: Set up Python
         uses: actions/setup-python@v5
