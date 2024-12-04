@@ -26,6 +26,7 @@ while IFS= read -r file; do
     python -m venv ./venv/
     source ./venv/bin/activate
     pip install -r requirements/$parent_image_type-requirements.txt
+    rm -rf ./venv/
     echo "::endgroup::"
 
 done <<< "$UPDATED_FILES"

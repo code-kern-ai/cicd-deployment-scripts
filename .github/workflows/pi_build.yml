@@ -36,6 +36,9 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       
+      - name: Install dependencies
+        run: python -m pip install pip-tools
+        
       - name: Run build
         run: |
           bash cicd-deployment-scripts/pi/build.sh \
