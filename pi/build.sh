@@ -3,15 +3,18 @@
 set -e
 
 PR_NUMBER=""
+DIFF_REF="dev"
 
-while getopts p: flag
+while getopts p:r: flag
 do
     case "${flag}" in
         p) PR_NUMBER=${OPTARG};;
+        r) DIFF_REF=${OPTARG};;
     esac
 done
 
-UPDATED_FILES=$(git diff --name-only)
+git diff $DIFF_REF --color
+UPDATED_FILES=$(git diff $DIFF_REF --name-only)
 while IFS= read -r file; do
     if [[ $file != requirements/* ]] || [[ $file != *.in ]]; then
         continue

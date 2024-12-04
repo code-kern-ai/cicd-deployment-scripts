@@ -37,4 +37,6 @@ jobs:
       
       - name: Run build
         run: |
-          bash cicd-deployment-scripts/pi/build.sh -p "${{ github.event.pull_request.number }}"
+          bash cicd-deployment-scripts/pi/build.sh \
+            -p "${{ github.event.pull_request.number }}" \
+            -r "${{ github.repository.default_branch }}" \
