@@ -19,7 +19,7 @@ jobs:
     env:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
     outputs:
-      updated_parent_types: ${{ steps.run-build.outputs.updated_parent_types }}
+      updated_parent_types: ${{ steps.run-compile.outputs.updated_parent_types }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -38,11 +38,16 @@ jobs:
       - name: Install dependencies
         run: python -m pip install pip-tools
 
-      - name: Run build
-        id: run-build
+      - name: Run compile
+        id: run-compile
         run: |
-          bash cicd-deployment-scripts/pi/build.sh \
+          bash cicd-deployment-scripts/pi/compile.sh \
             -p "${{ github.event.pull_request.number }}"
+
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
 
   pi-build:
     name: 'Parent Images: Build'
@@ -59,13 +64,8 @@ jobs:
       IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || github.event.pull_request.head.ref }}
     strategy:
       matrix:
-        parent_image_type: ${{ toJson(needs.pi-compile.outputs.updated_parent_types) }}
+        parent_image_type: ${{ fromJson(needs.pi-compile.outputs.updated_parent_types) }}
     steps:
-      - name: Dump needs context
-        env:
-          NEEDS_CONTEXT: ${{ toJson(needs) }}
-        run: echo "$NEEDS_CONTEXT"
-      
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
