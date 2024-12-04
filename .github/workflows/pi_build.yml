@@ -3,11 +3,11 @@ name: 'Parent Images: Build'
 on:
   workflow_call:
 
-# Special permissions required for OIDC authentication
-permissions:
-  id-token: write
-  contents: read
-  actions: read
+# # Special permissions required for OIDC authentication
+# permissions:
+#   id-token: write
+#   contents: read
+#   actions: read
 
 env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -39,4 +39,4 @@ jobs:
         run: |
           bash cicd-deployment-scripts/pi/build.sh \
             -p "${{ github.event.pull_request.number }}" \
-            -r "${{ github.repository.default_branch }}" \
+            -r "${{ github.event.repository.default_branch }}"

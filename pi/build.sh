@@ -13,6 +13,7 @@ do
     esac
 done
 
+echo "Printing diff"
 git diff $DIFF_REF --color
 UPDATED_FILES=$(git diff $DIFF_REF --name-only)
 while IFS= read -r file; do
