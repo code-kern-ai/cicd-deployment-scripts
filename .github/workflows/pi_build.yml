@@ -13,33 +13,98 @@ env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
 jobs:
-  pi-build:
-    name: 'Parent Images: Build Requirements'
+  pi-compile:
+    name: 'Parent Images: Compile Requirements'
     runs-on: ubuntu-latest
     env:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
+    outputs:
+      updated_parent_types: ${{ steps.run-build.outputs.updated_parent_types }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
     
       - name: GitHub Configuration
         run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
 
       - name: Clone cicd-deployment-scripts
         run: git clone --branch parent-images https://github.com/code-kern-ai/cicd-deployment-scripts.git
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
+
       - name: Install dependencies
         run: python -m pip install pip-tools
-        
+
       - name: Run build
+        id: run-build
         run: |
           bash cicd-deployment-scripts/pi/build.sh \
             -p "${{ github.event.pull_request.number }}"
+
+  pi-build:
+    name: 'Parent Images: Build'
+    runs-on: ubuntu-latest
+    needs: pi-compile
+    env:
+      PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
+      DEV_CONTAINER_REGISTRY: ${{ vars.DEV_CONTAINER_REGISTRY }}
+      DEV_LOGIN_USERNAME: ${{ secrets.DEV_LOGIN_USERNAME }}
+      DEV_LOGIN_PASSWORD: ${{ secrets.DEV_LOGIN_PASSWORD }}
+      DOCKERHUB_CONTAINER_REGISTRY: ${{ vars.DOCKERHUB_CONTAINER_REGISTRY }}
+      DOCKERHUB_LOGIN_USERNAME: ${{ secrets.DOCKERHUB_LOGIN_USERNAME }}
+      DOCKERHUB_LOGIN_PASSWORD: ${{ secrets.DOCKERHUB_LOGIN_PASSWORD }}
+      IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || github.event.pull_request.head.ref }}
+    strategy:
+      matrix:
+        parent_image_type: ${{ toJson(needs.pi-compile.outputs.updated_parent_types) }}
+    steps:
+      - name: Dump needs context
+        env:
+          NEEDS_CONTEXT: ${{ toJson(needs) }}
+        run: echo "$NEEDS_CONTEXT"
+      
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          repository: '${{ github.repository_owner }}/refinery-${{ matrix.parent_image_type }}-parent-image'
+          submodules: 'true'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64,arm
+
+      - name: Log into DEV registry
+        uses: docker/login-action@v3
+        with:
+          registry: "${{ env.DEV_CONTAINER_REGISTRY }}"
+          username: "${{ env.DEV_LOGIN_USERNAME }}"
+          password: "${{ env.DEV_LOGIN_PASSWORD }}"
+
+      - name: Log into Docker Hub registry
+        uses: docker/login-action@v3
+        with:
+          username: "${{ env.DOCKERHUB_LOGIN_USERNAME }}"
+          password: "${{ env.DOCKERHUB_LOGIN_PASSWORD }}"
+    
+      - name: Build & Push refinery-${{ matrix.parent_image_type }}-parent-image:amd64
+        if: ${{ github.event_name != 'release' }}
+        uses: docker/build-push-action@v5
+        with:
+          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-image:dev-${{ matrix.parent_image_type }}-cache
+          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-image:dev-${{ matrix.parent_image_type }}-cache,mode=max,image-manifest=true
+          platforms: linux/amd64
+          file: Dockerfile
+          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-image:dev-${{ matrix.parent_image_type }}
+          push: true
+          build-args: |
+            platform=linux/amd64
+            label=dockerfile-path=https://github.com/refinery-${{ matrix.parent_image_type }}-parent-image/blob/${{ github.sha }}/Dockerfile

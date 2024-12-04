@@ -12,21 +12,24 @@ do
 done
 
 UPDATED_FILES=$(gh pr diff $PR_NUMBER --name-only)
+UPDATED_PARENT_TYPES=()
 while IFS= read -r file; do
     if [[ $file != requirements/* ]] || [[ $file != *.in ]]; then
         continue
     fi
     
     parent_image_type=$(basename $file | sed 's|-requirements.in||g')
+    UPDATED_PARENT_TYPES+=($parent_image_type)
 
     echo "::group::Compiling $parent_image_type-requirements.in"
     pip-compile requirements/$parent_image_type-requirements.in
-
-    echo "Running pip install for $parent_image_type"
-    python -m venv ./venv/
-    source ./venv/bin/activate
-    pip install -r requirements/$parent_image_type-requirements.txt
-    rm -rf ./venv/
     echo "::endgroup::"
 
 done <<< "$UPDATED_FILES"
+
+JSON=""
+for parent_image_type in "${UPDATED_PARENT_TYPES[@]}"; do
+    JSON+="\"$parent_image_type\","
+done
+JSON="[${JSON::-1}]"
+echo "updated_parent_types=$JSON" >> $GITHUB_OUTPUT
