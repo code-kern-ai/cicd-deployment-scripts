@@ -105,15 +105,15 @@ jobs:
           repository: '${{ github.repository_owner }}/refinery-${{ matrix.parent_image_type }}-parent-image'
           submodules: 'true'
       
-      - name: Purge stale requirements
-        run: rm ${{ github.workspace }}/submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.txt
+      # - name: Purge stale requirements
+      #   run: rm ${{ github.workspace }}/submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.txt
       
       # Download requirements from artifacts  
       - name: Download ${{ matrix.parent_image_type }}-requirements
         uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.parent_image_type }}-requirements.txt
-          path: ${{ github.workspace }}/submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.txt
+          path: ${{ github.workspace }}/submodules/parent-images/requirements
 
       - name: GitHub Configuration
         run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
