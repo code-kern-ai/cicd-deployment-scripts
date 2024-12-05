@@ -89,7 +89,7 @@ jobs:
             app_repo: refinery-ui
     steps:
       - name: Print matrix values - ${{ matrix.parent_image_type }}
-        run: echo ${{ matrix }}
+        run: echo ${{ toJson(matrix) }}
 
   # pi-build:
   #   name: 'Parent Images: Docker Build'
