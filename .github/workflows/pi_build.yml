@@ -13,14 +13,14 @@ env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
 jobs:
-  pi-diff:
-    name: 'Parent Images: Diff Types'
+  pi-matrix:
+    name: 'Parent Images: Generate Matrix'
     runs-on: ubuntu-latest
     environment: dev
     env:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
     outputs:
-      include: ${{ steps.get-diff.outputs.include }}
+      include: ${{ steps.gen-matrix.outputs.include }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -34,23 +34,23 @@ jobs:
       - name: Clone cicd-deployment-scripts
         run: git clone --branch parent-images https://github.com/code-kern-ai/cicd-deployment-scripts.git
 
-      - name: Get Diff Types
-        id: get-diff
+      - name: Generate Matrix
+        id: gen-matrix
         run: |
-          bash cicd-deployment-scripts/pi/diff.sh \
+          bash cicd-deployment-scripts/pi/generate_matrix.sh \
             -p "${{ github.event.pull_request.number }}" \
             -s cicd-deployment-scripts/pi/settings.sh
 
-  pi-matrix-test:
-    name: 'Parent Images: Matrix Test'
+  pi-update-app:
+    name: 'Parent Images: Update'
     runs-on: ubuntu-latest
-    needs: [pi-diff]
+    needs: [pi-matrix]
     environment: dev
     env:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
     strategy:
       matrix: 
-        include: ${{ fromJson(needs.pi-diff.outputs.include) }}
+        include: ${{ fromJson(needs.pi-matrix.outputs.include) }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -100,7 +100,7 @@ jobs:
   # pi-build:
   #   name: 'Parent Images: Docker Build'
   #   runs-on: ubuntu-latest
-  #   needs: [pi-diff]
+  #   needs: [pi-matrix]
   #   environment: dev
   #   env:
   #     PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
@@ -110,7 +110,7 @@ jobs:
   #     IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || github.event.pull_request.head.ref }}
   #   strategy:
   #     matrix:
-  #       parent_image_type: ${{ fromJson(needs.pi-diff.outputs.updated_parent_types) }}
+  #       parent_image_type: ${{ fromJson(needs.pi-matrix.outputs.updated_parent_types) }}
   #   steps:
   #     - name: Checkout repository
   #       uses: actions/checkout@v4
