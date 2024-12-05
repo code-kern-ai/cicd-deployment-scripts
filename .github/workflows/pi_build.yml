@@ -73,11 +73,11 @@ jobs:
         run: |
           pip-compile \
             --output-file ${{ matrix.app }}/requirements/${{ matrix.parent_image_type }}-requirements.txt \
-            submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.in
+            submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.in 1> /dev/null
           
           pip-compile \
             --output-file ${{ matrix.app }}/requirements.txt \
-            ${{ matrix.app }}/requirements/requirements.in
+            ${{ matrix.app }}/requirements/requirements.in 1> /dev/null
 
       - name: Perform Edit/Git Operations
         run: |
