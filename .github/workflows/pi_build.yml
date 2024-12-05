@@ -38,7 +38,8 @@ jobs:
         id: get-diff
         run: |
           bash cicd-deployment-scripts/pi/diff.sh \
-            -p "${{ github.event.pull_request.number }}"
+            -p "${{ github.event.pull_request.number }}" \
+            -s cicd-deployment-scripts/pi/settings.sh
 
   pi-matrix-test:
     name: 'Parent Images: Matrix Test'

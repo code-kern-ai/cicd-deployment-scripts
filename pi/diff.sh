@@ -3,13 +3,17 @@
 set -e
 
 PR_NUMBER=""
+SOURCE_SCRIPT="pi/settings.sh"
 
-while getopts p: flag
+while getopts p:s: flag
 do
     case "${flag}" in
         p) PR_NUMBER=${OPTARG};;
+        s) SOURCE_SCRIPT=${OPTARG};;
     esac
 done
+
+source $SOURCE_SCRIPT
 
 UPDATED_FILES=$(gh pr diff $PR_NUMBER --name-only)
 UPDATED_PARENT_TYPES=()
