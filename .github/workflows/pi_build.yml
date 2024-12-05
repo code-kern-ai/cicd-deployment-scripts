@@ -40,112 +40,163 @@ jobs:
           bash cicd-deployment-scripts/pi/diff.sh \
             -p "${{ github.event.pull_request.number }}"
 
-  pi-build:
-    name: 'Parent Images: Docker Build'
+  pi-matrix-test:
+    name: 'Parent Images: Matrix Test'
     runs-on: ubuntu-latest
     needs: [pi-diff]
     environment: dev
     env:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
-      DEV_CONTAINER_REGISTRY: ${{ vars.DEV_CONTAINER_REGISTRY }}
-      DEV_LOGIN_USERNAME: ${{ secrets.DEV_LOGIN_USERNAME }}
-      DEV_LOGIN_PASSWORD: ${{ secrets.DEV_LOGIN_PASSWORD }}
-      IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || github.event.pull_request.head.ref }}
     strategy:
       matrix:
         parent_image_type: ${{ fromJson(needs.pi-diff.outputs.updated_parent_types) }}
+        include:
+          - parent_image_type: common
+            app_repo: refinery-gateway
+          - parent_image_type: common
+            app_repo: refinery-neural-search
+          - parent_image_type: common
+            app_repo: refinery-tokenizer
+          - parent_image_type: common
+            app_repo: refinery-updater
+          - parent_image_type: common
+            app_repo: refinery-weak-supervisor
+          - parent_image_type: common
+            app_repo: refinery-model-provider
+          - parent_image_type: common
+            app_repo: cognition-gateway
+
+          - parent_image_type: exec-env
+            app_repo: refinery-ac-exec-env
+          - parent_image_type: exec-env
+            app_repo: refinery-lf-exec-env
+          - parent_image_type: exec-env
+            app_repo: cognition-exec-env
+        
+          - parent_image_type: torch-cpu
+            app_repo: refinery-embedder
+          - parent_image_type: torch-cpu
+            app_repo: refinery-ml-exec-env
+          
+          - parent_image_type: torch-cuda
+            app_repo: refinery-embedder
+
+          - parent_image_type: next
+            app_repo: admin-dashboard
+          - parent_image_type: next
+            app_repo: cognition-ui
+          - parent_image_type: next
+            app_repo: refinery-ui
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          repository: '${{ github.repository_owner }}/refinery-${{ matrix.parent_image_type }}-parent-image'
-          fetch-depth: 0
-          submodules: 'true'
+      - name: Print matrix values - ${{ matrix.parent_image_type }}
+        run: echo ${{ matrix }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
+  # pi-build:
+  #   name: 'Parent Images: Docker Build'
+  #   runs-on: ubuntu-latest
+  #   needs: [pi-diff]
+  #   environment: dev
+  #   env:
+  #     PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
+  #     DEV_CONTAINER_REGISTRY: ${{ vars.DEV_CONTAINER_REGISTRY }}
+  #     DEV_LOGIN_USERNAME: ${{ secrets.DEV_LOGIN_USERNAME }}
+  #     DEV_LOGIN_PASSWORD: ${{ secrets.DEV_LOGIN_PASSWORD }}
+  #     IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || github.event.pull_request.head.ref }}
+  #   strategy:
+  #     matrix:
+  #       parent_image_type: ${{ fromJson(needs.pi-diff.outputs.updated_parent_types) }}
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #       with:
+  #         token: ${{ secrets.GH_TOKEN }}
+  #         repository: '${{ github.repository_owner }}/refinery-${{ matrix.parent_image_type }}-parent-image'
+  #         fetch-depth: 0
+  #         submodules: 'true'
 
-      - name: Install Dependencies
-        run: python -m pip install pip-tools
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: ${{ env.PYTHON_VERSION }}
+
+  #     - name: Install Dependencies
+  #       run: python -m pip install pip-tools
       
-      - name: Compile Requirements
-        run: |
-          cd ${{ github.workspace }}/submodules/parent-images
-          git checkout ${{ github.event.pull_request.head.ref }}
-          pip-compile requirements/${{ matrix.parent_image_type }}-requirements.in
+  #     - name: Compile Requirements
+  #       run: |
+  #         cd ${{ github.workspace }}/submodules/parent-images
+  #         git checkout ${{ github.event.pull_request.head.ref }}
+  #         pip-compile requirements/${{ matrix.parent_image_type }}-requirements.in
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          platforms: linux/amd64,linux/arm64
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
+  #       with:
+  #         platforms: linux/amd64,linux/arm64
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64,arm
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v3
+  #       with:
+  #         platforms: arm64,arm
 
-      - name: Log into DEV registry
-        uses: docker/login-action@v3
-        with:
-          registry: "${{ env.DEV_CONTAINER_REGISTRY }}"
-          username: "${{ env.DEV_LOGIN_USERNAME }}"
-          password: "${{ env.DEV_LOGIN_PASSWORD }}"
+  #     - name: Log into DEV registry
+  #       uses: docker/login-action@v3
+  #       with:
+  #         registry: "${{ env.DEV_CONTAINER_REGISTRY }}"
+  #         username: "${{ env.DEV_LOGIN_USERNAME }}"
+  #         password: "${{ env.DEV_LOGIN_PASSWORD }}"
 
-      - name: Build & Push refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-cache
-          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-cache,mode=max,image-manifest=true
-          platforms: linux/amd64
-          file: Dockerfile
-          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}
-          push: true
-          build-args: |
-            platform=linux/amd64
-            label=dockerfile-path=https://github.com/refinery-${{ matrix.parent_image_type }}-parent-image/blob/${{ github.sha }}/Dockerfile
+  #     - name: Build & Push refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}
+  #       uses: docker/build-push-action@v5
+  #       with:
+  #         context: .
+  #         cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-cache
+  #         cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-cache,mode=max,image-manifest=true
+  #         platforms: linux/amd64
+  #         file: Dockerfile
+  #         tags: ${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}
+  #         push: true
+  #         build-args: |
+  #           platform=linux/amd64
+  #           label=dockerfile-path=https://github.com/refinery-${{ matrix.parent_image_type }}-parent-image/blob/${{ github.sha }}/Dockerfile
 
-      - name: Build & Push refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-arm64
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-arm64-cache
-          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-arm64-cache,mode=max,image-manifest=true
-          platforms: linux/arm64
-          file: Dockerfile
-          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-arm64
-          push: true
-          build-args: |
-            platform=linux/arm64
-            label=dockerfile-path=https://github.com/refinery-${{ matrix.parent_image_type }}-parent-image/blob/${{ github.sha }}/Dockerfile
+  #     - name: Build & Push refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-arm64
+  #       uses: docker/build-push-action@v5
+  #       with:
+  #         context: .
+  #         cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-arm64-cache
+  #         cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-arm64-cache,mode=max,image-manifest=true
+  #         platforms: linux/arm64
+  #         file: Dockerfile
+  #         tags: ${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-arm64
+  #         push: true
+  #         build-args: |
+  #           platform=linux/arm64
+  #           label=dockerfile-path=https://github.com/refinery-${{ matrix.parent_image_type }}-parent-image/blob/${{ github.sha }}/Dockerfile
 
-      - name: Build & Push refinery-parent-images:sha-${{ matrix.parent_image_type }}
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}-cache
-          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}-cache,mode=max,image-manifest=true
-          platforms: linux/amd64
-          file: Dockerfile
-          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}
-          push: true
-          build-args: |
-            platform=linux/amd64
-            label=dockerfile-path=https://github.com/refinery-${{ matrix.parent_image_type }}-parent-image/blob/${{ github.sha }}/Dockerfile
+  #     - name: Build & Push refinery-parent-images:sha-${{ matrix.parent_image_type }}
+  #       uses: docker/build-push-action@v5
+  #       with:
+  #         context: .
+  #         cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}-cache
+  #         cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}-cache,mode=max,image-manifest=true
+  #         platforms: linux/amd64
+  #         file: Dockerfile
+  #         tags: ${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}
+  #         push: true
+  #         build-args: |
+  #           platform=linux/amd64
+  #           label=dockerfile-path=https://github.com/refinery-${{ matrix.parent_image_type }}-parent-image/blob/${{ github.sha }}/Dockerfile
 
-      - name: Build & Push refinery-parent-images:sha-${{ matrix.parent_image_type }}-arm64
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}-arm64-cache
-          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}-arm64-cache,mode=max,image-manifest=true
-          platforms: linux/arm64
-          file: Dockerfile
-          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}-arm64
-          push: true
-          build-args: |
-            platform=linux/arm64
-            label=dockerfile-path=https://github.com/refinery-${{ matrix.parent_image_type }}-parent-image/blob/${{ github.sha }}/Dockerfile
+  #     - name: Build & Push refinery-parent-images:sha-${{ matrix.parent_image_type }}-arm64
+  #       uses: docker/build-push-action@v5
+  #       with:
+  #         context: .
+  #         cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}-arm64-cache
+  #         cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}-arm64-cache,mode=max,image-manifest=true
+  #         platforms: linux/arm64
+  #         file: Dockerfile
+  #         tags: ${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}-arm64
+  #         push: true
+  #         build-args: |
+  #           platform=linux/arm64
+  #           label=dockerfile-path=https://github.com/refinery-${{ matrix.parent_image_type }}-parent-image/blob/${{ github.sha }}/Dockerfile
