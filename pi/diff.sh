@@ -38,5 +38,6 @@ for parent_image_type in "${UPDATED_PARENT_TYPES[@]}"; do
 done
 
 MATRIX='{"parent_image_type": ['${PARENT_IMAGE_TYPES::-1}'],"include": ['${INCLUDES::-1}']}'
-echo $MATRIX | jq -c --indent 2 '.'
-echo "matrix='$MATRIX'" >> $GITHUB_OUTPUT
+echo $MATRIX | jq -C --indent 2 '.'
+echo "parent_image_type='[${PARENT_IMAGE_TYPES::-1}]'" >> $GITHUB_OUTPUT
+echo "include='[${INCLUDES::-1}]'" >> $GITHUB_OUTPUT

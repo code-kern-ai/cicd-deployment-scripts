@@ -20,7 +20,8 @@ jobs:
     env:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
     outputs:
-      matrix: ${{ steps.get-diff.outputs.matrix }}
+      parent_image_type: ${{ steps.get-diff.outputs.parent_image_type }}
+      include: ${{ steps.get-diff.outputs.include }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -49,7 +50,9 @@ jobs:
     env:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
     strategy:
-      matrix: ${{ fromJson(needs.pi-diff.outputs.matrix) }}
+      matrix: 
+        parent_image_type: ${{ fromJson(needs.pi-diff.outputs.parent_image_type) }}
+        include: ${{ fromJson(needs.pi-diff.outputs.include) }}
     steps:
       - name: Print matrix values - ${{ matrix.parent_image_type }}
         run: echo "${{ toJson(matrix) }}"
