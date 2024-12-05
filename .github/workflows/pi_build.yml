@@ -62,16 +62,21 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-
+    
       - name: Install Dependencies
         run: python -m pip install pip-tools
       
+      - name: Clone ${{ matrix.app }}
+        run: git clone https://oauth2:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository_owner }}/${{ matrix.app }}.git
+      
       - name: Compile Requirements
-        run: pip-compile submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.in
-
-      - name: Create PR - ${{ matrix.app }}
         run: |
-          git clone https://oauth2:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository_owner }}/${{ matrix.app }}.git
+          pip-compile \
+            --output-file ${{ matrix.app }}/requirements/${{ matrix.parent_image_type }}-requirements.txt \
+            submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.in
+
+      - name: Perform Edit/Git Operations
+        run: |
           cd ${{ matrix.app }}
 
           git config user.email "devtools@kern.ai"
