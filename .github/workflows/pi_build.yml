@@ -78,6 +78,10 @@ jobs:
           cd ${{ github.workspace }}/submodules/parent-images
           git checkout ${{ github.event.pull_request.head.ref }}
           pip-compile requirements/${{ matrix.parent_image_type }}-requirements.in
+
+          git config --global user.email "devtools@kern.ai"
+          git config --global user.name "GitHub Actions"
+          
           cd ${{ github.workspace }}
           git checkout -b ${{ github.event.pull_request.head.ref }}
           git add submodules
