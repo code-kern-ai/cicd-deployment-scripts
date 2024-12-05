@@ -58,9 +58,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.GH_TOKEN }}
           repository: '${{ github.repository_owner }}/refinery-${{ matrix.parent_image_type }}-parent-image'
-          submodules: 'true'
           fetch-depth: 0
+          submodules: 'true'
 
       - name: GitHub Configuration
         run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
