@@ -130,7 +130,8 @@ jobs:
           cd ${{ github.workspace }}/submodules/parent-images
           ls -l
           git log --oneline -5
-          git fetch origin && git checkout ${{ github.event.pull_request.head.sha }}
+          git config --list --show-origin
+          git fetch && git checkout ${{ github.event.pull_request.head.sha }}
           pip-compile submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.in
       
       # # Download requirements from artifacts  
