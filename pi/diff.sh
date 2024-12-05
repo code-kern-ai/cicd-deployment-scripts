@@ -44,4 +44,5 @@ MATRIX=$(cat <<EOF
 }
 EOF
 )
-echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+echo $MATRIX | jq -c --indent 2 '.'
+echo "matrix='$MATRIX'" >> $GITHUB_OUTPUT
