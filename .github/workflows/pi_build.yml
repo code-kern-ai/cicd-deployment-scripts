@@ -60,6 +60,7 @@ jobs:
         with:
           repository: '${{ github.repository_owner }}/refinery-${{ matrix.parent_image_type }}-parent-image'
           submodules: 'true'
+          fetch-depth: 0
 
       - name: GitHub Configuration
         run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
