@@ -13,16 +13,16 @@ env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
 jobs:
-  pi-compile:
-    name: 'Parent Images: Compile Requirements'
+  pi-diff:
+    name: 'Parent Images: Diff PI Types'
     runs-on: ubuntu-latest
     environment: dev
     env:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
     outputs:
-      updated_parent_types: ${{ steps.run-compile.outputs.updated_parent_types }}
+      updated_parent_types: ${{ steps.get-diff.outputs.updated_parent_types }}
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository_owner }}/refinery-submodule-parent-images
@@ -34,60 +34,16 @@ jobs:
       - name: Clone cicd-deployment-scripts
         run: git clone --branch parent-images https://github.com/code-kern-ai/cicd-deployment-scripts.git
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install dependencies
-        run: python -m pip install pip-tools
-
-      - name: Run compile
-        id: run-compile
+      - name: Get Diff Types
+        id: get-diff
         run: |
-          bash cicd-deployment-scripts/pi/compile.sh \
+          bash cicd-deployment-scripts/pi/diff.sh \
             -p "${{ github.event.pull_request.number }}"
-
-  # pi-upload-artifacts:
-  #   name: 'Parent Images: Upload Artifacts'
-  #   runs-on: ubuntu-latest
-  #   needs: pi-compile
-  #   environment: dev
-  #   env:
-  #     PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
-  #   strategy:
-  #     matrix:
-  #       parent_image_type: ${{ fromJson(needs.pi-compile.outputs.updated_parent_types) }}
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         repository: ${{ github.repository_owner }}/refinery-submodule-parent-images
-  #         ref: ${{ github.event.pull_request.head.ref }}
-      
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v5
-  #       with:
-  #         python-version: ${{ env.PYTHON_VERSION }}
-
-  #     - name: Install dependencies
-  #       run: python -m pip install pip-tools
-      
-  #     - name: Compile Artifacts
-  #       run: pip-compile requirements/${{ matrix.parent_image_type }}-requirements.in
-      
-  #     # Save plan to artifacts  
-  #     - name: Upload ${{ matrix.parent_image_type }}-requirements
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: ${{ matrix.parent_image_type }}-requirements.txt
-  #         path: requirements/${{ matrix.parent_image_type }}-requirements.txt
-  #         if-no-files-found: error
 
   pi-build:
     name: 'Parent Images: Docker Build'
     runs-on: ubuntu-latest
-    needs: [pi-compile]
+    needs: [pi-diff]
     environment: dev
     env:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
@@ -97,7 +53,7 @@ jobs:
       IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || github.event.pull_request.head.ref }}
     strategy:
       matrix:
-        parent_image_type: ${{ fromJson(needs.pi-compile.outputs.updated_parent_types) }}
+        parent_image_type: ${{ fromJson(needs.pi-diff.outputs.updated_parent_types) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -105,42 +61,34 @@ jobs:
           repository: '${{ github.repository_owner }}/refinery-${{ matrix.parent_image_type }}-parent-image'
           submodules: 'true'
           fetch-depth: 0
-        
+
+      - name: GitHub Configuration
+        run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: python -m pip install pip-tools
       
-      # - name: Update submodules
-      #   run: |
-      #     echo "ls -l: $(pwd)"
-      #     ls -l
-      #     # cat ${{ github.workspace }}/submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.txt
-      #     cd submodules
-      #     echo "ls -l: $(pwd)"
-      #     ls -l
-      #     cd parent-images
-      #     echo "ls -l: $(pwd)"
-      #     ls -l
-
       - name: Compile Artifacts
         run: |
           cd ${{ github.workspace }}/submodules/parent-images
-          git checkout ${{ github.event.pull_request.head.sha }}
+          git checkout ${{ github.event.pull_request.head.ref }}
           pip-compile requirements/${{ matrix.parent_image_type }}-requirements.in
-      
-      # # Download requirements from artifacts  
-      # - name: Download ${{ matrix.parent_image_type }}-requirements
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: ${{ matrix.parent_image_type }}-requirements.txt
-      #     path: ${{ github.workspace }}/submodules/parent-images/requirements
-
-      # - name: GitHub Configuration
-      #   run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
+          cd ${{ github.workspace }}
+          git checkout -b ${{ github.event.pull_request.head.ref }}
+          git add submodules
+          git commit -m "${{ github.event.pull_request.title }}"
+          git push origin ${{ github.event.pull_request.head.ref }}
+          gh pr create \
+            --title "${{ github.event.pull_request.title }}" \
+            --body "${{ github.event.pull_request.body }}" \
+            --base dev \
+            --head ${{ github.event.pull_request.head.ref }} \
+            --repo ${{ github.repository_owner }}/refinery-${{ matrix.parent_image_type }}-parent-image
 
       # - name: Clone cicd-deployment-scripts
       #   run: git clone --branch parent-images https://github.com/code-kern-ai/cicd-deployment-scripts.git

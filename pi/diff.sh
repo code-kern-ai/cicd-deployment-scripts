@@ -21,10 +21,6 @@ while IFS= read -r file; do
     parent_image_type=$(basename $file | sed 's|-requirements.in||g')
     UPDATED_PARENT_TYPES+=($parent_image_type)
 
-    echo "::group::Compiling $parent_image_type-requirements.in"
-    pip-compile requirements/$parent_image_type-requirements.in
-    echo "::endgroup::"
-
 done <<< "$UPDATED_FILES"
 
 JSON=""
