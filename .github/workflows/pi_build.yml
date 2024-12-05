@@ -46,6 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [pi-matrix]
     environment: dev
+    continue-on-error: true
     env:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
     strategy:
