@@ -20,7 +20,6 @@ jobs:
     env:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
     outputs:
-      parent_image_type: ${{ steps.get-diff.outputs.parent_image_type }}
       include: ${{ steps.get-diff.outputs.include }}
     steps:
       - name: Checkout Repository
@@ -51,7 +50,6 @@ jobs:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
     strategy:
       matrix: 
-        parent_image_type: ${{ fromJson(needs.pi-diff.outputs.parent_image_type) }}
         include: ${{ fromJson(needs.pi-diff.outputs.include) }}
     steps:
       - name: Print matrix values - ${{ matrix.parent_image_type }}
