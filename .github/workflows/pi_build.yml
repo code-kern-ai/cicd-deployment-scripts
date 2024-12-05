@@ -63,7 +63,10 @@ jobs:
           fetch-depth: 0
 
       - name: GitHub Configuration
-        run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
+        run: |
+          git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
+          git config --global user.email "devtools@kern.ai"
+          git config --global user.name "GitHub Actions"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -80,9 +83,6 @@ jobs:
           pip-compile requirements/${{ matrix.parent_image_type }}-requirements.in
           
           cd ${{ github.workspace }}
-          git config user.email "devtools@kern.ai"
-          git config user.name "GitHub Actions"
-
           git checkout -b ${{ github.event.pull_request.head.ref }}
           git add submodules
           git commit -m "${{ github.event.pull_request.title }}"
