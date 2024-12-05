@@ -20,7 +20,7 @@ jobs:
     env:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
     outputs:
-      updated_parent_types: ${{ steps.get-diff.outputs.updated_parent_types }}
+      matrix: ${{ steps.get-diff.outputs.matrix }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -48,45 +48,7 @@ jobs:
     env:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
     strategy:
-      matrix:
-        parent_image_type: ${{ fromJson(needs.pi-diff.outputs.updated_parent_types) }}
-        include:
-          - parent_image_type: common
-            app_repo: refinery-gateway
-          - parent_image_type: common
-            app_repo: refinery-neural-search
-          - parent_image_type: common
-            app_repo: refinery-tokenizer
-          - parent_image_type: common
-            app_repo: refinery-updater
-          - parent_image_type: common
-            app_repo: refinery-weak-supervisor
-          - parent_image_type: common
-            app_repo: refinery-model-provider
-          - parent_image_type: common
-            app_repo: cognition-gateway
-
-          - parent_image_type: exec-env
-            app_repo: refinery-ac-exec-env
-          - parent_image_type: exec-env
-            app_repo: refinery-lf-exec-env
-          - parent_image_type: exec-env
-            app_repo: cognition-exec-env
-        
-          - parent_image_type: torch-cpu
-            app_repo: refinery-embedder
-          - parent_image_type: torch-cpu
-            app_repo: refinery-ml-exec-env
-          
-          - parent_image_type: torch-cuda
-            app_repo: refinery-embedder
-
-          - parent_image_type: next
-            app_repo: admin-dashboard
-          - parent_image_type: next
-            app_repo: cognition-ui
-          - parent_image_type: next
-            app_repo: refinery-ui
+      matrix: ${{ fromJson(needs.pi-diff.outputs.matrix) }}
     steps:
       - name: Print matrix values - ${{ matrix.parent_image_type }}
         run: echo "${{ toJson(matrix) }}"
