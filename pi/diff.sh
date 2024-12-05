@@ -39,5 +39,5 @@ done
 
 MATRIX='{"parent_image_type": ['${PARENT_IMAGE_TYPES::-1}'],"include": ['${INCLUDES::-1}']}'
 echo $MATRIX | jq -C --indent 2 '.'
-echo "parent_image_type='[${PARENT_IMAGE_TYPES::-1}]'" >> $GITHUB_OUTPUT
-echo "include='[${INCLUDES::-1}]'" >> $GITHUB_OUTPUT
+echo "parent_image_type=[${PARENT_IMAGE_TYPES::-1}]" >> $GITHUB_OUTPUT
+echo "include=[${INCLUDES::-1}]" >> $GITHUB_OUTPUT
