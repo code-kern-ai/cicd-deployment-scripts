@@ -113,6 +113,18 @@ jobs:
       - name: Install dependencies
         run: python -m pip install pip-tools
       
+      - name: Update submodules
+        run: |
+          echo "ls -l: $(pwd)"
+          ls -l
+          cat ${{ github.workspace }}/submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.txt
+          cd submodules
+          echo "ls -l: $(pwd)"
+          ls -l
+          cd parent-images
+          echo "ls -l: $(pwd)"
+          ls -l
+
       - name: Compile Artifacts
         run: |
           cd submodules/parent-images
@@ -131,15 +143,6 @@ jobs:
 
       # - name: Clone cicd-deployment-scripts
       #   run: git clone --branch parent-images https://github.com/code-kern-ai/cicd-deployment-scripts.git
-
-      - name: Update submodules
-        run: |
-          echo "ls -l: $(pwd)"
-          ls -l
-          cat ${{ github.workspace }}/submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.txt
-          cd ..
-          echo "ls -l: $(pwd)"
-          ls -l
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
