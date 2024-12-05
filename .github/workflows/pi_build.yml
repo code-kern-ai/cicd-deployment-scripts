@@ -105,6 +105,9 @@ jobs:
           repository: '${{ github.repository_owner }}/refinery-${{ matrix.parent_image_type }}-parent-image'
           submodules: 'true'
       
+      - name: Purge stale requirements
+        run: rm ${{ github.workspace }}/submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.txt
+      
       # Download requirements from artifacts  
       - name: Download ${{ matrix.parent_image_type }}-requirements
         uses: actions/download-artifact@v4
