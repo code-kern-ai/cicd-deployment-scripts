@@ -74,6 +74,10 @@ jobs:
           pip-compile \
             --output-file ${{ matrix.app }}/requirements/${{ matrix.parent_image_type }}-requirements.txt \
             submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.in
+          
+          pip-compile \
+            --output-file ${{ matrix.app }}/requirements.txt \
+            ${{ matrix.app }}/requirements/requirements.in
 
       - name: Perform Edit/Git Operations
         run: |
@@ -85,7 +89,7 @@ jobs:
           git checkout -b ${{ github.event.pull_request.head.ref }} || git checkout ${{ github.event.pull_request.head.ref }}
           git push origin ${{ github.event.pull_request.head.ref }} && git pull origin ${{ github.event.pull_request.head.ref }}
 
-          git add requirements/${{ matrix.parent_image_type }}-requirements.txt
+          git add requirements*
           git commit -m "ci: update ${{ matrix.parent_image_type }}-requirements.txt"
           git push origin ${{ github.event.pull_request.head.ref }}
           echo "::notice::${{ matrix.app }} updated to origin/${{ github.event.pull_request.head.ref }}"
