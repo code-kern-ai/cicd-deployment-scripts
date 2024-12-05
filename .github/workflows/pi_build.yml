@@ -72,13 +72,13 @@ jobs:
       
       - name: Compile Requirements
         run: |
-          pip-compile \
+          pip-compile --quiet \
             --output-file ${{ matrix.app }}/requirements/${{ matrix.parent_image_type }}-requirements.txt \
-            submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.in 1> /dev/null
+            submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.in
           
-          pip-compile \
+          pip-compile --quiet \
             --output-file ${{ matrix.app }}/requirements.txt \
-            ${{ matrix.app }}/requirements/requirements.in 1> /dev/null
+            ${{ matrix.app }}/requirements/requirements.in
 
       - name: Perform Edit/Git Operations
         run: |
