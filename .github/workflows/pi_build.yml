@@ -128,7 +128,9 @@ jobs:
       - name: Compile Artifacts
         run: |
           cd ${{ github.workspace }}/submodules/parent-images
-          git fetch origin && git checkout ${{ github.event.pull_request.head.ref }}
+          ls -l
+          git log --oneline -5
+          git fetch origin && git checkout ${{ github.event.pull_request.head.sha }}
           pip-compile submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.in
       
       # # Download requirements from artifacts  
