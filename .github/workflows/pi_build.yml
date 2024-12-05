@@ -117,7 +117,7 @@ jobs:
         run: |
           echo "ls -l: $(pwd)"
           ls -l
-          cat ${{ github.workspace }}/submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.txt
+          # cat ${{ github.workspace }}/submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.txt
           cd submodules
           echo "ls -l: $(pwd)"
           ls -l
@@ -127,7 +127,7 @@ jobs:
 
       - name: Compile Artifacts
         run: |
-          cd submodules/parent-images
+          cd ${{ github.workspace }}/submodules/parent-images
           git fetch origin && git checkout ${{ github.event.pull_request.head.ref }}
           pip-compile submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.in
       
