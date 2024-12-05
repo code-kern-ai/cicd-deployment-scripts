@@ -114,25 +114,23 @@ jobs:
       - name: Install dependencies
         run: python -m pip install pip-tools
       
-      - name: Update submodules
-        run: |
-          echo "ls -l: $(pwd)"
-          ls -l
-          # cat ${{ github.workspace }}/submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.txt
-          cd submodules
-          echo "ls -l: $(pwd)"
-          ls -l
-          cd parent-images
-          echo "ls -l: $(pwd)"
-          ls -l
+      # - name: Update submodules
+      #   run: |
+      #     echo "ls -l: $(pwd)"
+      #     ls -l
+      #     # cat ${{ github.workspace }}/submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.txt
+      #     cd submodules
+      #     echo "ls -l: $(pwd)"
+      #     ls -l
+      #     cd parent-images
+      #     echo "ls -l: $(pwd)"
+      #     ls -l
 
       - name: Compile Artifacts
         run: |
           cd ${{ github.workspace }}/submodules/parent-images
-          ls -l
-          git log --oneline -5
-          git fetch && git checkout ${{ github.event.pull_request.head.sha }}
-          pip-compile submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.in
+          git checkout ${{ github.event.pull_request.head.sha }}
+          pip-compile requirements/${{ matrix.parent_image_type }}-requirements.in
       
       # # Download requirements from artifacts  
       # - name: Download ${{ matrix.parent_image_type }}-requirements
