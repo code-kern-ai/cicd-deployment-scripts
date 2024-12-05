@@ -23,9 +23,21 @@ while IFS= read -r file; do
 
 done <<< "$UPDATED_FILES"
 
-JSON=""
+PARENT_IMAGE_TYPES=""
+INCLUDES=""
 for parent_image_type in "${UPDATED_PARENT_TYPES[@]}"; do
-    JSON+="\"$parent_image_type\","
+    PARENT_IMAGE_TYPES+='"'$parent_image_type'",'
+    eval 'APP_REPOS=( "${'$(echo ${parent_image_type} | sed "s|-|_|g")'[@]}" )'
+    for app in "${APP_REPOS[@]}"; do
+        INCLUDES+='{ "parent_image_type": "'${parent_image_type}'", "app": "'${app}'" },'
+    done
 done
-JSON="[${JSON::-1}]"
-echo "updated_parent_types=$JSON" >> $GITHUB_OUTPUT
+
+MATRIX=$(cat <<EOF
+{
+    "parent_image_type": [${PARENT_IMAGE_TYPES::-1}],
+    "include": [${INCLUDES::-1}]
+}
+EOF
+)
+echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
