@@ -39,7 +39,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref || github.event.repository.default_branch }}
     
       - name: Clone cicd-deployment-scripts
-        run: git clone --branch parent-images https://oauth2:${{ secrets.GH_TOKEN }}@github.com/code-kern-ai/cicd-deployment-scripts.git
+        run: git clone https://oauth2:${{ secrets.GH_TOKEN }}@github.com/code-kern-ai/cicd-deployment-scripts.git
 
       - name: Generate Matrix
         id: generate-matrix

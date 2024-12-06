@@ -14,7 +14,7 @@ env:
 
 jobs:
   pi-matrix:
-    uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/pi_matrix.yml@parent-images
+    uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/pi_matrix.yml@dev
     secrets: inherit
     with:
       repository: ${{ github.repository }}
@@ -44,7 +44,7 @@ jobs:
           repository: ${{ github.repository_owner }}/${{ matrix.app }}
         
       - name: Clone cicd-deployment-scripts
-        run: git clone --branch parent-images https://oauth2:${{ secrets.GH_TOKEN }}@github.com/code-kern-ai/cicd-deployment-scripts.git
+        run: git clone https://oauth2:${{ secrets.GH_TOKEN }}@github.com/code-kern-ai/cicd-deployment-scripts.git
 
       - name: Perform Edit/Git Operations
         run: |
