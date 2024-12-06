@@ -1,0 +1,80 @@
+name: 'Parent Images: Release'
+
+on:
+  workflow_call:
+
+# Special permissions required for OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+jobs:
+  pi-matrix:
+    uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/pi_matrix.yml@parent-images
+    secrets: inherit
+    with:
+      parent_image_type: ${{ vars.PARENT_IMAGE_TYPE }}
+
+  pi-edit:
+    name: 'Parent Images: Dockerfile ' # suffix populated by matrix
+    runs-on: ubuntu-latest
+    needs: [pi-matrix]
+    environment: dev
+    env:
+      PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
+      DOCKERHUB_CONTAINER_REGISTRY: ${{ vars.DOCKERHUB_CONTAINER_REGISTRY }}
+      DOCKERHUB_LOGIN_USERNAME: ${{ secrets.DOCKERHUB_LOGIN_USERNAME }}
+      DOCKERHUB_LOGIN_PASSWORD: ${{ secrets.DOCKERHUB_LOGIN_PASSWORD }}
+      PARENT_IMAGE_NAME: ${{ vars.PARENT_IMAGE_NAME }}
+      PARENT_IMAGE_TYPE: ${{ vars.PARENT_IMAGE_TYPE }}
+      DOCKERFILE: ${{ vars.DOCKERFILE }}
+    strategy:
+      matrix:
+        include: ${{ fromJson(needs.pi-matrix.outputs.include) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          repository: ${{ github.repository_owner }}/${{ matrix.app }}
+        
+      - name: Clone cicd-deployment-scripts
+        run: git clone --branch parent-images https://oauth2:${{ secrets.GH_TOKEN }}@github.com/code-kern-ai/cicd-deployment-scripts.git
+
+      - name: Perform Edit/Git Operations
+        run: |
+          bash cicd-deployment-scripts/pi/edit_dockerfile.sh \
+            -i ${{ env.PARENT_IMAGE_NAME }} \
+            -t ${{ matrix.parent_image_type }} \
+            -l ${{ github.event.release.tag_name }} \
+            -r ${{ env.DOCKERHUB_CONTAINER_REGISTRY }} \
+            -d ${{ env.DOCKERFILE }}
+
+          LATEST_IMAGE_TAG="${{ env.DOCKERHUB_CONTAINER_REGISTRY }}/${{ matrix.parent_image_type }}:${{ github.event.release.tag_name }}"
+          BASE_REF="dev"
+          HEAD_REF="parent-images"
+          PR_TITLE="ci(pi): update to $LATEST_IMAGE_TAG"
+
+          git config user.email "devtools@kern.ai"
+          git config user.name "GitHub Actions"
+
+          git checkout -b parent-images || git checkout parent-images
+          git push origin parent-images && git pull origin parent-images
+
+          git add ${{ env.DOCKERFILE }}
+          git commit -m "$PR_TITLE" || true
+          git push origin parent-images
+          echo "::notice::${{ matrix.app }} updated to $LATEST_IMAGE_TAG"
+
+          bash cicd-deployment-scripts/pi/pr_create.sh \
+            -b "$BASE_REF" \
+            -h "$HEAD_REF" \
+            -t "ci(pi): update to $LATEST_IMAGE_TAG" \
+            -o ${{ github.repository_owner }} \}}
+            -r ${{ github.event.repository.name }} \}}
+            -n ${{ github.event.release.tag_name }} \}}
+            -a ${{ matrix.app }} 
