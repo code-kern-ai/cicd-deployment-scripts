@@ -110,13 +110,13 @@ jobs:
       - name: Clone ${{ matrix.app }}
         run: |
           git clone https://oauth2:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository_owner }}/${{ matrix.app }}.git
-          cd ${{ matrix.app }}
+          cd ${{ github.workspace }}/${{ matrix.app }}
 
           git config user.email "devtools@kern.ai"
           git config user.name "GitHub Actions"
 
           git checkout -b ${{ needs.configure-branch-name.outputs.gh_head_ref }} || git checkout ${{ needs.configure-branch-name.outputs.gh_head_ref }}
-          git pull origin ${{ needs.configure-branch-name.outputs.gh_head_ref }} && git push origin ${{ needs.configure-branch-name.outputs.gh_head_ref }}
+          git push origin ${{ needs.configure-branch-name.outputs.gh_head_ref }} && git pull origin ${{ needs.configure-branch-name.outputs.gh_head_ref }}
 
       - name: Compile Requirements
         run: |
@@ -130,7 +130,7 @@ jobs:
 
       - name: Perform Edit/Git Operations
         run: |
-          cd ${{ matrix.app }}
+          cd ${{ github.workspace }}/${{ matrix.app }}
 
           git add requirements*
           git commit -m "ci: update ${{ matrix.parent_image_type }}-requirements.txt" || true
