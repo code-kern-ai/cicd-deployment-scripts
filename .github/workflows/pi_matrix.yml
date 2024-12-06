@@ -43,6 +43,6 @@ jobs:
         id: generate-matrix
         run: |
           bash cicd-deployment-scripts/pi/matrix.sh \
-            -p "${{ github.event.pull_request.number }}" \
+            -p "${{ github.event.pull_request.number || '' }}" \
             -s cicd-deployment-scripts/pi/settings.sh \
             -t "${{ inputs.parent_image_type }}"

@@ -17,19 +17,22 @@ done
 
 source $SOURCE_SCRIPT
 
-UPDATED_FILES=$(gh pr diff $PR_NUMBER --name-only)
 UPDATED_PARENT_TYPES=()
-while IFS= read -r file; do
-    if [[ $file != requirements/* ]] || [[ $file != *.in ]]; then
-        continue
-    fi
-    
-    parent_image_type=$(basename $file | sed 's|-requirements.in||g')
-    UPDATED_PARENT_TYPES+=($parent_image_type)
 
-done <<< "$UPDATED_FILES"
+if [ -n $PR_NUMBER ] && [ -z $PARENT_IMAGE_TYPE ]; then
+    UPDATED_FILES=$(gh pr diff $PR_NUMBER --name-only)
+    while IFS= read -r file; do
+        if [[ $file != requirements/* ]] || [[ $file != *.in ]]; then
+            continue
+        fi
+        
+        parent_image_type=$(basename $file | sed 's|-requirements.in||g')
+        UPDATED_PARENT_TYPES+=($parent_image_type)
 
-if [ -n $PARENT_IMAGE_TYPE ]; then
+    done <<< "$UPDATED_FILES"
+    echo "::notice::Exporting matrix for parent image types: $UPDATED_PARENT_TYPES"
+elif [ -z $PR_NUMBER ] && [ -n $PARENT_IMAGE_TYPE ]; then
+    echo "::notice::Exporting matrix for parent image type: $PARENT_IMAGE_TYPE"
     UPDATED_PARENT_TYPES=( $PARENT_IMAGE_TYPE )
 fi
 
