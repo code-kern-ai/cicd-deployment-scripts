@@ -79,7 +79,7 @@ jobs:
             --body "${{ github.event.pull_request.body }}" \
             --base dev \
             --head ${{ needs.configure-branch-name.outputs.gh_head_ref }} \
-            --repo ${{ github.repository_owner }}/refinery-${{ matrix.parent_image_type }}-parent-image
+            --repo ${{ github.repository_owner }}/refinery-${{ matrix.parent_image_type }}-parent-image  || true
 
   pi-update-app:
     name: 'Parent Images: App'
@@ -142,5 +142,5 @@ jobs:
             --body "${{ github.event.pull_request.body }}" \
             --base dev \
             --head ${{ needs.configure-branch-name.outputs.gh_head_ref }} \
-            --repo ${{ github.repository_owner }}/${{ matrix.app }}
+            --repo ${{ github.repository_owner }}/${{ matrix.app }} || true
           
