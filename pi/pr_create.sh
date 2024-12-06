@@ -37,7 +37,7 @@ EOF
         --title "$PR_TITLE" \
         --body "$PR_BODY" \
         --draft \
-        --repo $REPOSITORY_OWNER/$APP
+        --repo $REPOSITORY_OWNER/$APP || true
         # --reviewer $REPOSITORY_OWNER/devops-admin \
 
 else
