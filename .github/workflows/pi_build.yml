@@ -1,0 +1,130 @@
+name: 'Parent Images: Build'
+
+on:
+  workflow_call:
+
+# Special permissions required for OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+jobs:
+  pi-matrix:
+    uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/pi_matrix.yml@parent-images
+    secrets: inherit
+    with:
+      repository: "${{ github.repository_owner }}/refinery-submodule-parent-images"
+
+  pi-build:
+    name: 'Parent Images: Docker Build'
+    runs-on: ubuntu-latest
+    needs: [pi-matrix]
+    environment: dev
+    env:
+      PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
+      DEV_CONTAINER_REGISTRY: ${{ vars.DEV_CONTAINER_REGISTRY }}
+      DEV_LOGIN_USERNAME: ${{ secrets.DEV_LOGIN_USERNAME }}
+      DEV_LOGIN_PASSWORD: ${{ secrets.DEV_LOGIN_PASSWORD }}
+      IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || github.event.pull_request.head.ref }}
+    strategy:
+      matrix:
+        parent_image_type: ${{ fromJson(needs.pi-matrix.outputs.parent_image_type) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          repository: '${{ github.repository_owner }}/refinery-${{ matrix.parent_image_type }}-parent-image'
+          fetch-depth: 0
+          submodules: 'true'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Dependencies
+        run: python -m pip install pip-tools
+      
+      - name: Compile Requirements
+        run: |
+          cd ${{ github.workspace }}/submodules/parent-images
+          git checkout ${{ github.event.pull_request.head.ref }}
+          pip-compile requirements/${{ matrix.parent_image_type }}-requirements.in
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64,arm
+
+      - name: Log into DEV registry
+        uses: docker/login-action@v3
+        with:
+          registry: "${{ env.DEV_CONTAINER_REGISTRY }}"
+          username: "${{ env.DEV_LOGIN_USERNAME }}"
+          password: "${{ env.DEV_LOGIN_PASSWORD }}"
+
+      - name: Build & Push refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-cache
+          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-cache,mode=max,image-manifest=true
+          platforms: linux/amd64
+          file: Dockerfile
+          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}
+          push: true
+          build-args: |
+            platform=linux/amd64
+            label=dockerfile-path=https://github.com/refinery-${{ matrix.parent_image_type }}-parent-image/blob/${{ github.sha }}/Dockerfile
+
+      - name: Build & Push refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-arm64
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-arm64-cache
+          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-arm64-cache,mode=max,image-manifest=true
+          platforms: linux/arm64
+          file: Dockerfile
+          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.head.ref }}-${{ matrix.parent_image_type }}-arm64
+          push: true
+          build-args: |
+            platform=linux/arm64
+            label=dockerfile-path=https://github.com/refinery-${{ matrix.parent_image_type }}-parent-image/blob/${{ github.sha }}/Dockerfile
+
+      - name: Build & Push refinery-parent-images:sha-${{ matrix.parent_image_type }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}-cache
+          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}-cache,mode=max,image-manifest=true
+          platforms: linux/amd64
+          file: Dockerfile
+          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}
+          push: true
+          build-args: |
+            platform=linux/amd64
+            label=dockerfile-path=https://github.com/refinery-${{ matrix.parent_image_type }}-parent-image/blob/${{ github.sha }}/Dockerfile
+
+      - name: Build & Push refinery-parent-images:sha-${{ matrix.parent_image_type }}-arm64
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}-arm64-cache
+          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}-arm64-cache,mode=max,image-manifest=true
+          platforms: linux/arm64
+          file: Dockerfile
+          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ matrix.parent_image_type }}-arm64
+          push: true
+          build-args: |
+            platform=linux/arm64
+            label=dockerfile-path=https://github.com/refinery-${{ matrix.parent_image_type }}-parent-image/blob/${{ github.sha }}/Dockerfile
