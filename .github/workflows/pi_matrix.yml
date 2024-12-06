@@ -1,0 +1,48 @@
+name: 'Parent Images: Matrix'
+
+on:
+  workflow_call:
+    inputs:
+      parent_image_type:
+        description: 'If specified, "include" only outputs apps associated to this parent image type'
+        required: false
+        type: string
+        default: ''
+    outputs:
+      parent_image_type:
+        description: 'List[str] of parent image types'
+        value: ${{ jobs.pi-matrix.outputs.parent_image_type }}
+      include:
+        description: 'List[Dict] of apps associated to parent image types'
+        value: ${{ jobs.pi-matrix.outputs.include }}
+
+jobs:
+  pi-matrix:
+    name: 'Parent Images: Generate Matrix'
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
+    outputs:
+      parent_image_type: ${{ steps.generate-matrix.outputs.parent_image_type }}
+      include: ${{ steps.generate-matrix.outputs.include }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/refinery-submodule-parent-images
+          ref: ${{ github.event.pull_request.head.ref }}
+    
+      - name: GitHub Configuration
+        run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
+
+      - name: Clone cicd-deployment-scripts
+        run: git clone --branch parent-images https://github.com/code-kern-ai/cicd-deployment-scripts.git
+
+      - name: Generate Matrix
+        id: generate-matrix
+        run: |
+          bash cicd-deployment-scripts/pi/matrix.sh \
+            -p "${{ github.event.pull_request.number }}" \
+            -s cicd-deployment-scripts/pi/settings.sh \
+            -t "${{ inputs.parent_image_type }}"
