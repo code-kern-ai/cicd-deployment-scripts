@@ -116,7 +116,7 @@ jobs:
           git config user.name "GitHub Actions"
 
           git checkout -b ${{ needs.configure-branch-name.outputs.gh_head_ref }} || git checkout ${{ needs.configure-branch-name.outputs.gh_head_ref }}
-          git push origin ${{ needs.configure-branch-name.outputs.gh_head_ref }} && git pull origin ${{ needs.configure-branch-name.outputs.gh_head_ref }}
+          git pull origin ${{ needs.configure-branch-name.outputs.gh_head_ref }}
 
       - name: Compile Requirements
         run: |
