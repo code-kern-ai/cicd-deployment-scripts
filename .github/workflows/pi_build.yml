@@ -16,6 +16,8 @@ jobs:
   pi-matrix:
     uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/pi_matrix.yml@parent-images
     secrets: inherit
+    with:
+      repository: "${{ github.repository_owner }}/refinery-submodule-parent-images"
 
   pi-build:
     name: 'Parent Images: Docker Build'

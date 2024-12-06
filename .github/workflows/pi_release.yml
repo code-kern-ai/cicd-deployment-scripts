@@ -17,6 +17,7 @@ jobs:
     uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/pi_matrix.yml@parent-images
     secrets: inherit
     with:
+      repository: ${{ github.repository }}
       parent_image_type: ${{ vars.PARENT_IMAGE_TYPE }}
 
   pi-edit:
