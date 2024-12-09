@@ -1,8 +1,12 @@
 #!/bin/bash
 
-export mini=(
-    "refinery-authorizer"
-    "refinery-gateway-proxy"
+export torch_cpu=(
+    "refinery-embedder"
+    "refinery-ml-exec-env"
+)
+
+export torch_cuda=(
+    "refinery-embedder"
 )
 
 export common=(
@@ -13,7 +17,14 @@ export common=(
     "refinery-weak-supervisor"
     "refinery-model-provider"
     "cognition-gateway"
-    "${mini[@]}"
+    "${torch_cpu[@]}"
+    "${torch_cuda[@]}"
+)
+
+export mini=(
+    "refinery-authorizer"
+    "refinery-gateway-proxy"
+    "${common[@]}"
 )
 
 export exec_env=(
@@ -22,21 +33,10 @@ export exec_env=(
     "cognition-exec-env"
 )
 
-export torch_cpu=(
-    "refinery-embedder"
-    "refinery-ml-exec-env"
-    "${common[@]}"
-)
-
-export torch_cuda=(
-    "refinery-embedder"
-    "${common[@]}"
-)
-
 export next=(
     "admin-dashboard"
     "cognition-ui"
     "refinery-ui"
 )
 
-export ALL_SERVICES=( "${mini[@]}" "${common[@]}" "${exec_env[@]}" "${torch_cpu[@]}" "${torch_cuda[@]}" )
+export ALL_SERVICES=( "${mini[@]}" "${exec_env[@]}" "${next[@]}" )
