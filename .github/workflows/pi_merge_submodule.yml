@@ -118,24 +118,46 @@ jobs:
           git checkout -b ${{ needs.configure-branch-name.outputs.gh_head_ref }} || git checkout ${{ needs.configure-branch-name.outputs.gh_head_ref }}
           git pull origin ${{ needs.configure-branch-name.outputs.gh_head_ref }}
 
-      - name: Compile Requirements
+      - name: Compile Requirements (Python)
+        if: matrix.parent_image_type != 'next'
         run: |
           pip-compile --quiet \
             --output-file ${{ matrix.app }}/requirements/${{ matrix.parent_image_type }}-requirements.txt \
             submodules/parent-images/requirements/${{ matrix.parent_image_type }}-requirements.in
-          
-          pip-compile --quiet \
-            --output-file ${{ matrix.app }}/requirements.txt \
-            ${{ matrix.app }}/requirements/requirements.in
+      
+      - name: Compile Requirements (Next)
+        if: matrix.parent_image_type == 'next'
+        run: |
+          jq --slurp '.[0] * .[1]' \
+            package.json \
+            ${{ matrix.app }}/package.json \
+            > package.json.tmp
+          mv package.json.tmp ${{ matrix.app }}/package.json
 
-      - name: Perform Edit/Git Operations
+      - name: Perform Edit/Git Operations (Python)
+        if: matrix.parent_image_type != 'next'
         run: |
           cd ${{ github.workspace }}/${{ matrix.app }}
 
-          git add requirements*
+          git add requirements/${{ matrix.parent_image_type }}-requirements.in
           git commit -m "ci: update ${{ matrix.parent_image_type }}-requirements.txt" || true
           git push origin ${{ needs.configure-branch-name.outputs.gh_head_ref }}
-          echo "::notice::${{ matrix.app }} updated to origin/${{ needs.configure-branch-name.outputs.gh_head_ref }}"
+          echo "::notice::${{ matrix.app }} - updated ${{ matrix.parent_image_type }}-requirements.txt"
+
+          export exitcode=0
+          pip-compile --quiet \
+            --output-file requirements.txt \
+            requirements/requirements.in || export exitcode=$?
+          
+          if [ $exitcode -ne 0 ]; then
+            echo "::error::pip-compile failed with exit code $exitcode"
+            exit $exitcode
+          else
+            git add requirements.txt
+            git commit -m "ci: update requirements.txt" || true
+            git push origin ${{ needs.configure-branch-name.outputs.gh_head_ref }}
+            echo "::notice::${{ matrix.app }} - updated requirements.txt"
+          fi
 
           gh pr create --draft \
             --title "${{ github.event.pull_request.title }}" \
@@ -144,3 +166,19 @@ jobs:
             --head ${{ needs.configure-branch-name.outputs.gh_head_ref }} \
             --repo ${{ github.repository_owner }}/${{ matrix.app }} || true
           
+      - name: Perform Edit/Git Operations (Next)
+        if: matrix.parent_image_type == 'next'
+        run: |
+          cd ${{ github.workspace }}/${{ matrix.app }}
+
+          git add package.json
+          git commit -m "ci: update ${{ matrix.parent_image_type }} package.json" || true
+          git push origin ${{ needs.configure-branch-name.outputs.gh_head_ref }}
+          echo "::notice::${{ matrix.app }} - updated ${{ matrix.parent_image_type }} package.json"
+
+          gh pr create --draft \
+            --title "${{ github.event.pull_request.title }}" \
+            --body "${{ github.event.pull_request.body }}" \
+            --base dev \
+            --head ${{ needs.configure-branch-name.outputs.gh_head_ref }} \
+            --repo ${{ github.repository_owner }}/${{ matrix.app }} || true
