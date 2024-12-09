@@ -182,3 +182,41 @@ jobs:
             --base dev \
             --head ${{ needs.configure-branch-name.outputs.gh_head_ref }} \
             --repo ${{ github.repository_owner }}/${{ matrix.app }} || true
+
+  gh-delete-submodule-branches:
+    name: 'GitHub: Delete Branch'
+    needs: [pi-matrix, pi-update-submodule, pi-update-app]
+    if: !failure()
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: 
+        parent_image_type: ${{ fromJson(needs.pi-matrix.outputs.parent_image_type) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          repository: '${{ github.repository_owner }}/refinery-${{ matrix.parent_image_type }}-parent-image'
+      
+      - name: Delete Branch
+        shell: bash
+        run: git push origin --delete ${{ github.event.pull_request.head.ref }}
+
+  gh-delete-app-branches:
+    name: 'GitHub: Delete Branch'
+    needs: [pi-matrix, pi-update-submodule, pi-update-app]
+    if: !failure()
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: 
+        include: ${{ fromJson(needs.pi-matrix.outputs.include) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          repository: '${{ github.repository_owner }}/${{ matrix.app }}'
+      
+      - name: Delete Branch
+        shell: bash
+        run: git push origin --delete ${{ github.event.pull_request.head.ref }}

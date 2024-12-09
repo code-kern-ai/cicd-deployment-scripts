@@ -115,3 +115,18 @@ jobs:
           build-args: |
             platform=linux/arm64
             label=dockerfile-path=https://github.com/refinery-${{ env.PARENT_IMAGE_TYPE }}-parent-image/blob/${{ github.sha }}/Dockerfile
+
+  gh-delete-branch:
+    name: 'GitHub: Delete Branch'
+    needs: [pi-build]
+    if: !failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+      
+      - name: Delete Branch
+        shell: bash
+        run: git push origin --delete ${{ github.event.pull_request.head.ref }}
