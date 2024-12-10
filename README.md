@@ -603,7 +603,7 @@ Triggers:
 
 **Description:**
 
-- builds & pushes refinery-parent-images:<branch>-<type> to registry.dev.kern.ai
+- builds & pushes `refinery-parent-images:<branch>-<type>` to registry.dev.kern.ai
 
 
 
@@ -643,7 +643,7 @@ Outputs:
 
 **Description:**
 
-- creates a [Strategy]() input for GitHub Action with the following structure:
+- creates a [Matrix Strategy](https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflow) input for GitHub Action with the following structure:
 - {
   "parent_image_type": [
     "mini",
@@ -733,10 +733,13 @@ Triggers:
 
 **Description:**
 
-- builds & pushes refinery-parent-images:dev-<type> to registry.dev.kern.ai
+- builds & pushes `refinery-parent-images:dev-<type>` to registry.dev.kern.ai
 - updates Application repositories' <type>-requirements.in and requirements.txt
 
-
+**Troubleshooting:**
+- package version resolution failure (ResolutionImpossible) ([example](https://github.com/code-kern-ai/refinery-submodule-parent-images/actions/runs/12200031962/job/34036100963))
+- resolved by updating the package version in the Application repository's <type>-requirements.in file
+- worked around by manually performing the [requirements compilation](https://www.notion.so/kern-ai/Docker-Base-Images-9d858b002ff840d3b0a3e90ec61d4179?pvs=4#a4450704a486434083710ef071b48cdc)
 
 **Jobs:**
 
@@ -786,7 +789,7 @@ Triggers:
 
 **Description:**
 
-- builds & pushes refinery-parent-images:vX.X.X-<type> to Docker Hub
+- builds & pushes `refinery-parent-images:vX.X.X-<type>` to Docker Hub
 - updates Application repositories' Dockerfiles to use the new parent image (updates Application repositories' open PRs)
 
 
