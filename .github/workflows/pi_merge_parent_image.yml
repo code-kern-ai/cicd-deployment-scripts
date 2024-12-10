@@ -1,4 +1,4 @@
-name: 'Parent Images: Build'
+name: 'Parent Images: Parent Image Merge'
 
 on:
   workflow_call:

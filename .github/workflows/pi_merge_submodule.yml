@@ -1,4 +1,4 @@
-name: 'Parent Images: Submodules Merge'
+name: 'Parent Images: Submodule Merge'
 
 on:
   workflow_call:

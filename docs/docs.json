@@ -580,7 +580,7 @@
     ]
   },
   "pi_merge_submodule.yml": {
-    "name": "Parent Images: Submodules Merge",
+    "name": "Parent Images: Submodule Merge",
     "trigger": [
       "pull_request_closed (dev)"
     ],
@@ -622,7 +622,7 @@
     ]
   },
   "pi_merge_parent_image.yml": {
-    "name": "Parent Images: Build",
+    "name": "Parent Images: Parent Image Merge",
     "trigger": [
       "pull_request_closed (dev)"
     ],

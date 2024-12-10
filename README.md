@@ -25,8 +25,8 @@ Scripts used for Kern AI CI/CD efforts.
 - [K8: Test](#k8-test)
 - [Parent Images: Build](#parent-images-build)
 - [Parent Images: Matrix](#parent-images-matrix)
-- [Parent Images: Submodules Merge](#parent-images-submodules-merge)
-- [Parent Images: Build](#parent-images-build)
+- [Parent Images: Submodule Merge](#parent-images-submodule-merge)
+- [Parent Images: Parent Image Merge](#parent-images-parent-image-merge)
 - [Parent Images: Release](#parent-images-release)
 - [OpenTofu: Release](#opentofu-release)
 - [OpenTofu: Generate Docs](#opentofu-generate-docs)
@@ -684,7 +684,7 @@ Outputs:
 
 
 
-### Parent Images: Submodules Merge
+### Parent Images: Submodule Merge
 
 Workflow file: `pi_merge_submodule.yml`
 
@@ -720,7 +720,7 @@ Triggers:
 
 
 
-### Parent Images: Build
+### Parent Images: Parent Image Merge
 
 Workflow file: `pi_merge_parent_image.yml`
 
