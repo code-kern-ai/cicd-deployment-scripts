@@ -240,7 +240,7 @@ jobs:
   gh-delete-branch:
     name: 'GitHub: Delete Branch'
     needs: [pi-build]
-    if: !failure()
+    if: ${{ !failure() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -255,7 +255,7 @@ jobs:
   gh-delete-app-branches:
     name: 'GitHub: Delete Branch'
     needs: [pi-matrix, pi-update-app]
-    if: !failure()
+    if: ${{ !failure() }}
     runs-on: ubuntu-latest
     strategy:
       matrix: 

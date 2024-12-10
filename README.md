@@ -23,6 +23,11 @@ Scripts used for Kern AI CI/CD efforts.
 - [K8: Release](#k8-release)
 - [K8: Restart](#k8-restart)
 - [K8: Test](#k8-test)
+- [Parent Images: Build](#parent-images-build)
+- [Parent Images: Matrix](#parent-images-matrix)
+- [Parent Images: Submodules Merge](#parent-images-submodules-merge)
+- [Parent Images: Build](#parent-images-build)
+- [Parent Images: Release](#parent-images-release)
 - [OpenTofu: Release](#opentofu-release)
 - [OpenTofu: Generate Docs](#opentofu-generate-docs)
 - [OpenTofu: Plan/Apply](#opentofu-planapply)
@@ -580,6 +585,218 @@ Inputs:
 
 - K8: Test Cluster Deployment
 	- `Test Cluster Deployment`
+
+
+
+
+
+### Parent Images: Build
+
+Workflow file: `pi_build.yml`
+
+Triggers:
+- pull_request_opened_synchronized
+
+
+
+
+
+**Description:**
+
+- builds & pushes refinery-parent-images:<branch>-<type> to registry.dev.kern.ai
+
+
+
+**Jobs:**
+
+- Configure Head Branch Name
+	- `Configure branch name`
+
+- pi-matrix
+
+- Parent Images: Docker Build
+	- `Set up Python`
+	- `Install Dependencies`
+	- `Compile Requirements`
+	- `Build & Push refinery-parent-images:${{ needs.configure-branch-name.outputs.gh_head_ref }}-${{ matrix.parent_image_type }}`
+	- `Build & Push refinery-parent-images:${{ needs.configure-branch-name.outputs.gh_head_ref }}-${{ matrix.parent_image_type }}-arm64`
+
+
+
+
+
+### Parent Images: Matrix
+
+Workflow file: `pi_matrix.yml`
+
+Triggers:
+- workflow_call
+
+Inputs:
+- repository
+- checkout_ref
+- parent_image_type
+
+Outputs:
+- parent_image_type
+- include
+
+**Description:**
+
+- creates a [Strategy]() input for GitHub Action with the following structure:
+- {
+  "parent_image_type": [
+    "mini",
+    "next"
+  ],
+  "include": [
+    {
+      "parent_image_type": "mini",
+      "app": "refinery-authorizer"
+    },
+    {
+      "parent_image_type": "mini",
+      "app": "refinery-gateway-proxy"
+    },
+    {
+      "parent_image_type": "next",
+      "app": "admin-dashboard"
+    },
+    {
+      "parent_image_type": "next",
+      "app": "refinery-ui"
+    },
+    {
+      "parent_image_type": "next",
+      "app": "cognition-ui"
+    }
+  ]
+}
+
+
+
+**Jobs:**
+
+- Parent Images: Generate Matrix
+	- `Generate Matrix`
+
+
+
+
+
+### Parent Images: Submodules Merge
+
+Workflow file: `pi_merge_submodule.yml`
+
+Triggers:
+- pull_request_closed (dev)
+
+
+
+
+
+**Description:**
+
+- updates Parent Image repositories' submodule reference
+
+
+
+**Jobs:**
+
+- Configure Head Branch Name
+	- `Configure branch name`
+
+- pi-matrix
+
+- Parent Images: Submodule
+	- `Set up Python`
+	- `Install Dependencies`
+	- `Perform Edit/Git Operations`
+
+- GitHub: Delete Branch
+	- `Delete Branch`
+
+
+
+
+
+### Parent Images: Build
+
+Workflow file: `pi_merge_parent_image.yml`
+
+Triggers:
+- pull_request_closed (dev)
+
+
+
+
+
+**Description:**
+
+- builds & pushes refinery-parent-images:dev-<type> to registry.dev.kern.ai
+- updates Application repositories' <type>-requirements.in and requirements.txt
+
+
+
+**Jobs:**
+
+- Configure Head Branch Name
+	- `Configure branch name`
+
+- pi-matrix
+
+- Parent Images: Docker Build
+	- `Set up Python`
+	- `Install Dependencies`
+	- `Compile Requirements`
+	- `Build & Push refinery-parent-images:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}`
+	- `Build & Push refinery-parent-images:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-arm64`
+	- `Build & Push refinery-parent-images:sha-${{ env.PARENT_IMAGE_TYPE }}`
+	- `Build & Push refinery-parent-images:sha-${{ env.PARENT_IMAGE_TYPE }}-arm64`
+
+- Parent Images: App
+	- `Set up Python`
+	- `Install Dependencies`
+	- `Clone ${{ matrix.app }}`
+	- `Compile Requirements (Python)`
+	- `Compile Requirements (Next)`
+	- `Perform Edit/Git Operations (Python)`
+	- `Perform Edit/Git Operations (Next)`
+
+- GitHub: Delete Branch
+	- `Delete Branch`
+
+- GitHub: Delete Branch
+	- `Delete Branch`
+
+
+
+
+
+### Parent Images: Release
+
+Workflow file: `pi_release.yml`
+
+Triggers:
+- prerelease
+
+
+
+
+
+**Description:**
+
+- builds & pushes refinery-parent-images:vX.X.X-<type> to Docker Hub
+- updates Application repositories' Dockerfiles to use the new parent image (updates Application repositories' open PRs)
+
+
+
+**Jobs:**
+
+- pi-matrix
+
+- Parent Images: Dockerfile 
+	- `Perform Edit/Git Operations`
 
 
 

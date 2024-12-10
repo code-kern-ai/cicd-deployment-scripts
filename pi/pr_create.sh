@@ -41,16 +41,16 @@ EOF
         # --reviewer $REPOSITORY_OWNER/devops-admin \
 
 else
-    EXISTING_PR_NUMBER=$(gh pr list \
-        --base $BASE_REF \
-        --head $HEAD_REF \
-        --repo $REPOSITORY_OWNER/$APP \
-        --json number --jq '.[].number')
     PR_BODY=$(cat <<EOF
 $EXISTING_PR_BODY
 - https://github.com/$REPOSITORY_OWNER/$REPOSITORY_NAME/pull/$RELEASE_TAG
 EOF
 )
+    EXISTING_PR_NUMBER=$(gh pr list \
+        --base $BASE_REF \
+        --head $HEAD_REF \
+        --repo $REPOSITORY_OWNER/$APP \
+        --json number --jq '.[].number')
     gh pr edit $EXISTING_PR_NUMBER \
         --body "$PR_BODY" \
         --repo $REPOSITORY_OWNER/$APP || true

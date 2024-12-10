@@ -513,6 +513,208 @@
       }
     ]
   },
+  "pi_build.yml": {
+    "name": "Parent Images: Build",
+    "trigger": [
+      "pull_request_opened_synchronized"
+    ],
+    "inputs": [],
+    "outputs": [],
+    "description": [
+      "builds & pushes refinery-parent-images:<branch>-<type> to registry.dev.kern.ai"
+    ],
+    "troubleshooting": [],
+    "jobs": [
+      {
+        "name": "configure-branch-name",
+        "descriptive_name": "Configure Head Branch Name",
+        "steps": [
+          "Configure branch name"
+        ]
+      },
+      {
+        "name": "pi-matrix",
+        "descriptive_name": null,
+        "steps": []
+      },
+      {
+        "name": "pi-build",
+        "descriptive_name": "Parent Images: Docker Build",
+        "steps": [
+          "Set up Python",
+          "Install Dependencies",
+          "Compile Requirements",
+          "Build & Push refinery-parent-images:${{ needs.configure-branch-name.outputs.gh_head_ref }}-${{ matrix.parent_image_type }}",
+          "Build & Push refinery-parent-images:${{ needs.configure-branch-name.outputs.gh_head_ref }}-${{ matrix.parent_image_type }}-arm64"
+        ]
+      }
+    ]
+  },
+  "pi_matrix.yml": {
+    "name": "Parent Images: Matrix",
+    "trigger": [
+      "workflow_call"
+    ],
+    "inputs": [
+      "repository",
+      "checkout_ref",
+      "parent_image_type"
+    ],
+    "outputs": [
+      "parent_image_type",
+      "include"
+    ],
+    "description": [
+      "creates a [Strategy]() input for GitHub Action with the following structure:",
+      "{\n  \"parent_image_type\": [\n    \"mini\",\n    \"next\"\n  ],\n  \"include\": [\n    {\n      \"parent_image_type\": \"mini\",\n      \"app\": \"refinery-authorizer\"\n    },\n    {\n      \"parent_image_type\": \"mini\",\n      \"app\": \"refinery-gateway-proxy\"\n    },\n    {\n      \"parent_image_type\": \"next\",\n      \"app\": \"admin-dashboard\"\n    },\n    {\n      \"parent_image_type\": \"next\",\n      \"app\": \"refinery-ui\"\n    },\n    {\n      \"parent_image_type\": \"next\",\n      \"app\": \"cognition-ui\"\n    }\n  ]\n}"
+    ],
+    "troubleshooting": [],
+    "jobs": [
+      {
+        "name": "pi-matrix",
+        "descriptive_name": "Parent Images: Generate Matrix",
+        "steps": [
+          "Generate Matrix"
+        ]
+      }
+    ]
+  },
+  "pi_merge_submodule.yml": {
+    "name": "Parent Images: Submodules Merge",
+    "trigger": [
+      "pull_request_closed (dev)"
+    ],
+    "inputs": [],
+    "outputs": [],
+    "description": [
+      "updates Parent Image repositories' submodule reference"
+    ],
+    "troubleshooting": [],
+    "jobs": [
+      {
+        "name": "configure-branch-name",
+        "descriptive_name": "Configure Head Branch Name",
+        "steps": [
+          "Configure branch name"
+        ]
+      },
+      {
+        "name": "pi-matrix",
+        "descriptive_name": null,
+        "steps": []
+      },
+      {
+        "name": "pi-update-submodule",
+        "descriptive_name": "Parent Images: Submodule",
+        "steps": [
+          "Set up Python",
+          "Install Dependencies",
+          "Perform Edit/Git Operations"
+        ]
+      },
+      {
+        "name": "gh-delete-submodule-branches",
+        "descriptive_name": "GitHub: Delete Branch",
+        "steps": [
+          "Delete Branch"
+        ]
+      }
+    ]
+  },
+  "pi_merge_parent_image.yml": {
+    "name": "Parent Images: Build",
+    "trigger": [
+      "pull_request_closed (dev)"
+    ],
+    "inputs": [],
+    "outputs": [],
+    "description": [
+      "builds & pushes refinery-parent-images:dev-<type> to registry.dev.kern.ai",
+      "updates Application repositories' <type>-requirements.in and requirements.txt"
+    ],
+    "troubleshooting": [],
+    "jobs": [
+      {
+        "name": "configure-branch-name",
+        "descriptive_name": "Configure Head Branch Name",
+        "steps": [
+          "Configure branch name"
+        ]
+      },
+      {
+        "name": "pi-matrix",
+        "descriptive_name": null,
+        "steps": []
+      },
+      {
+        "name": "pi-build",
+        "descriptive_name": "Parent Images: Docker Build",
+        "steps": [
+          "Set up Python",
+          "Install Dependencies",
+          "Compile Requirements",
+          "Build & Push refinery-parent-images:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}",
+          "Build & Push refinery-parent-images:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-arm64",
+          "Build & Push refinery-parent-images:sha-${{ env.PARENT_IMAGE_TYPE }}",
+          "Build & Push refinery-parent-images:sha-${{ env.PARENT_IMAGE_TYPE }}-arm64"
+        ]
+      },
+      {
+        "name": "pi-update-app",
+        "descriptive_name": "Parent Images: App",
+        "steps": [
+          "Set up Python",
+          "Install Dependencies",
+          "Clone ${{ matrix.app }}",
+          "Compile Requirements (Python)",
+          "Compile Requirements (Next)",
+          "Perform Edit/Git Operations (Python)",
+          "Perform Edit/Git Operations (Next)"
+        ]
+      },
+      {
+        "name": "gh-delete-branch",
+        "descriptive_name": "GitHub: Delete Branch",
+        "steps": [
+          "Delete Branch"
+        ]
+      },
+      {
+        "name": "gh-delete-app-branches",
+        "descriptive_name": "GitHub: Delete Branch",
+        "steps": [
+          "Delete Branch"
+        ]
+      }
+    ]
+  },
+  "pi_release.yml": {
+    "name": "Parent Images: Release",
+    "trigger": [
+      "prerelease"
+    ],
+    "inputs": [],
+    "outputs": [],
+    "description": [
+      "builds & pushes refinery-parent-images:vX.X.X-<type> to Docker Hub",
+      "updates Application repositories' Dockerfiles to use the new parent image (updates Application repositories' open PRs)"
+    ],
+    "troubleshooting": [],
+    "jobs": [
+      {
+        "name": "pi-matrix",
+        "descriptive_name": null,
+        "steps": []
+      },
+      {
+        "name": "pi-edit",
+        "descriptive_name": "Parent Images: Dockerfile ",
+        "steps": [
+          "Perform Edit/Git Operations"
+        ]
+      }
+    ]
+  },
   "release_please.yml": {
     "name": "OpenTofu: Release",
     "trigger": [

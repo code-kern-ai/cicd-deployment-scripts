@@ -85,7 +85,7 @@ jobs:
   gh-delete-submodule-branches:
     name: 'GitHub: Delete Branch'
     needs: [pi-matrix, pi-update-submodule]
-    if: !failure()
+    if: ${{ !failure() }}
     runs-on: ubuntu-latest
     strategy:
       matrix: 
