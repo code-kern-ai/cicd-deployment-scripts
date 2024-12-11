@@ -63,12 +63,12 @@ jobs:
           git config user.email "devtools@kern.ai"
           git config user.name "GitHub Actions"
 
-          git checkout -b "$HEAD_REF" || git checkout "$HEAD_REF"
-          git pull origin "$HEAD_REF"
+          git branch -D "$HEAD_REF" || true
+          git checkout -b "$HEAD_REF"
 
           git add ${{ env.DOCKERFILE }}
           git commit -m "$PR_TITLE" || true
-          git push origin "$HEAD_REF"
+          git push --force origin "$HEAD_REF"
           echo "::notice::${{ matrix.app }} updated to $LATEST_IMAGE_TAG"
 
           bash cicd-deployment-scripts/pi/pr_create.sh \
