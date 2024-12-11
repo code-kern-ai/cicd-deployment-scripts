@@ -172,6 +172,8 @@ jobs:
 
           git checkout -b ${{ needs.configure-branch-name.outputs.gh_head_ref }} || git checkout ${{ needs.configure-branch-name.outputs.gh_head_ref }}
 
+          bash smodules init
+
       - name: Compile Requirements (Python)
         if: matrix.parent_image_type != 'next'
         run: |
