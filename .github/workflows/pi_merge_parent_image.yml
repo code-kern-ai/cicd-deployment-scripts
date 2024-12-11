@@ -164,15 +164,13 @@ jobs:
       
       - name: Clone ${{ matrix.app }}
         run: |
-          git clone https://oauth2:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository_owner }}/${{ matrix.app }}.git
+          git clone --recurse-submodules https://oauth2:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository_owner }}/${{ matrix.app }}.git
           cd ${{ github.workspace }}/${{ matrix.app }}
 
           git config user.email "devtools@kern.ai"
           git config user.name "GitHub Actions"
 
           git checkout -b ${{ needs.configure-branch-name.outputs.gh_head_ref }} || git checkout ${{ needs.configure-branch-name.outputs.gh_head_ref }}
-
-          bash smodules init
 
       - name: Compile Requirements (Python)
         if: matrix.parent_image_type != 'next'
