@@ -19,6 +19,7 @@ jobs:
     with:
       repository: ${{ github.repository }}
       parent_image_type: ${{ vars.PARENT_IMAGE_TYPE }}
+      edit_dockerfile: true
 
   pi-edit:
     name: 'Parent Images: Dockerfile' # suffix populated by matrix
@@ -48,6 +49,9 @@ jobs:
 
       - name: Perform Edit/Git Operations
         run: |
+          git branch -D "$HEAD_REF" || true
+          git checkout -b "$HEAD_REF"
+          
           bash cicd-deployment-scripts/pi/edit_dockerfile.sh \
             -i ${{ env.PARENT_IMAGE_NAME }} \
             -t ${{ matrix.parent_image_type }} \
@@ -62,9 +66,6 @@ jobs:
 
           git config user.email "devtools@kern.ai"
           git config user.name "GitHub Actions"
-
-          git branch -D "$HEAD_REF" || true
-          git checkout -b "$HEAD_REF"
 
           git add ${{ env.DOCKERFILE }}
           git commit -m "$PR_TITLE" || true

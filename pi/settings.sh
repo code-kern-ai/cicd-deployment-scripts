@@ -9,7 +9,7 @@ export torch_cuda=(
     "refinery-embedder"
 )
 
-export common=(
+export common_dockerfile=(
     "refinery-gateway"
     "refinery-neural-search"
     "refinery-tokenizer"
@@ -17,13 +17,21 @@ export common=(
     "refinery-weak-supervisor"
     "refinery-model-provider"
     "cognition-gateway"
+)
+
+export common=(
+    "${common_dockerfile[@]}"
     "${torch_cpu[@]}"
     "${torch_cuda[@]}"
 )
 
-export mini=(
+export mini_dockerfile=(
     "refinery-authorizer"
     "refinery-gateway-proxy"
+)
+
+export mini=(
+    "${mini_dockerfile[@]}"
     "${common[@]}"
 )
 

@@ -18,6 +18,11 @@ on:
         required: false
         type: string
         default: ''
+      edit_dockerfile:
+        description: 'If set to true, "include" only outputs apps associated to this parent image type with no internal dependencies (e.g. common -> mini)'
+        required: false
+        type: boolean
+        default: false
     outputs:
       parent_image_type:
         description: 'List[str] of parent image types'
@@ -55,4 +60,5 @@ jobs:
           bash cicd-deployment-scripts/pi/matrix.sh \
             -p "${{ github.event.pull_request.number || '' }}" \
             -s cicd-deployment-scripts/pi/settings.sh \
-            -t "${{ inputs.parent_image_type }}"
+            -t "${{ inputs.parent_image_type }}" \
+            -d "${{ inputs.edit_dockerfile }}"

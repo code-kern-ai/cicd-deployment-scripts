@@ -5,13 +5,15 @@ set -e
 PARENT_IMAGE_TYPE=""
 PR_NUMBER=""
 SOURCE_SCRIPT="pi/settings.sh"
+EDIT_DOCKERFILE=false
 
-while getopts t:p:s: flag
+while getopts t:p:s:d: flag
 do
     case "${flag}" in
         t) PARENT_IMAGE_TYPE=${OPTARG};;
         p) PR_NUMBER=${OPTARG};;
         s) SOURCE_SCRIPT=${OPTARG};;
+        d) EDIT_DOCKERFILE=${OPTARG};;
     esac
 done
 
@@ -40,7 +42,11 @@ PARENT_IMAGE_TYPES=""
 INCLUDES=""
 for parent_image_type in "${UPDATED_PARENT_TYPES[@]}"; do
     PARENT_IMAGE_TYPES+="\"$parent_image_type\","
-    eval 'APP_REPOS=( "${'$(echo ${parent_image_type} | sed "s|-|_|g")'[@]}" )'
+    if [ $EDIT_DOCKERFILE = true ]; then
+        eval 'APP_REPOS=( "${'$(echo ${parent_image_type}_dockerfile | sed "s|-|_|g")'[@]}" )'
+    else
+        eval 'APP_REPOS=( "${'$(echo ${parent_image_type} | sed "s|-|_|g")'[@]}" )'
+    fi
     for app in "${APP_REPOS[@]}"; do
         INCLUDES+='{ "parent_image_type": "'${parent_image_type}'", "app": "'${app}'" },'
     done
