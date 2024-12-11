@@ -193,7 +193,7 @@ jobs:
         run: |
           cd ${{ github.workspace }}/${{ matrix.app }}
 
-          git add requirements/${{ matrix.parent_image_type }}-requirements.in
+          git add requirements/${{ matrix.parent_image_type }}-requirements.txt
           git commit -m "ci: update ${{ matrix.parent_image_type }}-requirements.txt" || true
           git push origin ${{ needs.configure-branch-name.outputs.gh_head_ref }}
           echo "::notice::${{ matrix.app }} - updated ${{ matrix.parent_image_type }}-requirements.txt"
