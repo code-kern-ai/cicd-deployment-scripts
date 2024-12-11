@@ -40,6 +40,7 @@ jobs:
       DEV_CONTAINER_REGISTRY: ${{ vars.DEV_CONTAINER_REGISTRY }}
       DEV_LOGIN_USERNAME: ${{ secrets.DEV_LOGIN_USERNAME }}
       DEV_LOGIN_PASSWORD: ${{ secrets.DEV_LOGIN_PASSWORD }}
+      PARENT_IMAGE_NAME: ${{ vars.PARENT_IMAGE_NAME }}
       PARENT_IMAGE_TYPE: ${{ vars.PARENT_IMAGE_TYPE }}
       DOCKERFILE: ${{ vars.DOCKERFILE }}
     steps:
@@ -78,57 +79,57 @@ jobs:
           username: "${{ env.DEV_LOGIN_USERNAME }}"
           password: "${{ env.DEV_LOGIN_PASSWORD }}"
 
-      - name: Build & Push refinery-parent-images:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}
+      - name: Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}
         uses: docker/build-push-action@v5
         with:
           context: .
-          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-cache
-          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-cache,mode=max,image-manifest=true
+          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-cache
+          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-cache,mode=max,image-manifest=true
           platforms: linux/amd64
           file: ${{ env.DOCKERFILE }}
-          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}
+          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}
           push: true
           build-args: |
             platform=linux/amd64
             label=dockerfile-path=https://github.com/refinery-${{ env.PARENT_IMAGE_TYPE }}-parent-image/blob/${{ github.sha }}/Dockerfile
 
-      - name: Build & Push refinery-parent-images:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-arm64
+      - name: Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-arm64
         uses: docker/build-push-action@v5
         with:
           context: .
-          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-arm64-cache
-          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-arm64-cache,mode=max,image-manifest=true
+          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-arm64-cache
+          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-arm64-cache,mode=max,image-manifest=true
           platforms: linux/arm64
           file: ${{ env.DOCKERFILE }}
-          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-arm64
+          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-arm64
           push: true
           build-args: |
             platform=linux/arm64
             label=dockerfile-path=https://github.com/refinery-${{ env.PARENT_IMAGE_TYPE }}-parent-image/blob/${{ github.sha }}/Dockerfile
 
-      - name: Build & Push refinery-parent-images:sha-${{ env.PARENT_IMAGE_TYPE }}
+      - name: Build & Push ${{ env.PARENT_IMAGE_NAME }}:sha-${{ env.PARENT_IMAGE_TYPE }}
         uses: docker/build-push-action@v5
         with:
           context: .
-          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}-cache
-          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}-cache,mode=max,image-manifest=true
+          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}-cache
+          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}-cache,mode=max,image-manifest=true
           platforms: linux/amd64
           file: ${{ env.DOCKERFILE }}
-          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}
+          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}
           push: true
           build-args: |
             platform=linux/amd64
             label=dockerfile-path=https://github.com/refinery-${{ env.PARENT_IMAGE_TYPE }}-parent-image/blob/${{ github.sha }}/Dockerfile
 
-      - name: Build & Push refinery-parent-images:sha-${{ env.PARENT_IMAGE_TYPE }}-arm64
+      - name: Build & Push ${{ env.PARENT_IMAGE_NAME }}:sha-${{ env.PARENT_IMAGE_TYPE }}-arm64
         uses: docker/build-push-action@v5
         with:
           context: .
-          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}-arm64-cache
-          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}-arm64-cache,mode=max,image-manifest=true
+          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}-arm64-cache
+          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}-arm64-cache,mode=max,image-manifest=true
           platforms: linux/arm64
           file: ${{ env.DOCKERFILE }}
-          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/refinery-parent-images:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}-arm64
+          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}-arm64
           push: true
           build-args: |
             platform=linux/arm64
@@ -247,25 +248,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_TOKEN }}
-      
-      - name: Delete Branch
-        shell: bash
-        run: git push origin --delete ${{ github.event.pull_request.head.ref }}
-
-  gh-delete-app-branches:
-    name: 'GitHub: Delete Branch'
-    needs: [pi-matrix, pi-update-app]
-    if: ${{ !failure() }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix: 
-        include: ${{ fromJson(needs.pi-matrix.outputs.include) }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          repository: '${{ github.repository_owner }}/${{ matrix.app }}'
       
       - name: Delete Branch
         shell: bash

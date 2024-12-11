@@ -31,7 +31,7 @@ if [ -n $PR_NUMBER ] && [ -z $PARENT_IMAGE_TYPE ]; then
 
     done <<< "$UPDATED_FILES"
     echo "::notice::Exporting matrix for parent image types: $UPDATED_PARENT_TYPES"
-elif [ -z $PR_NUMBER ] && [ -n $PARENT_IMAGE_TYPE ]; then
+elif [ -n $PARENT_IMAGE_TYPE ]; then
     echo "::notice::Exporting matrix for parent image type: $PARENT_IMAGE_TYPE"
     UPDATED_PARENT_TYPES=( $PARENT_IMAGE_TYPE )
 fi
