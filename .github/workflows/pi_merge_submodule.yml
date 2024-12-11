@@ -95,7 +95,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_TOKEN }}
-          repository: '${{ github.repository_owner }}/refinery-${{ matrix.parent_image_type }}-parent-image'
       
       - name: Delete Branch
         shell: bash
