@@ -23,5 +23,12 @@ PI_EXISTING_TAG=$(grep "${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}:v.*-${PARENT_IMA
 PI_EXISTING_IMAGE="${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}:${PI_EXISTING_TAG}"
 PI_NEW_IMAGE="${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}:${RELEASE_TAG}-${PARENT_IMAGE_TYPE}"
 
-sed -e 's|'${PI_EXISTING_IMAGE}'|'${PI_NEW_IMAGE}'|g' ${DOCKERFILE} > ${DOCKERFILE}.tmp && mv ${DOCKERFILE}.tmp ${DOCKERFILE}
+echo "Dockerfile before update:"
+cat ${DOCKERFILE}
+sed 's|'${PI_EXISTING_IMAGE}'|'${PI_NEW_IMAGE}'|g' ${DOCKERFILE} > ${DOCKERFILE}.tmp && mv ${DOCKERFILE}.tmp ${DOCKERFILE}
+
+echo "sed output:"
+sed 's|'${PI_EXISTING_IMAGE}'|'${PI_NEW_IMAGE}'|g' ${DOCKERFILE}
+echo "Dockerfile after update:"
+cat ${DOCKERFILE}
 echo "::notice::Dockerfile updated with new image: ${PI_NEW_IMAGE}"
