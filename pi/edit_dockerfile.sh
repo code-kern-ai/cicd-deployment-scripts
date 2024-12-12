@@ -19,6 +19,20 @@ do
     esac
 done
 
+echo "------------ git status ------------"
+git status
+echo "------------------------------------"
+echo "------------ ls -l ------------"
+ls -l
+echo "------------------------------------"
+echo "------------ echo grep ------------"
+echo "grep ${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}:v.*-${PARENT_IMAGE_TYPE} $DOCKERFILE"
+echo "------------------------------------"
+echo "------------ grep ------------"
+grep "${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}:v.*-${PARENT_IMAGE_TYPE}" $DOCKERFILE
+echo "------------------------------------"
+
+
 grep "${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}:v.*-${PARENT_IMAGE_TYPE}" $DOCKERFILE | while read -r line ; do
     PI_EXISTING_TAG=$(echo $line | sed 's|FROM ||g' | cut -d ':' -f 2)
     PI_EXISTING_IMAGE="${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}:${PI_EXISTING_TAG}"
