@@ -34,6 +34,7 @@ jobs:
       PARENT_IMAGE_NAME: ${{ vars.PARENT_IMAGE_NAME }}
       PARENT_IMAGE_TYPE: ${{ vars.PARENT_IMAGE_TYPE }}
       DOCKERFILE: ${{ vars.DOCKERFILE }}
+      HEAD_REF: parent-image-updates
     strategy:
       matrix:
         include: ${{ fromJson(needs.pi-matrix.outputs.include) }}
@@ -51,11 +52,10 @@ jobs:
         run: |
           RELEASE_IMAGE="${{ env.DOCKERHUB_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.event.release.tag_name }}-${{ matrix.parent_image_type }}"
           BASE_REF="dev"
-          HEAD_REF="parent-images"
           PR_TITLE="ci(pi): $RELEASE_IMAGE"
           
-          git branch -D "$HEAD_REF" || true
-          git checkout -b "$HEAD_REF"
+          git checkout "${{ env.HEAD_REF }}" || git checkout -b "${{ env.HEAD_REF }}"
+          git push origin "${{ env.HEAD_REF }}" && git pull origin "${{ env.HEAD_REF }}"
 
           bash cicd-deployment-scripts/pi/edit_dockerfile.sh \
             -i ${{ env.PARENT_IMAGE_NAME }} \
@@ -69,12 +69,12 @@ jobs:
 
           git add ${{ env.DOCKERFILE }}
           git commit -m "$PR_TITLE" || true
-          git push --force origin "$HEAD_REF"
+          git push --force origin "${{ env.HEAD_REF }}"
           echo "::notice::${{ matrix.app }} updated to $RELEASE_IMAGE"
 
           bash cicd-deployment-scripts/pi/pr_create.sh \
             -b "$BASE_REF" \
-            -h "$HEAD_REF" \
+            -h "${{ env.HEAD_REF }}" \
             -t "$PR_TITLE" \
             -o ${{ github.repository_owner }} \
             -r ${{ github.event.repository.name }} \

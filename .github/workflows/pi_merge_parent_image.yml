@@ -13,16 +13,6 @@ env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
 jobs:
-  configure-branch-name:
-    name: 'Configure Head Branch Name'
-    runs-on: ubuntu-latest
-    outputs:
-      gh_head_ref: ${{ steps.configure-branch-name.outputs.gh_head_ref }}
-    steps:
-      - name: Configure branch name
-        id: configure-branch-name
-        run: echo "gh_head_ref=$(echo "${{ github.event.pull_request.head.ref }}" | sed 's|/|-|g')" >> $GITHUB_OUTPUT
-
   pi-matrix:
     uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/pi_matrix.yml@dev
     secrets: inherit
@@ -138,11 +128,12 @@ jobs:
   pi-update-app:
     name: 'Parent Images: App'
     runs-on: ubuntu-latest
-    needs: [pi-matrix, configure-branch-name, pi-build]
+    needs: [pi-matrix, pi-build]
     environment: dev
     continue-on-error: true
     env:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
+      HEAD_REF: parent-image-updates
     strategy:
       matrix: 
         include: ${{ fromJson(needs.pi-matrix.outputs.include) }}
@@ -170,7 +161,7 @@ jobs:
           git config user.email "devtools@kern.ai"
           git config user.name "GitHub Actions"
 
-          git checkout -b ${{ needs.configure-branch-name.outputs.gh_head_ref }} || git checkout ${{ needs.configure-branch-name.outputs.gh_head_ref }}
+          git checkout -b ${{ env.HEAD_REF }} || git checkout ${{ env.HEAD_REF }}
 
       - name: Compile Requirements (Python)
         if: matrix.parent_image_type != 'next'
@@ -195,7 +186,7 @@ jobs:
 
           git add requirements/${{ matrix.parent_image_type }}-requirements.txt
           git commit -m "ci: update ${{ matrix.parent_image_type }}-requirements.txt" || true
-          git push origin ${{ needs.configure-branch-name.outputs.gh_head_ref }}
+          git push origin ${{ env.HEAD_REF }}
           echo "::notice::${{ matrix.app }} - updated ${{ matrix.parent_image_type }}-requirements.txt"
 
           export exitcode=0
@@ -209,7 +200,7 @@ jobs:
           else
             git add requirements.txt
             git commit -m "ci: update requirements.txt" || true
-            git push origin ${{ needs.configure-branch-name.outputs.gh_head_ref }}
+            git push origin ${{ env.HEAD_REF }}
             echo "::notice::${{ matrix.app }} - updated requirements.txt"
           fi
 
@@ -217,7 +208,7 @@ jobs:
             --title "${{ github.event.pull_request.title }}" \
             --body "${{ github.event.pull_request.body }}" \
             --base dev \
-            --head ${{ needs.configure-branch-name.outputs.gh_head_ref }} \
+            --head ${{ env.HEAD_REF }} \
             --repo ${{ github.repository_owner }}/${{ matrix.app }} || true
           
       - name: Perform Edit/Git Operations (Next)
@@ -227,14 +218,14 @@ jobs:
 
           git add package.json
           git commit -m "ci: update ${{ matrix.parent_image_type }} package.json" || true
-          git push origin ${{ needs.configure-branch-name.outputs.gh_head_ref }}
+          git push origin ${{ env.HEAD_REF }}
           echo "::notice::${{ matrix.app }} - updated ${{ matrix.parent_image_type }} package.json"
 
           gh pr create --draft \
             --title "${{ github.event.pull_request.title }}" \
             --body "${{ github.event.pull_request.body }}" \
             --base dev \
-            --head ${{ needs.configure-branch-name.outputs.gh_head_ref }} \
+            --head ${{ env.HEAD_REF }} \
             --repo ${{ github.repository_owner }}/${{ matrix.app }} || true
 
   gh-delete-branch:
