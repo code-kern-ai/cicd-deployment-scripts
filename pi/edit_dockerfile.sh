@@ -3,8 +3,8 @@
 set -e
 
 PARENT_IMAGE_NAME="refinery-parent-images"
-PARENT_IMAGE_TYPE="common"
-RELEASE_TAG="v1.19.1"
+PARENT_IMAGE_TYPE=""
+RELEASE_TAG=""
 DOCKER_REGISTRY="kernai"
 DOCKERFILE="Dockerfile"
 
@@ -19,7 +19,7 @@ do
     esac
 done
 
-line=$(grep "${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}:" $DOCKERFILE)
+line=$(grep "${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}:v.*-${PARENT_IMAGE_TYPE}" $DOCKERFILE)
 
 PI_EXISTING_TAG=$(echo $line | sed 's|FROM ||g' | cut -d ':' -f 2)
 PI_EXISTING_IMAGE="${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}:${PI_EXISTING_TAG}"

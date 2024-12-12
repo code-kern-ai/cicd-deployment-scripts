@@ -44,6 +44,7 @@ jobs:
         with:
           token: ${{ secrets.GH_TOKEN }}
           repository: ${{ github.repository_owner }}/${{ matrix.app }}
+          fetch-depth: 0
         
       - name: Clone cicd-deployment-scripts
         run: git clone https://oauth2:${{ secrets.GH_TOKEN }}@github.com/code-kern-ai/cicd-deployment-scripts.git
@@ -58,11 +59,11 @@ jobs:
           git push origin "${{ env.HEAD_REF }}" && git pull origin "${{ env.HEAD_REF }}"
 
           bash cicd-deployment-scripts/pi/edit_dockerfile.sh \
-            -i ${{ env.PARENT_IMAGE_NAME }} \
-            -t ${{ matrix.parent_image_type }} \
-            -l ${{ github.event.release.tag_name }} \
-            -r ${{ env.DOCKERHUB_CONTAINER_REGISTRY }} \
-            -d ${{ env.DOCKERFILE }}
+            -i "${{ env.PARENT_IMAGE_NAME }}" \
+            -t "${{ matrix.parent_image_type }}" \
+            -l "${{ github.event.release.tag_name }}" \
+            -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
+            -d "${{ env.DOCKERFILE }}"
 
           git config user.email "devtools@kern.ai"
           git config user.name "GitHub Actions"
