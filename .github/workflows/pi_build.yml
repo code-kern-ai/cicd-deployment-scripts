@@ -229,7 +229,7 @@ jobs:
           fi
 
           gh pr create --draft \
-            --title "${{ github.event.pull_request.title }}" \
+            --title "test: parent image updates" \
             --body "${{ github.event.pull_request.body }}" \
             --base dev \
             --head ${{ env.HEAD_REF }} \
@@ -260,7 +260,7 @@ jobs:
           echo "::notice::${{ matrix.app }} - updated ${{ matrix.parent_image_type }} package.json"
 
           gh pr create --draft \
-            --title "${{ github.event.pull_request.title }}" \
+            --title "test: parent image updates" \
             --body "${{ github.event.pull_request.body }}" \
             --base dev \
             --head ${{ env.HEAD_REF }} \
