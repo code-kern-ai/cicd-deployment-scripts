@@ -208,8 +208,8 @@ jobs:
             -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
             -d "dev.${{ env.DOCKERFILE }}"
 
-          git add requirements/${{ matrix.parent_image_type }}-requirements.txt
-          git commit -m "ci: update ${{ matrix.parent_image_type }}-requirements.txt" || true
+          git add requirements/${{ matrix.parent_image_type }}-requirements.txt ${{ env.DOCKERFILE }} dev.${{ env.DOCKERFILE }}
+          git commit -m "ci: update ${{ matrix.parent_image_type }}-requirements.txt and Dockerfile" || true
           git push origin ${{ env.HEAD_REF }}
           echo "::notice::${{ matrix.app }} - updated ${{ matrix.parent_image_type }}-requirements.txt"
 

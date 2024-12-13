@@ -19,20 +19,11 @@ do
     esac
 done
 
-echo "--------- echo grep ---------"
-echo "grep ${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME} $DOCKERFILE"
-echo "-----------------------------"
-
 grep "${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}" $DOCKERFILE | while read -r line ; do
     PI_EXISTING_TAG=$(echo $line | sed 's|FROM ||g' | cut -d ':' -f 2)
     PI_EXISTING_IMAGE="${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}:${PI_EXISTING_TAG}"
     PI_NEW_IMAGE="${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}:${RELEASE_TAG}-${PARENT_IMAGE_TYPE}"
 
-    echo "PI_EXISTING_TAG = $PI_EXISTING_TAG"
-    echo "PI_EXISTING_IMAGE = $PI_EXISTING_IMAGE"
-    echo "PI_NEW_IMAGE = $PI_NEW_IMAGE"
-
     sed "s|${PI_EXISTING_IMAGE}|${PI_NEW_IMAGE}|g" ${DOCKERFILE} > ${DOCKERFILE}.tmp && mv ${DOCKERFILE}.tmp ${DOCKERFILE}
+    echo "::notice::Dockerfile updated with new image: ${PI_NEW_IMAGE}"
 done
-
-echo "::notice::Dockerfile updated with new image: ${PI_NEW_IMAGE}"
