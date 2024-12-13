@@ -168,6 +168,7 @@ jobs:
           git config user.name "GitHub Actions"
 
           git checkout -b ${{ env.HEAD_REF }} || git checkout ${{ env.HEAD_REF }}
+          git pull origin ${{ env.HEAD_REF }} || true
 
       - name: Compile Requirements (Python)
         if: matrix.parent_image_type != 'next'
@@ -243,14 +244,14 @@ jobs:
             -i "${{ env.PARENT_IMAGE_NAME }}" \
             -t "${{ matrix.parent_image_type }}" \
             -l "${{ env.HEAD_REF }}" \
-            -r "${{ env.DEV_CONTAINER_REGISTRY }}" \
+            -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
             -d "${{ env.DOCKERFILE }}"
 
           bash ${{ github.workspace }}/cicd-deployment-scripts/pi/edit_dockerfile.sh \
             -i "${{ env.PARENT_IMAGE_NAME }}" \
             -t "${{ matrix.parent_image_type }}" \
             -l "${{ env.HEAD_REF }}" \
-            -r "${{ env.DEV_CONTAINER_REGISTRY }}" \
+            -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
             -d "dev.${{ env.DOCKERFILE }}"
 
           git add package.json
