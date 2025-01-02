@@ -44,7 +44,7 @@ if [ -n "$DELETE_SINCE_DAYS" ]; then
             curl -X DELETE -u $HTTPS_USERNAME https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/sha256:$digest
             echo "::warning::deleted $APP_NAME:$tag, $days_since days old"
         else
-            echo "::notice::$APP_NAME:$tag is $days_since days old"
+            echo "$APP_NAME:$tag is $days_since days old"
         fi
     done
     exit 0
