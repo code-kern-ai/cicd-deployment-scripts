@@ -49,7 +49,7 @@
     ],
     "troubleshooting": []
   },
-  "az_fnapp_deploy.yml": {
+  "az_fa_deploy.yml": {
     "trigger": [
       "workflow_dispatch",
       "push"
