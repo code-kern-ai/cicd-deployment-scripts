@@ -86,9 +86,9 @@ jobs:
     needs: [pi-matrix, pi-update-submodule]
     if: ${{ !failure() }}
     runs-on: ubuntu-latest
-    strategy:
-      matrix: 
-        parent_image_type: ${{ fromJson(needs.pi-matrix.outputs.parent_image_type) }}
+    # strategy:
+    #   matrix: 
+    #     parent_image_type: ${{ fromJson(needs.pi-matrix.outputs.parent_image_type) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
