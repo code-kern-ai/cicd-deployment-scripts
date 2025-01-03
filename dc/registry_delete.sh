@@ -58,7 +58,7 @@ if [ -n "$DELETE_SINCE_DAYS" ]; then
         
         if [ $days_since -gt $DELETE_SINCE_DAYS ]; then
             digest=$(echo $manifest | sha256sum | cut -d ' ' -f 1)
-            curl -X DELETE -u $HTTPS_USERNAME https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/sha256:$digest
+            curl -X DELETE -u $HTTPS_USERNAME -s https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/sha256:$digest
             echo "::warning::deleted $APP_NAME:$tag, $days_since days old"
         else
             echo "$APP_NAME:$tag is $days_since days old"
@@ -77,7 +77,7 @@ if [ -n $DELETE_TAG ]; then
     
     digest=$(echo $manifest | sha256sum | cut -d ' ' -f 1)
     
-    curl -X DELETE -u $HTTPS_USERNAME \
+    curl -X DELETE -u $HTTPS_USERNAME -s \
         https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/sha256:$digest
     
     echo "::warning::deleted $REGISTRY_URL/$GITHUB_OWNER/$APP_NAME:$DELETE_TAG"
