@@ -30,7 +30,7 @@ done
 function validate_image_tag() {
     manifest=$1
     errors=$(echo $manifest | jq -r '.errors')
-    if [ $errors != null ]; then
+    if [ "$errors" != "null" ]; then
         echo "::error::$REGISTRY_URL/$APP_NAME:$DELETE_TAG => $(echo $errors | jq -r '.[0].code')"
         echo $manifest | jq -rc '.errors'
         kill -s TERM $TOP_PID
