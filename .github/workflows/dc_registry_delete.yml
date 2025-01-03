@@ -8,6 +8,11 @@ on:
         type: string
         description: "Delete images older than the specified number of days and exit gracefully"
         default: ''
+      delete_tag:
+        required: false
+        type: string
+        description: "Delete images with the specified tag and exit gracefully"
+        default: ''
 
 # Special permissions required for OIDC authentication
 permissions:
@@ -26,8 +31,9 @@ jobs:
     env:
       ENVIRONMENT_NAME: ${{ github.event_name == 'release' && 'prod' || github.event.pull_request.base.ref }}
       REGISTRY_HTTPS_USERNAME: "${{ secrets.REGISTRY_HTTPS_USERNAME }}"
-      CONTAINER_REGISTRY: "${{ vars.CONTAINER_REGISTRY }}"
-      IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || 'dev' }}
+      DEV_CONTAINER_REGISTRY: ${{ vars.DEV_CONTAINER_REGISTRY }}
+      DEV_LOGIN_USERNAME: ${{ secrets.DEV_LOGIN_USERNAME }}
+      DEV_LOGIN_PASSWORD: ${{ secrets.DEV_LOGIN_PASSWORD }}
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
@@ -41,8 +47,8 @@ jobs:
         bash cicd-deployment-scripts/dc/registry_delete.sh \
           -e ${{ env.ENVIRONMENT_NAME }} \
           -g ${{ github.repository_owner }} \
-          -r ${{ env.CONTAINER_REGISTRY }} \
+          -r ${{ env.DEV_CONTAINER_REGISTRY }} \
           -a ${{ github.event.repository.name }} \
-          -t ${{ github.ref_name }} \
-          -u ${{ env.REGISTRY_HTTPS_USERNAME }} \
+          -t ${{ inputs.delete_tag }} \
+          -u "${{ env.DEV_LOGIN_USERNAME }}:${{ env.DEV_LOGIN_PASSWORD }}" \
           -d ${{ inputs.delete_since_days }}
