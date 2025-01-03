@@ -27,7 +27,7 @@ done
 if [ -n "$DELETE_SINCE_DAYS" ]; then
     echo "::notice::Deleting images older than $DELETE_SINCE_DAYS days"
     repo_tags=$(curl -s -u $HTTPS_USERNAME https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/tags/list | jq -r '.tags[]')
-    echo $repo_tags | while read -r tag ; do
+    while IFS= read -r tag; do
         created=$(curl -s -u $HTTPS_USERNAME \
             https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/$tag \
             | jq -r '.history[0].v1Compatibility' | jq -r '.created')
@@ -46,7 +46,7 @@ if [ -n "$DELETE_SINCE_DAYS" ]; then
         else
             echo "$APP_NAME:$tag is $days_since days old"
         fi
-    done
+    done <<< "$repo_tags"
     exit 0
 fi
 
