@@ -1,4 +1,8 @@
 # !/bin/bash
+
+trap "exit 1" TERM
+export TOP_PID=$$
+
 set -e
 
 ENVIRONMENT_NAME="dev"
@@ -29,7 +33,7 @@ function validate_image_tag() {
     if [ $errors != null ]; then
         echo "::error::$REGISTRY_URL/$APP_NAME:$DELETE_TAG => $(echo $errors | jq -r '.[0].code')"
         echo $manifest | jq -rc '.errors'
-        exit 1
+        kill -s TERM $TOP_PID
     fi
 }
 
