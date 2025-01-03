@@ -44,8 +44,10 @@ if [ -n "$DELETE_SINCE_DAYS" ]; then
         
         validate_image_tag $manifest
 
-        created=$(echo $manifest | jq -r '.history[0].v1Compatibility' | jq -r '.created')
-        created_date=$(date -d $created +%s)
+        created=$(curl -s -u $HTTPS_USERNAME \
+            https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/$tag \
+            | jq -r '.history[0].v1Compatibility' | jq -r '.created')
+        created_date=$(gdate -d $created +%s)
         current_date=$(date +%s)
         days_since=$(( (current_date - created_date) / (60*60*24) ))
         
