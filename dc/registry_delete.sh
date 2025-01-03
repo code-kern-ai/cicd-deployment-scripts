@@ -5,8 +5,8 @@ ENVIRONMENT_NAME="dev"
 GITHUB_OWNER="code-kern-ai"
 REGISTRY_URL="registry.dev.kern.ai"
 APP_NAME="hosted-inference-api"
-DELETE_TAG=""
-HTTPS_USERNAME=""
+DELETE_TAG="andhrelja"
+HTTPS_USERNAME="andrea:Jasan91007"
 DELETE_SINCE_DAYS=""
 
 while getopts e:g:r:a:t:u:d: flag
@@ -58,7 +58,8 @@ if [ -n $DELETE_TAG ]; then
     
     errors=$(echo $manifest | jq -r '.errors')
     if [ $errors != null ]; then
-        echo "::error::$REGISTRY_URL/$APP_NAME:$DELETE_TAG not found"
+        echo "::error::$REGISTRY_URL/$APP_NAME:$DELETE_TAG => $(echo $errors | jq -r '.[0].code')"
+        echo $manifest | jq -rc '.errors'
         exit 1
     fi
     
