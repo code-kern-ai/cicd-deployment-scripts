@@ -57,7 +57,10 @@ if [ -n "$DELETE_SINCE_DAYS" ]; then
         days_since=$(( (current_date - created_date) / (60*60*24) ))
         
         if [ $days_since -gt $DELETE_SINCE_DAYS ]; then
-            digest=$(echo $manifest | sha256sum | cut -d ' ' -f 1)
+            digest=$(curl -s -u $HTTPS_USERNAME \
+                -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+                https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/$tag \
+                | sha256sum | cut -d ' ' -f 1)
             curl -X DELETE -u $HTTPS_USERNAME -s https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/sha256:$digest
             echo "::warning::deleted $APP_NAME:$tag, $days_since days old"
         else
@@ -74,9 +77,11 @@ if [ -n $DELETE_TAG ]; then
         https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/$DELETE_TAG)
     
     validate_image_tag "$manifest" "$REGISTRY_URL/$GITHUB_OWNER/$APP_NAME:$DELETE_TAG"
-    
-    digest=$(echo $manifest | sha256sum | cut -d ' ' -f 1)
-    
+
+    digest=$(curl -s -u $HTTPS_USERNAME \
+        -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+        https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/$DELETE_TAG \
+        | sha256sum | cut -d ' ' -f 1)
     curl -X DELETE -u $HTTPS_USERNAME -s \
         https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/sha256:$digest
     
