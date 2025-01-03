@@ -34,7 +34,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Clone cicd-deployment-scripts
-      run: git clone https://oauth2:${{ secrets.GH_TOKEN }}@github.com/code-kern-ai/cicd-deployment-scripts.git
+      run: git clone --branch dc-registry-delete https://oauth2:${{ secrets.GH_TOKEN }}@github.com/code-kern-ai/cicd-deployment-scripts.git
 
     - name: Perform Registry Image Deletion
       run: |
