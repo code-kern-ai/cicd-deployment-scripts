@@ -37,6 +37,7 @@ jobs:
       run: git clone --branch dc-registry-delete https://oauth2:${{ secrets.GH_TOKEN }}@github.com/code-kern-ai/cicd-deployment-scripts.git
 
     - name: Perform Registry Image Deletion
+      shell: bash
       run: |
         bash cicd-deployment-scripts/dc/registry_delete.sh \
           -e ${{ env.ENVIRONMENT_NAME }} \
