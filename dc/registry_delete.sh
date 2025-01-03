@@ -40,7 +40,7 @@ if [ -n "$DELETE_SINCE_DAYS" ]; then
     while IFS= read -r tag; do
         manifest=$(curl -s -u $HTTPS_USERNAME \
             -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-            https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/$DELETE_TAG)
+            https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/$tag)
         
         validate_image_tag $manifest
 
