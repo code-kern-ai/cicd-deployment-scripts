@@ -25,7 +25,9 @@ done
 
 function validate_image_tag() {
     manifest=$1
+    echo "manifest: $manifest"
     errors=$(echo $manifest | jq -r '.errors')
+    echo "errors: $errors"
     if [ $errors != null ]; then
         echo "::error::$REGISTRY_URL/$APP_NAME:$DELETE_TAG => $(echo $errors | jq -r '.[0].code')"
         echo $manifest | jq -rc '.errors'
@@ -41,7 +43,6 @@ if [ -n "$DELETE_SINCE_DAYS" ]; then
         manifest=$(curl -s -u $HTTPS_USERNAME \
             -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
             https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/$tag)
-        echo "manifest: $manifest"
         
         validate_image_tag $manifest
 
