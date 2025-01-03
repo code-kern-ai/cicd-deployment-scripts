@@ -14,12 +14,6 @@ on:
         description: "Delete images with the specified tag and exit gracefully"
         default: ''
 
-# Special permissions required for OIDC authentication
-permissions:
-  id-token: write
-  contents: read
-  actions: read
-
 env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
