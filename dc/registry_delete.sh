@@ -41,13 +41,14 @@ if [ -n "$DELETE_SINCE_DAYS" ]; then
         manifest=$(curl -s -u $HTTPS_USERNAME \
             -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
             https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/$tag)
+        echo "manifest: $manifest"
         
         validate_image_tag $manifest
 
         created=$(curl -s -u $HTTPS_USERNAME \
             https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/$tag \
             | jq -r '.history[0].v1Compatibility' | jq -r '.created')
-        created_date=$(gdate -d $created +%s)
+        created_date=$(date -d $created +%s)
         current_date=$(date +%s)
         days_since=$(( (current_date - created_date) / (60*60*24) ))
         
