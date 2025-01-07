@@ -1,0 +1,74 @@
+name: 'DC: Bulk Delete Registry Images'
+
+on:
+  workflow_call:
+    inputs:
+      delete_since_days:
+        required: false
+        type: string
+        description: "Delete images older than the specified number of days and exit gracefully"
+        default: ''
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+jobs:
+  dc-generate-matrix:
+    name: 'Docker Compose: Get Images to Bulk Delete'
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      ENVIRONMENT_NAME: dev
+      REGISTRY_HTTPS_USERNAME: "${{ secrets.REGISTRY_HTTPS_USERNAME }}"
+      DEV_CONTAINER_REGISTRY: ${{ vars.DEV_CONTAINER_REGISTRY }}
+      DEV_LOGIN_USERNAME: ${{ secrets.DEV_LOGIN_USERNAME }}
+      DEV_LOGIN_PASSWORD: ${{ secrets.DEV_LOGIN_PASSWORD }}
+    outputs:
+      app_name: ${{ steps.generate-matrix.outputs.app_name }}
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout cicd-deployment-scripts
+      uses: actions/checkout@v4
+      with:
+        repository: 'code-kern-ai/cicd-deployment-scripts'
+  
+    - name: Generate Matrix
+      id: generate-matrix
+      run: |
+        app_names=$(curl -s -u "${{ env.DEV_LOGIN_USERNAME }}:${{ env.DEV_LOGIN_PASSWORD }}" \
+          https://${{ env.DEV_CONTAINER_REGISTRY }}/v2/_catalog \
+          | jq -c '[.repositories[] | split("/") | .[1]]')
+        echo "app_name=$app_names" >> $GITHUB_OUTPUT
+
+  dc-registry-delete-bulk:
+    name: 'Docker Compose: Bulk Delete Registry Images'
+    runs-on: ubuntu-latest
+    needs: dc-generate-matrix
+    environment: dev
+    env:
+      ENVIRONMENT_NAME: dev
+      REGISTRY_HTTPS_USERNAME: "${{ secrets.REGISTRY_HTTPS_USERNAME }}"
+      DEV_CONTAINER_REGISTRY: ${{ vars.DEV_CONTAINER_REGISTRY }}
+      DEV_LOGIN_USERNAME: ${{ secrets.DEV_LOGIN_USERNAME }}
+      DEV_LOGIN_PASSWORD: ${{ secrets.DEV_LOGIN_PASSWORD }}
+    strategy:
+      matrix:
+        app_name: ${{ fromJson(needs.dc-generate-matrix.outputs.app_name) }}
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout cicd-deployment-scripts
+      uses: actions/checkout@v4
+      with:
+        repository: 'code-kern-ai/cicd-deployment-scripts'
+
+    - name: Perform Registry Image Deletion
+      shell: bash
+      run: |
+        bash ./dc/registry_delete.sh \
+          -e ${{ env.ENVIRONMENT_NAME }} \
+          -g ${{ github.repository_owner }} \
+          -r ${{ env.DEV_CONTAINER_REGISTRY }} \
+          -a ${{ matrix.app_name }} \
+          -t "" \
+          -u "${{ env.DEV_LOGIN_USERNAME }}:${{ env.DEV_LOGIN_PASSWORD }}" \
+          -d "${{ inputs.delete_since_days }}"
