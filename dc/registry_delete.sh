@@ -1,4 +1,11 @@
 # !/bin/bash
+<<<<<<< HEAD
+=======
+
+trap "exit 1" TERM
+export TOP_PID=$$
+
+>>>>>>> b63724af1a7542546a7f1694f540e0015d447a62
 set -e
 
 ENVIRONMENT_NAME="dev"
@@ -23,15 +30,42 @@ do
 done
 
 
+<<<<<<< HEAD
+=======
+function validate_image_tag() {
+    manifest=$1
+    image=$2
+    errors=$(echo $manifest | jq -r '.errors')
+    if [ "$errors" != "null" ]; then
+        echo "::error::$image => $(echo $errors | jq -r '.[0].code')"
+        echo $manifest | jq -rc '.errors'
+        kill -s TERM $TOP_PID
+    fi
+}
+
+>>>>>>> b63724af1a7542546a7f1694f540e0015d447a62
 # Delete images older than DELETE_SINCE_DAYS and exit 0
 if [ -n "$DELETE_SINCE_DAYS" ]; then
     echo "::notice::Deleting images older than $DELETE_SINCE_DAYS days"
     repo_tags=$(curl -s -u $HTTPS_USERNAME https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/tags/list | jq -r '.tags[]')
+<<<<<<< HEAD
     echo $repo_tags | while read -r tag ; do
         created=$(curl -s -u $HTTPS_USERNAME \
             https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/$tag \
             | jq -r '.history[0].v1Compatibility' | jq -r '.created')
         
+=======
+    while IFS= read -r tag; do
+        manifest=$(curl -s -u $HTTPS_USERNAME \
+            -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+            https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/$tag)
+        
+        validate_image_tag "$manifest" "$REGISTRY_URL/$GITHUB_OWNER/$APP_NAME:$tag"
+
+        created=$(curl -s -u $HTTPS_USERNAME \
+            https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/$tag \
+            | jq -r '.history[0].v1Compatibility' | jq -r '.created')
+>>>>>>> b63724af1a7542546a7f1694f540e0015d447a62
         created_date=$(date -d $created +%s)
         current_date=$(date +%s)
         days_since=$(( (current_date - created_date) / (60*60*24) ))
@@ -41,12 +75,20 @@ if [ -n "$DELETE_SINCE_DAYS" ]; then
                 -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
                 https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/$tag \
                 | sha256sum | cut -d ' ' -f 1)
+<<<<<<< HEAD
             curl -X DELETE -u $HTTPS_USERNAME https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/sha256:$digest
+=======
+            curl -X DELETE -u $HTTPS_USERNAME -s https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/sha256:$digest
+>>>>>>> b63724af1a7542546a7f1694f540e0015d447a62
             echo "::warning::deleted $APP_NAME:$tag, $days_since days old"
         else
             echo "$APP_NAME:$tag is $days_since days old"
         fi
+<<<<<<< HEAD
     done
+=======
+    done <<< "$repo_tags"
+>>>>>>> b63724af1a7542546a7f1694f540e0015d447a62
     exit 0
 fi
 
@@ -56,6 +98,7 @@ if [ -n $DELETE_TAG ]; then
         -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
         https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/$DELETE_TAG)
     
+<<<<<<< HEAD
     errors=$(echo $manifest | jq -r '.errors')
     if [ $errors != null ]; then
         echo "::error::$REGISTRY_URL/$APP_NAME:$DELETE_TAG not found"
@@ -65,6 +108,15 @@ if [ -n $DELETE_TAG ]; then
     digest=$(echo $manifest | sha256sum | cut -d ' ' -f 1)
     
     curl -X DELETE -u $HTTPS_USERNAME \
+=======
+    validate_image_tag "$manifest" "$REGISTRY_URL/$GITHUB_OWNER/$APP_NAME:$DELETE_TAG"
+
+    digest=$(curl -s -u $HTTPS_USERNAME \
+        -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+        https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/$DELETE_TAG \
+        | sha256sum | cut -d ' ' -f 1)
+    curl -X DELETE -u $HTTPS_USERNAME -s \
+>>>>>>> b63724af1a7542546a7f1694f540e0015d447a62
         https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/sha256:$digest
     
     echo "::warning::deleted $REGISTRY_URL/$GITHUB_OWNER/$APP_NAME:$DELETE_TAG"
