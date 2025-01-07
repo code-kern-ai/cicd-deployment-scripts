@@ -1,0 +1,53 @@
+name: 'DC: Delete Registry Images'
+
+on:
+  workflow_call:
+    inputs:
+      delete_since_days:
+        required: false
+        type: string
+        description: "Delete images older than the specified number of days and exit gracefully"
+        default: ''
+      delete_tag:
+        required: false
+        type: string
+        description: "Delete images with the specified tag and exit gracefully"
+        default: ''
+      app_name:
+        required: false
+        type: string
+        description: "Application name - provided by the caller unless called from an application repository"
+        default: ''
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+jobs:
+  dc-registry-delete:
+    name: 'Docker Compose: Delete Registry Images'
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      ENVIRONMENT_NAME: dev
+      REGISTRY_HTTPS_USERNAME: "${{ secrets.REGISTRY_HTTPS_USERNAME }}"
+      DEV_CONTAINER_REGISTRY: ${{ vars.DEV_CONTAINER_REGISTRY }}
+      DEV_LOGIN_USERNAME: ${{ secrets.DEV_LOGIN_USERNAME }}
+      DEV_LOGIN_PASSWORD: ${{ secrets.DEV_LOGIN_PASSWORD }}
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        repository: 'code-kern-ai/cicd-deployment-scripts'
+
+    - name: Perform Registry Image Deletion
+      shell: bash
+      run: |
+        bash ./dc/registry_delete.sh \
+          -e ${{ env.ENVIRONMENT_NAME }} \
+          -g ${{ github.repository_owner }} \
+          -r ${{ env.DEV_CONTAINER_REGISTRY }} \
+          -a ${{ inputs.app_name || github.event.repository.name }} \
+          -t "${{ inputs.delete_tag }}" \
+          -u "${{ env.DEV_LOGIN_USERNAME }}:${{ env.DEV_LOGIN_PASSWORD }}" \
+          -d "${{ inputs.delete_since_days }}"

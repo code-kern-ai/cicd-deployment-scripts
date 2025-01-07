@@ -97,7 +97,7 @@ jobs:
             platform=linux/arm64
             label=dockerfile-path=https://github.com/refinery-${{ env.PARENT_IMAGE_TYPE }}-parent-image/blob/${{ github.sha }}/Dockerfile
 
-      - name: Build & Push ${{ env.PARENT_IMAGE_NAME }}:sha-${{ env.PARENT_IMAGE_TYPE }}
+      - name: Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -111,7 +111,7 @@ jobs:
             platform=linux/amd64
             label=dockerfile-path=https://github.com/refinery-${{ env.PARENT_IMAGE_TYPE }}-parent-image/blob/${{ github.sha }}/Dockerfile
 
-      - name: Build & Push ${{ env.PARENT_IMAGE_NAME }}:sha-${{ env.PARENT_IMAGE_TYPE }}-arm64
+      - name: Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}-arm64
         uses: docker/build-push-action@v5
         with:
           context: .
