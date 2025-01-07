@@ -43,10 +43,10 @@ if [ -n "$DELETE_SINCE_DAYS" ]; then
     echo "::notice::Deleting images older than $DELETE_SINCE_DAYS days"
     repo_tags=$(curl -s -u $HTTPS_USERNAME https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/tags/list | jq -r '.tags[]?')
     if [ -z "$repo_tags" ]; then
-        echo "::warning::No images found for $APP_NAME"
+        echo "::notice::No images found for $APP_NAME"
         exit 0
     fi
-    
+
     while IFS= read -r tag; do
         manifest=$(curl -s -u $HTTPS_USERNAME \
             -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
