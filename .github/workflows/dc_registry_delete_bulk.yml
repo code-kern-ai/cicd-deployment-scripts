@@ -1,4 +1,4 @@
-name: 'DC: Bulk Delete Registry Images'
+name: 'DC: Delete Registry Images (Bulk)'
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
       delete_since_days:
         required: false
         type: string
-        description: "Delete images older than the specified number of days and exit gracefully"
+        description: "Delete older than (days)"
         default: ''
 
 env:
