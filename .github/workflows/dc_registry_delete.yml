@@ -40,6 +40,7 @@ jobs:
       with:
         repository: 'code-kern-ai/cicd-deployment-scripts'
         ref: dc-registry-delete
+        fetch-depth: 0
 
     # - name: Clone cicd-deployment-scripts
     #   run: git clone --branch dc-registry-delete https://oauth2:${{ secrets.GH_TOKEN }}@github.com/code-kern-ai/cicd-deployment-scripts.git
