@@ -52,6 +52,7 @@ jobs:
     strategy:
       matrix:
         app_name: ${{ fromJson(needs.dc-generate-matrix.outputs.app_name) }}
+    continue-on-error: true
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout cicd-deployment-scripts
