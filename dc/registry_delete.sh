@@ -1,11 +1,8 @@
 # !/bin/bash
-<<<<<<< HEAD
-=======
 
 trap "exit 1" TERM
 export TOP_PID=$$
 
->>>>>>> b63724af1a7542546a7f1694f540e0015d447a62
 set -e
 
 ENVIRONMENT_NAME="dev"
