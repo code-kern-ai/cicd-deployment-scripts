@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0](https://github.com/code-kern-ai/cicd-deployment-scripts/compare/v3.1.0...v3.2.0) (2025-01-07)
+
+
+### Features
+
+* DEV Registry delete workflows ([#19](https://github.com/code-kern-ai/cicd-deployment-scripts/issues/19)) ([7d6eab2](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/7d6eab280c16013bb4f7ff4f63e22c96d921e9c0))
+
 ## [3.1.0](https://github.com/code-kern-ai/cicd-deployment-scripts/compare/v3.0.0...v3.1.0) (2025-01-02)
 
 
