@@ -85,6 +85,12 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: 'code-kern-ai/cicd-deployment-scripts'
+    
+    - name: Setup SSH known_hosts
+      run: |
+        mkdir -p -m 0700 ~/.ssh
+        echo "${{ env.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+        chmod 600 ~/.ssh/known_hosts
 
     - name: Perform Registry Image Deletion
       shell: bash
