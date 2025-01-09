@@ -8,6 +8,16 @@ on:
         type: string
         description: "Delete older than (days)"
         default: ''
+      app_name:
+        required: false
+        type: string
+        description: "Application Name"
+        default: ''
+      force_delete_repo:
+        required: false
+        type: boolean
+        description: "Force Delete"
+        default: false
 
 env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -30,13 +40,25 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: 'code-kern-ai/cicd-deployment-scripts'
+    
+    - name: Validate Input
+      run: |
+        if [ "${{ github.event.inputs.force_delete_repo }}" = true ] && [ -z "${{ inputs.app_name }}" ]; then
+          echo "::error::Application Name is required when force deleting repository"
+          exit 1
+        fi
   
     - name: Generate Matrix
       id: generate-matrix
       run: |
-        app_names=$(curl -s -u "${{ env.DEV_LOGIN_USERNAME }}:${{ env.DEV_LOGIN_PASSWORD }}" \
-          https://${{ env.DEV_CONTAINER_REGISTRY }}/v2/_catalog \
-          | jq -c '[.repositories[] | split("/") | .[1]]')
+        if [ "${{ github.event.inputs.force_delete_repo }}" = false ]; then
+          app_names=$(curl -s -u "${{ env.DEV_LOGIN_USERNAME }}:${{ env.DEV_LOGIN_PASSWORD }}" \
+            https://${{ env.DEV_CONTAINER_REGISTRY }}/v2/_catalog \
+            | jq -c '[.repositories[] | split("/") | .[1]]')
+        else
+          app_names='["${{ inputs.app_name}}"]'
+        fi
+
         echo "app_name=$app_names" >> $GITHUB_OUTPUT
 
   dc-registry-delete-bulk:
@@ -49,6 +71,9 @@ jobs:
       DEV_CONTAINER_REGISTRY: ${{ vars.DEV_CONTAINER_REGISTRY }}
       DEV_LOGIN_USERNAME: ${{ secrets.DEV_LOGIN_USERNAME }}
       DEV_LOGIN_PASSWORD: ${{ secrets.DEV_LOGIN_PASSWORD }}
+      SSH_PRIVATE_KEY: ${{ secrets.DEV_SERVER_SSH_PRIVATE_KEY }}
+      SSH_USER: ${{ secrets.DEV_SERVER_SSH_USERNAME }}
+      SSH_HOST: ${{ secrets.DEV_SERVER_SSH_HOST }}
     strategy:
       matrix:
         app_name: ${{ fromJson(needs.dc-generate-matrix.outputs.app_name) }}
@@ -70,4 +95,8 @@ jobs:
           -a ${{ matrix.app_name }} \
           -t "" \
           -u "${{ env.DEV_LOGIN_USERNAME }}:${{ env.DEV_LOGIN_PASSWORD }}" \
-          -d "${{ inputs.delete_since_days }}"
+          -d "${{ inputs.delete_since_days }}" \
+          -p "${{ env.SSH_PRIVATE_KEY }}" \
+          -s "${{ env.SSH_USER }}" \
+          -h "${{ env.SSH_HOST }}" \
+          -f "${{ github.event.inputs.force_delete_repo }}"
