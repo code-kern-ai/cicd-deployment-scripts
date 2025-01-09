@@ -89,9 +89,7 @@ function force_delete_repo() {
 if [ "$FORCE_DELETE_REPO" == "true" ]; then
     repo_tags=$(curl -s -u $HTTPS_USERNAME https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/tags/list | jq -r '.tags[]?')
     if [ -n "$repo_tags" ]; then
-        echo "::error::found existing manifests for $REGISTRY_URL/$GITHUB_OWNER/$APP_NAME"
-        exit 1
-    else
+        echo "::warning::found existing manifests for $REGISTRY_URL/$GITHUB_OWNER/$APP_NAME, running delete"
         delete_since_days "$repo_tags" "0"
     fi
 
