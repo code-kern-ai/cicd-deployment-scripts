@@ -74,6 +74,7 @@ jobs:
       SSH_PRIVATE_KEY: ${{ secrets.DEV_SERVER_SSH_PRIVATE_KEY }}
       SSH_USER: ${{ secrets.DEV_SERVER_SSH_USERNAME }}
       SSH_HOST: ${{ secrets.DEV_SERVER_SSH_HOST }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DEV_SERVER_SSH_KNOWN_HOSTS }}
     strategy:
       matrix:
         app_name: ${{ fromJson(needs.dc-generate-matrix.outputs.app_name) }}

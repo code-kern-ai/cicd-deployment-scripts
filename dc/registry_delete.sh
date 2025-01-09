@@ -15,9 +15,10 @@ DELETE_SINCE_DAYS=""
 SSH_KEY=""
 SSH_USER=""
 SSH_HOST=""
+SSH_KNOWN_HOSTS=""
 FORCE_DELETE_REPO=false
 
-while getopts e:g:r:a:t:u:d:p:s:h:f: flag
+while getopts e:g:r:a:t:u:d:p:s:h:k:f: flag
 do
     case "${flag}" in
         e) ENVIRONMENT_NAME=${OPTARG};;
@@ -30,6 +31,7 @@ do
         p) SSH_KEY=${OPTARG};;
         s) SSH_USER=${OPTARG};;
         h) SSH_HOST=${OPTARG};;
+        k) SSH_KNOWN_HOSTS=${OPTARG};;
         f) FORCE_DELETE_REPO=${OPTARG};;
     esac
 done
@@ -78,6 +80,7 @@ function delete_since_days() {
 }
 
 function force_delete_repo() {
+    cp ~/.ssh/known_hosts ~/.ssh/known_hosts.old && echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
     echo "$SSH_KEY" | ssh $SSH_USER@$SSH_HOST "cd ci-setup && docker exec -i -u root ci-setup_registry_1 bin/registry garbage-collect --delete-untagged /etc/docker/registry/config.yml"
     echo "$SSH_KEY" | ssh $SSH_USER@$SSH_HOST "cd ci-setup && docker exec -i -u root ci-setup_registry_1 rm -rf /var/lib/registry/docker/registry/v2/repositories/$GITHUB_OWNER/$APP_NAME"
     echo "::warning::force deleted $REGISTRY_URL/$GITHUB_OWNER/$APP_NAME"
