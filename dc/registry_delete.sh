@@ -91,9 +91,10 @@ if [ "$FORCE_DELETE_REPO" == "true" ]; then
     if [ -n "$repo_tags" ]; then
         echo "::error::found existing manifests for $REGISTRY_URL/$GITHUB_OWNER/$APP_NAME"
         exit 1
+    else
+        delete_since_days "$repo_tags" "0"
     fi
 
-    delete_since_days "$repo_tags" "0"
     force_delete_repo
     exit 0
 fi
