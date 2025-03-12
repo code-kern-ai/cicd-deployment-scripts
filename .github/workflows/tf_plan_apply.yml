@@ -38,6 +38,8 @@ jobs:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GH_TOKEN }}
 
     # Install the latest version of the OpenTofu CLI
     - name: Setup OpenTofu
