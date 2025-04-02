@@ -39,11 +39,11 @@ jobs:
       shell: bash
       run: |
         bash ./pg/dump.sh \
-          -h ${{ env.PG_HOST }} \
-          -u ${{ env.PG_USER }} \
-          -d ${{ inputs.database_name }} \
-          -n ${{ inputs.pg_dump_name }} \
-          -p ${{ env.PG_PASSWORD }} \
+          -h "${{ env.PG_HOST }}" \
+          -u "${{ env.PG_USER }}" \
+          -d "${{ inputs.database_name }}" \
+          -n "${{ inputs.pg_dump_name }}" \
+          -p "${{ env.PG_PASSWORD }}" \
           -r ${{ env.FILE_SHARE_RESOURCE_GROUP}} \
           -s ${{ env.STORAGE_ACCOUNT_NAME }} \
           -f ${{ env.FILE_SHARE_NAME }}
