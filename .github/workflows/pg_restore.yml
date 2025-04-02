@@ -46,7 +46,7 @@ jobs:
           --account-key ${{ env.STORAGE_ACCOUNT_KEY }} \
           --no-progress
 
-        echo "PG_DUMP_PATH=$(pwd)/pg_dump/${{ inputs.database_name }}/${{ inputs.pg_dump_name}}"
+        echo "PG_DUMP_PATH=$(pwd)/pg_dump/${{ inputs.database_name }}/${{ inputs.pg_dump_name}}" >> $GITHUB_OUTPUT
 
     - name: Restore Dump
       shell: bash
