@@ -13,6 +13,12 @@ on:
         default: refinery
         type: string
 
+# Special permissions required for AZ CLI OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
 jobs:
   pg-dump:
     name: 'Postgres: Dump ${{ inputs.database_name }}'
