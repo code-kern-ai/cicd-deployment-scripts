@@ -37,7 +37,8 @@ jobs:
       id: generate-dump
       shell: bash
       run: |
-        bash ./pg/dump.sh \
+        ls -al
+        bash ./cicd-deployment-scripts/pg/dump.sh \
           -h ${{ env.PG_HOST }} \
           -u ${{ env.PG_USER }} \
           -d ${{ inputs.database_name }} \
