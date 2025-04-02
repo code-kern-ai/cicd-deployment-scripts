@@ -13,12 +13,6 @@ on:
         default: refinery
         type: string
 
-# Special permissions required for AZ CLI OIDC authentication
-permissions:
-  id-token: write
-  contents: read
-  actions: read
-
 jobs:
   pg-dump:
     name: 'Postgres: Dump ${{ inputs.database_name }}'
@@ -39,13 +33,6 @@ jobs:
       with:
         repository: '${{ github.repository_owner }}/cicd-deployment-scripts'
 
-    - name: Azure Cloud Login
-      uses: azure/login@v2
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
     - name: Generate Dump
       id: generate-dump
       shell: bash
@@ -61,12 +48,10 @@ jobs:
           -f ${{ env.FILE_SHARE_NAME }}
 
     - name: Upload Dump
-      uses: azure/cli@v2
-      with:
-        azcliversion: latest
-        inlineScript: |
-          az storage file upload-batch \
-            --destination ${{ env.FILE_SHARE_NAME }} \
-            --destination-path pg_dump/${{ inputs.database_name }}/${{ inputs.pg_dump_name}} \
-            --source ${{ steps.generate-dump.outputs.PG_DUMP_PATH }} \
-            --account-key ${{ env.STORAGE_ACCOUNT_KEY }}
+      shell: bash
+      run: |
+        az storage file upload-batch \
+          --destination ${{ env.FILE_SHARE_NAME }} \
+          --destination-path pg_dump/${{ inputs.database_name }}/${{ inputs.pg_dump_name}} \
+          --source ${{ steps.generate-dump.outputs.PG_DUMP_PATH }} \
+          --account-key ${{ env.STORAGE_ACCOUNT_KEY }}
