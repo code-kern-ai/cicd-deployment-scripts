@@ -1,4 +1,4 @@
-name: 'Postgres: Dump Database'
+name: 'Postgres: Restore Database'
 
 on:
   workflow_call:
@@ -14,8 +14,8 @@ on:
         type: string
 
 jobs:
-  pg-dump:
-    name: 'Postgres: Dump ${{ inputs.database_name }}'
+  pg-restore:
+    name: 'Postgres: Restore ${{ inputs.database_name }}'
     runs-on: [self-hosted, "${{ github.ref_name }}"]
     environment: ${{ github.ref_name }}
     env:
@@ -34,23 +34,26 @@ jobs:
         repository: '${{ github.repository_owner }}/cicd-deployment-scripts'
         ref: 'pg-dump-restore'
 
-    - name: Generate Dump
-      id: generate-dump
+    - name: Download Dump
+      id: download-dump
       shell: bash
       run: |
-        bash ./pg/dump.sh \
+        az storage file download-batch \
+          --destination . \
+          --source ${{ env.FILE_SHARE_NAME }} \
+          --pattern "pg_dump/${{ inputs.database_name }}/${{ inputs.pg_dump_name}}/*" \
+          --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
+          --account-key ${{ env.STORAGE_ACCOUNT_KEY }} \
+          --no-progress
+
+        echo "PG_DUMP_PATH=$(pwd)/pg_dump/${{ inputs.database_name }}/${{ inputs.pg_dump_name}}"
+
+    - name: Restore Dump
+      shell: bash
+      run: |
+        bash ./pg/restore.sh \
           -h "${{ env.PG_HOST }}" \
           -u "${{ env.PG_USER }}" \
           -d "${{ inputs.database_name }}" \
-          -n "${{ inputs.pg_dump_name }}" \
+          -n "${{ steps.download-dump.outputs.PG_DUMP_PATH }}" \
           -p "${{ env.PG_PASSWORD }}"
-
-    - name: Upload Dump
-      shell: bash
-      run: |
-        az storage file upload-batch \
-          --destination ${{ env.FILE_SHARE_NAME }} \
-          --destination-path pg_dump/${{ inputs.database_name }}/${{ inputs.pg_dump_name}} \
-          --source ${{ steps.generate-dump.outputs.PG_DUMP_PATH }} \
-          --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
-          --account-key ${{ env.STORAGE_ACCOUNT_KEY }}

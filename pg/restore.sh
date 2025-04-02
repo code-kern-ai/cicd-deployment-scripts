@@ -5,24 +5,16 @@ PG_HOST=""
 PG_USER=""
 PG_PASSWORD=""
 PG_DATABASE=""
-PG_DUMP_NAME=""
+PG_DUMP_PATH=""
 
-RESOURCE_GROUP_NAME=""
-STORAGE_ACCOUNT_NAME=""
-FILE_SHARE_NAME=""
-
-
-while getopts h:u:d:n:p:r:s:f: flag
+while getopts h:u:d:n:p: flag
 do
     case "${flag}" in
         h) PG_HOST=${OPTARG};;
         u) PG_USER=${OPTARG};;
         d) PG_DATABASE=${OPTARG};;
-        n) PG_DUMP_NAME=${OPTARG};;
+        n) PG_DUMP_PATH=${OPTARG};;
         p) PG_PASSWORD=${OPTARG};;
-        r) RESOURCE_GROUP_NAME=${OPTARG};;
-        s) STORAGE_ACCOUNT_NAME=${OPTARG};;
-        f) FILE_SHARE_NAME=${OPTARG};;
     esac
 done
 
@@ -31,16 +23,6 @@ done
 export PGHOST=$PG_HOST
 export PGUSER=$PG_USER
 export PGPASSWORD=$PG_PASSWORD
-
-mkdir pg_dump_${PG_DATABASE}_${PG_DUMP_NAME}
-
-az storage file download-batch \
-    --account-name $STORAGE_ACCOUNT_NAME \
-    --destination . \
-    --source ${FILE_SHARE_NAME} \
-    --pattern "pg_dump/${PG_DATABASE}/${PG_DUMP_NAME}/*" \
-    --account-key $STORAGE_ACCOUNT_KEY \
-    --no-progress
 
 # terminate existing and block new connections to the database
 psql --command "REVOKE CONNECT ON DATABASE $PG_DATABASE FROM PUBLIC, $PG_USER;"
@@ -52,4 +34,4 @@ WHERE pid <> pg_backend_pid() AND datname = '$PG_DATABASE';
 dropdb $PG_DATABASE
 createdb $PG_DATABASE
 
-pg_restore --dbname $PG_DATABASE pg_dump/${PG_DATABASE}/${PG_DUMP_NAME} --format=d --jobs 2
+pg_restore --dbname $PG_DATABASE ${PG_DUMP_PATH} --format=d --jobs 2
