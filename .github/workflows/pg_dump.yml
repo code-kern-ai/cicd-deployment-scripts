@@ -55,4 +55,5 @@ jobs:
           --destination ${{ env.FILE_SHARE_NAME }} \
           --destination-path pg_dump/${{ inputs.database_name }}/${{ inputs.pg_dump_name}} \
           --source ${{ steps.generate-dump.outputs.PG_DUMP_PATH }} \
+          --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
           --account-key ${{ env.STORAGE_ACCOUNT_KEY }}
