@@ -1,4 +1,4 @@
-name: 'Postgres: Dump'
+name: 'Postgres: Dump Database'
 
 on:
   workflow_call:
@@ -31,7 +31,7 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v2
       with:
-        repository: '${{ github.event.repository.owner }}/cicd-deployment-scripts'
+        repository: '${{ github.repository_owner }}/cicd-deployment-scripts'
 
     - name: Azure Cloud Login
       uses: azure/login@v2
@@ -44,7 +44,7 @@ jobs:
       id: generate-dump
       shell: bash
       run: |
-        bash cicd-deployment-scripts/pg/dump.sh \
+        bash ./pg/dump.sh \
           -h ${{ env.PG_HOST }} \
           -u ${{ env.PG_USER }} \
           -d ${{ inputs.database_name }} \
