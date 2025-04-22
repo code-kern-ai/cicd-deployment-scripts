@@ -1,0 +1,56 @@
+name: 'Postgres: Dump Database'
+
+on:
+  workflow_call:
+    inputs:
+      pg_dump_name:
+        description: 'Dump Name'
+        required: true
+        type: string
+      database_name:
+        description: 'Database Name'
+        required: true
+        default: refinery
+        type: string
+
+jobs:
+  pg-dump:
+    name: 'Postgres: Dump ${{ inputs.database_name }}'
+    runs-on: [self-hosted, "${{ github.ref_name }}"]
+    environment: ${{ github.ref_name }}
+    env:
+      ENVIRONMENT_NAME: ${{ github.ref_name }}
+      FILE_SHARE_RESOURCE_GROUP: "${{ vars.FILE_SHARE_RESOURCE_GROUP }}"
+      STORAGE_ACCOUNT_NAME: "${{ vars.STORAGE_ACCOUNT_NAME }}"
+      STORAGE_ACCOUNT_KEY: "${{ secrets.STORAGE_ACCOUNT_KEY }}"
+      FILE_SHARE_NAME: "${{ vars.FILE_SHARE_NAME }}"
+      PG_HOST: "${{ secrets.PG_HOST }}"
+      PG_USER: "${{ secrets.PG_USER }}"
+      PG_PASSWORD: "${{ secrets.PG_PASSWORD }}"
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      with:
+        repository: '${{ github.repository_owner }}/cicd-deployment-scripts'
+        ref: 'pg-dump-restore'
+
+    - name: Generate Dump
+      id: generate-dump
+      shell: bash
+      run: |
+        bash ./pg/dump.sh \
+          -h "${{ env.PG_HOST }}" \
+          -u "${{ env.PG_USER }}" \
+          -d "${{ inputs.database_name }}" \
+          -n "${{ inputs.pg_dump_name }}" \
+          -p "${{ env.PG_PASSWORD }}"
+
+    - name: Upload Dump
+      shell: bash
+      run: |
+        az storage file upload-batch \
+          --destination ${{ env.FILE_SHARE_NAME }} \
+          --destination-path pg_dump/${{ inputs.database_name }}/${{ inputs.pg_dump_name}} \
+          --source ${{ steps.generate-dump.outputs.PG_DUMP_PATH }} \
+          --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
+          --account-key ${{ env.STORAGE_ACCOUNT_KEY }}

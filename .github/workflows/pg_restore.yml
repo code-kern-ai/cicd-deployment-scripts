@@ -1,0 +1,59 @@
+name: 'Postgres: Restore Database'
+
+on:
+  workflow_call:
+    inputs:
+      pg_dump_name:
+        description: 'Dump Name'
+        required: true
+        type: string
+      database_name:
+        description: 'Database Name'
+        required: true
+        default: refinery
+        type: string
+
+jobs:
+  pg-restore:
+    name: 'Postgres: Restore ${{ inputs.database_name }}'
+    runs-on: [self-hosted, "${{ github.ref_name }}"]
+    environment: ${{ github.ref_name }}
+    env:
+      ENVIRONMENT_NAME: ${{ github.ref_name }}
+      FILE_SHARE_RESOURCE_GROUP: "${{ vars.FILE_SHARE_RESOURCE_GROUP }}"
+      STORAGE_ACCOUNT_NAME: "${{ vars.STORAGE_ACCOUNT_NAME }}"
+      STORAGE_ACCOUNT_KEY: "${{ secrets.STORAGE_ACCOUNT_KEY }}"
+      FILE_SHARE_NAME: "${{ vars.FILE_SHARE_NAME }}"
+      PG_HOST: "${{ secrets.PG_HOST }}"
+      PG_USER: "${{ secrets.PG_USER }}"
+      PG_PASSWORD: "${{ secrets.PG_PASSWORD }}"
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      with:
+        repository: '${{ github.repository_owner }}/cicd-deployment-scripts'
+        ref: 'pg-dump-restore'
+
+    - name: Download Dump
+      id: download-dump
+      shell: bash
+      run: |
+        az storage file download-batch \
+          --destination . \
+          --source ${{ env.FILE_SHARE_NAME }} \
+          --pattern "pg_dump/${{ inputs.database_name }}/${{ inputs.pg_dump_name}}/*" \
+          --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
+          --account-key ${{ env.STORAGE_ACCOUNT_KEY }} \
+          --no-progress
+
+        echo "PG_DUMP_PATH=$(pwd)/pg_dump/${{ inputs.database_name }}/${{ inputs.pg_dump_name}}" >> $GITHUB_OUTPUT
+
+    - name: Restore Dump
+      shell: bash
+      run: |
+        bash ./pg/restore.sh \
+          -h "${{ env.PG_HOST }}" \
+          -u "${{ env.PG_USER }}" \
+          -d "${{ inputs.database_name }}" \
+          -n "${{ steps.download-dump.outputs.PG_DUMP_PATH }}" \
+          -p "${{ env.PG_PASSWORD }}"
