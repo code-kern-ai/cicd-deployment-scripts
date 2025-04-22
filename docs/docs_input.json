@@ -199,6 +199,26 @@
       "in case of a workflow failure (TBD), ignore the failure and proceed with Pull Request merge"
     ]
   },
+  "pg_dump.yml": {
+    "trigger": [
+      "workflow_dispatch"
+    ],
+    "description": [
+      "generates a PostgreSQL dump of the database specified by the workflow input",
+      "the dump is stored in the Azure File Storage configured by GitHub Actions Environment Variables"
+    ],
+    "troubleshooting": []
+  },
+  "pg_restore.yml": {
+    "trigger": [
+      "workflow_dispatch"
+    ],
+    "description": [
+      "restores a PostgreSQL dump of the database specified by the workflow input",
+      "the dump is downloaded from the Azure File Storage configured by GitHub Actions Environment Variables"
+    ],
+    "troubleshooting": []
+  },
   "pi_build.yml": {
     "trigger": [
       "pull_request_opened_synchronized"

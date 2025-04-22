@@ -23,6 +23,8 @@ Scripts used for Kern AI CI/CD efforts.
 - [K8: Release](#k8-release)
 - [K8: Restart](#k8-restart)
 - [K8: Test](#k8-test)
+- [Postgres: Dump Database](#postgres-dump-database)
+- [Postgres: Restore Database](#postgres-restore-database)
 - [Parent Images: Build](#parent-images-build)
 - [Parent Images: Matrix](#parent-images-matrix)
 - [Parent Images: Submodule Merge](#parent-images-submodule-merge)
@@ -190,7 +192,7 @@ Outputs:
 
 ### Azure: Function App Deployment
 
-Workflow file: `az_fnapp_deploy.yml`
+Workflow file: `az_fa_deploy.yml`
 
 Triggers:
 - workflow_dispatch
@@ -590,6 +592,66 @@ Inputs:
 
 
 
+### Postgres: Dump Database
+
+Workflow file: `pg_dump.yml`
+
+Triggers:
+- workflow_dispatch
+
+Inputs:
+- pg_dump_name
+- database_name
+
+
+
+**Description:**
+
+- generates a PostgreSQL dump of the database specified by the workflow input
+- the dump is stored in the Azure File Storage configured by GitHub Actions Environment Variables
+
+
+
+**Jobs:**
+
+- Postgres: Dump ${{ inputs.database_name }}
+	- `Generate Dump`
+	- `Upload Dump`
+
+
+
+
+
+### Postgres: Restore Database
+
+Workflow file: `pg_restore.yml`
+
+Triggers:
+- workflow_dispatch
+
+Inputs:
+- pg_dump_name
+- database_name
+
+
+
+**Description:**
+
+- restores a PostgreSQL dump of the database specified by the workflow input
+- the dump is downloaded from the Azure File Storage configured by GitHub Actions Environment Variables
+
+
+
+**Jobs:**
+
+- Postgres: Restore ${{ inputs.database_name }}
+	- `Download Dump`
+	- `Restore Dump`
+
+
+
+
+
 ### Parent Images: Build
 
 Workflow file: `pi_build.yml`
@@ -618,8 +680,18 @@ Triggers:
 	- `Set up Python`
 	- `Install Dependencies`
 	- `Compile Requirements`
-	- `Build & Push refinery-parent-images:${{ needs.configure-branch-name.outputs.gh_head_ref }}-${{ matrix.parent_image_type }}`
-	- `Build & Push refinery-parent-images:${{ needs.configure-branch-name.outputs.gh_head_ref }}-${{ matrix.parent_image_type }}-arm64`
+	- `Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ env.HEAD_REF }}-${{ matrix.parent_image_type }}`
+	- `Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ env.HEAD_REF }}-${{ matrix.parent_image_type }}-arm64`
+
+- Parent Images: App
+	- `Set up Python`
+	- `Install Dependencies`
+	- `Compile Requirements`
+	- `Clone ${{ matrix.app }}`
+	- `Compile Requirements (Python)`
+	- `Compile Requirements (Next)`
+	- `Perform Edit/Git Operations (Python)`
+	- `Perform Edit/Git Operations (Next)`
 
 
 
@@ -636,6 +708,7 @@ Inputs:
 - repository
 - checkout_ref
 - parent_image_type
+- edit_dockerfile
 
 Outputs:
 - parent_image_type
@@ -713,7 +786,10 @@ Triggers:
 	- `Install Dependencies`
 	- `Perform Edit/Git Operations`
 
-- GitHub: Delete Branch
+- GitHub: Delete Submodule Branch
+	- `Delete Branch`
+
+- GitHub: Delete App Branch
 	- `Delete Branch`
 
 
@@ -743,19 +819,14 @@ Triggers:
 
 **Jobs:**
 
-- Configure Head Branch Name
-	- `Configure branch name`
-
 - pi-matrix
 
 - Parent Images: Docker Build
 	- `Set up Python`
 	- `Install Dependencies`
 	- `Compile Requirements`
-	- `Build & Push refinery-parent-images:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}`
-	- `Build & Push refinery-parent-images:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-arm64`
-	- `Build & Push refinery-parent-images:sha-${{ env.PARENT_IMAGE_TYPE }}`
-	- `Build & Push refinery-parent-images:sha-${{ env.PARENT_IMAGE_TYPE }}-arm64`
+	- `Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}`
+	- `Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}`
 
 - Parent Images: App
 	- `Set up Python`
@@ -765,9 +836,6 @@ Triggers:
 	- `Compile Requirements (Next)`
 	- `Perform Edit/Git Operations (Python)`
 	- `Perform Edit/Git Operations (Next)`
-
-- GitHub: Delete Branch
-	- `Delete Branch`
 
 - GitHub: Delete Branch
 	- `Delete Branch`
@@ -798,8 +866,10 @@ Triggers:
 
 - pi-matrix
 
-- Parent Images: Dockerfile 
+- Parent Images: Dockerfile
 	- `Perform Edit/Git Operations`
+
+- call-gh-release
 
 
 

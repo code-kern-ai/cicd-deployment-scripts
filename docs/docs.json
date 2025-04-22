@@ -139,7 +139,7 @@
       }
     ]
   },
-  "az_fnapp_deploy.yml": {
+  "az_fa_deploy.yml": {
     "name": "Azure: Function App Deployment",
     "trigger": [
       "workflow_dispatch",
@@ -513,6 +513,58 @@
       }
     ]
   },
+  "pg_dump.yml": {
+    "name": "Postgres: Dump Database",
+    "trigger": [
+      "workflow_dispatch"
+    ],
+    "inputs": [
+      "pg_dump_name",
+      "database_name"
+    ],
+    "outputs": [],
+    "description": [
+      "generates a PostgreSQL dump of the database specified by the workflow input",
+      "the dump is stored in the Azure File Storage configured by GitHub Actions Environment Variables"
+    ],
+    "troubleshooting": [],
+    "jobs": [
+      {
+        "name": "pg-dump",
+        "descriptive_name": "Postgres: Dump ${{ inputs.database_name }}",
+        "steps": [
+          "Generate Dump",
+          "Upload Dump"
+        ]
+      }
+    ]
+  },
+  "pg_restore.yml": {
+    "name": "Postgres: Restore Database",
+    "trigger": [
+      "workflow_dispatch"
+    ],
+    "inputs": [
+      "pg_dump_name",
+      "database_name"
+    ],
+    "outputs": [],
+    "description": [
+      "restores a PostgreSQL dump of the database specified by the workflow input",
+      "the dump is downloaded from the Azure File Storage configured by GitHub Actions Environment Variables"
+    ],
+    "troubleshooting": [],
+    "jobs": [
+      {
+        "name": "pg-restore",
+        "descriptive_name": "Postgres: Restore ${{ inputs.database_name }}",
+        "steps": [
+          "Download Dump",
+          "Restore Dump"
+        ]
+      }
+    ]
+  },
   "pi_build.yml": {
     "name": "Parent Images: Build",
     "trigger": [
@@ -544,8 +596,22 @@
           "Set up Python",
           "Install Dependencies",
           "Compile Requirements",
-          "Build & Push refinery-parent-images:${{ needs.configure-branch-name.outputs.gh_head_ref }}-${{ matrix.parent_image_type }}",
-          "Build & Push refinery-parent-images:${{ needs.configure-branch-name.outputs.gh_head_ref }}-${{ matrix.parent_image_type }}-arm64"
+          "Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ env.HEAD_REF }}-${{ matrix.parent_image_type }}",
+          "Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ env.HEAD_REF }}-${{ matrix.parent_image_type }}-arm64"
+        ]
+      },
+      {
+        "name": "pi-update-app",
+        "descriptive_name": "Parent Images: App",
+        "steps": [
+          "Set up Python",
+          "Install Dependencies",
+          "Compile Requirements",
+          "Clone ${{ matrix.app }}",
+          "Compile Requirements (Python)",
+          "Compile Requirements (Next)",
+          "Perform Edit/Git Operations (Python)",
+          "Perform Edit/Git Operations (Next)"
         ]
       }
     ]
@@ -558,7 +624,8 @@
     "inputs": [
       "repository",
       "checkout_ref",
-      "parent_image_type"
+      "parent_image_type",
+      "edit_dockerfile"
     ],
     "outputs": [
       "parent_image_type",
@@ -614,7 +681,14 @@
       },
       {
         "name": "gh-delete-submodule-branches",
-        "descriptive_name": "GitHub: Delete Branch",
+        "descriptive_name": "GitHub: Delete Submodule Branch",
+        "steps": [
+          "Delete Branch"
+        ]
+      },
+      {
+        "name": "gh-delete-app-branches",
+        "descriptive_name": "GitHub: Delete App Branch",
         "steps": [
           "Delete Branch"
         ]
@@ -639,13 +713,6 @@
     ],
     "jobs": [
       {
-        "name": "configure-branch-name",
-        "descriptive_name": "Configure Head Branch Name",
-        "steps": [
-          "Configure branch name"
-        ]
-      },
-      {
         "name": "pi-matrix",
         "descriptive_name": null,
         "steps": []
@@ -657,10 +724,8 @@
           "Set up Python",
           "Install Dependencies",
           "Compile Requirements",
-          "Build & Push refinery-parent-images:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}",
-          "Build & Push refinery-parent-images:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-arm64",
-          "Build & Push refinery-parent-images:sha-${{ env.PARENT_IMAGE_TYPE }}",
-          "Build & Push refinery-parent-images:sha-${{ env.PARENT_IMAGE_TYPE }}-arm64"
+          "Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}",
+          "Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}"
         ]
       },
       {
@@ -678,13 +743,6 @@
       },
       {
         "name": "gh-delete-branch",
-        "descriptive_name": "GitHub: Delete Branch",
-        "steps": [
-          "Delete Branch"
-        ]
-      },
-      {
-        "name": "gh-delete-app-branches",
         "descriptive_name": "GitHub: Delete Branch",
         "steps": [
           "Delete Branch"
@@ -712,10 +770,15 @@
       },
       {
         "name": "pi-edit",
-        "descriptive_name": "Parent Images: Dockerfile ",
+        "descriptive_name": "Parent Images: Dockerfile",
         "steps": [
           "Perform Edit/Git Operations"
         ]
+      },
+      {
+        "name": "call-gh-release",
+        "descriptive_name": null,
+        "steps": []
       }
     ]
   },
