@@ -17,6 +17,7 @@ export common_dockerfile=(
     "refinery-weak-supervisor"
     "refinery-model-provider"
     "cognition-gateway"
+    "cognition-integration-provider"
 )
 
 export common=(
@@ -27,7 +28,6 @@ export common=(
 
 export mini_dockerfile=(
     "refinery-authorizer"
-    "refinery-gateway-proxy"
 )
 
 export mini=(
