@@ -27,9 +27,9 @@ on:
       parent_image_type:
         description: 'List[str] of parent image types'
         value: ${{ jobs.pi-matrix.outputs.parent_image_type }}
-      include:
-        description: 'List[Dict] of apps associated to parent image types'
-        value: ${{ jobs.pi-matrix.outputs.include }}
+      app:
+        description: 'List[str] of apps associated to parent image types'
+        value: ${{ jobs.pi-matrix.outputs.app }}
 
 env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
