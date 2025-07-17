@@ -197,7 +197,6 @@ jobs:
           git add requirements/*.txt ${{ env.DOCKERFILE }} dev.${{ env.DOCKERFILE }} 
           if [ -f "gpu.${{ env.DOCKERFILE }}" ]; then git add gpu.${{ env.DOCKERFILE }}; fi
           git commit -m "ci: update requirements and Dockerfile" || true
-          git push origin ${{ env.HEAD_REF }}
           echo "::notice::${{ matrix.app }} - updated requirement files and ${{ env.DOCKERFILE }}s"
 
           export exitcode=0
