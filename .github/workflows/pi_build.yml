@@ -180,11 +180,13 @@ jobs:
             -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
             -d "${{ env.DOCKERFILE }}"
 
-          bash ${{ github.workspace }}/cicd-deployment-scripts/pi/edit_dockerfile.sh \
-            -i "${{ env.PARENT_IMAGE_NAME }}" \
-            -l "${{ env.HEAD_REF }}" \
-            -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
-            -d "dev.${{ env.DOCKERFILE }}"
+          if [ -f "dev.${{ env.DOCKERFILE }}" ]; then
+            bash ${{ github.workspace }}/cicd-deployment-scripts/pi/edit_dockerfile.sh \
+              -i "${{ env.PARENT_IMAGE_NAME }}" \
+              -l "${{ env.HEAD_REF }}" \
+              -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
+              -d "dev.${{ env.DOCKERFILE }}"
+          fi
           
           if [ -f "gpu.${{ env.DOCKERFILE }}" ]; then
             bash ${{ github.workspace }}/cicd-deployment-scripts/pi/edit_dockerfile.sh \
@@ -194,7 +196,8 @@ jobs:
               -d "gpu.${{ env.DOCKERFILE }}"
           fi
 
-          git add requirements/*.txt ${{ env.DOCKERFILE }} dev.${{ env.DOCKERFILE }} 
+          git add requirements/*.txt ${{ env.DOCKERFILE }}
+          if [ -f "dev.${{ env.DOCKERFILE }}" ]; then git add dev.${{ env.DOCKERFILE }}; fi
           if [ -f "gpu.${{ env.DOCKERFILE }}" ]; then git add gpu.${{ env.DOCKERFILE }}; fi
           git commit -m "ci: update requirements and Dockerfile" || true
           echo "::notice::${{ matrix.app }} - updated requirement files and ${{ env.DOCKERFILE }}s"
