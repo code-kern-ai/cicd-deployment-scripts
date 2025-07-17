@@ -22,7 +22,7 @@ done
 grep "${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}" $DOCKERFILE | while read -r line ; do
     PI_EXISTING_TAG=$(echo $line | sed 's|FROM ||g' | cut -d ':' -f 2)
     ALREADY_UPDATED=$(echo $PI_EXISTING_TAG | grep $RELEASE_TAG || true)
-    
+
     if [ -z $ALREADY_UPDATED ] && [ -z $HEAD_REF ]; then
         PARENT_IMAGE_TYPE=$(echo $PI_EXISTING_TAG | cut -d '-' -f 2-)
     elif [ -n $ALREADY_UPDATED ] && [ -z $HEAD_REF ]; then
@@ -38,5 +38,5 @@ grep "${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}" $DOCKERFILE | while read -r line 
     PI_NEW_IMAGE="${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}:${RELEASE_TAG}-${PARENT_IMAGE_TYPE}"
 
     sed "s|${PI_EXISTING_IMAGE}|${PI_NEW_IMAGE}|g" ${DOCKERFILE} > ${DOCKERFILE}.tmp && mv ${DOCKERFILE}.tmp ${DOCKERFILE}
-    echo "::notice::Dockerfile updated with new image: ${PI_NEW_IMAGE}"
+    echo "::notice::${DOCKERFILE} updated with new image: ${PI_NEW_IMAGE}"
 done
