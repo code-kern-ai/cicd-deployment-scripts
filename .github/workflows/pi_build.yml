@@ -164,6 +164,7 @@ jobs:
           git pull origin ${{ env.HEAD_REF }} || true
       
       - name: Update parent requirements
+        if: github.run_attempt == 1
         run: |
           cd ${{ github.workspace }}/${{ matrix.app }}
           REQUIREMENTS_FILES=$(ls requirements/*.txt)
@@ -198,8 +199,8 @@ jobs:
           fi
 
           git add requirements/*.txt ${{ env.DOCKERFILE }}
-          if [ -f "dev.${{ env.DOCKERFILE }}" ]; then git add dev.${{ env.DOCKERFILE }}; fi
-          if [ -f "gpu.${{ env.DOCKERFILE }}" ]; then git add gpu.${{ env.DOCKERFILE }}; fi
+          git add dev.${{ env.DOCKERFILE }} || true
+          git add gpu.${{ env.DOCKERFILE }} || true
           git commit -m "ci: update requirements and Dockerfile" || true
           git push origin ${{ env.HEAD_REF }} || true
           echo "::notice::${{ matrix.app }} - updated requirement files and ${{ env.DOCKERFILE }}s"
