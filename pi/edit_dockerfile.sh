@@ -6,7 +6,7 @@ PARENT_IMAGE_NAME="refinery-parent-images"
 RELEASE_TAG="parent-image-updates"
 DOCKER_REGISTRY="kernai"
 DOCKERFILE="Dockerfile"
-HEAD_REF="parent-image-updates"
+HEAD_REF=""
 
 while getopts i:l:r:d:h: flag
 do
