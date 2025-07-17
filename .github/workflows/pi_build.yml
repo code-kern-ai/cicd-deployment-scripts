@@ -201,6 +201,7 @@ jobs:
           if [ -f "dev.${{ env.DOCKERFILE }}" ]; then git add dev.${{ env.DOCKERFILE }}; fi
           if [ -f "gpu.${{ env.DOCKERFILE }}" ]; then git add gpu.${{ env.DOCKERFILE }}; fi
           git commit -m "ci: update requirements and Dockerfile" || true
+          git push origin ${{ env.HEAD_REF }} || true
           echo "::notice::${{ matrix.app }} - updated requirement files and ${{ env.DOCKERFILE }}s"
 
           export exitcode=0
