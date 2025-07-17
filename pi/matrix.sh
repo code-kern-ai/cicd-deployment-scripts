@@ -2,9 +2,9 @@
 
 set -e
 
+PR_NUMBER="38"
+SOURCE_SCRIPT="pi/constants.sh"
 PARENT_IMAGE_TYPE=""
-PR_NUMBER=""
-SOURCE_SCRIPT="pi/settings.sh"
 EDIT_DOCKERFILE=false
 
 while getopts t:p:s:d: flag
@@ -22,7 +22,7 @@ source $SOURCE_SCRIPT
 UPDATED_PARENT_TYPES=()
 
 if [ -n $PR_NUMBER ] && [ -z $PARENT_IMAGE_TYPE ]; then
-    UPDATED_FILES=$(gh pr diff $PR_NUMBER --name-only)
+    UPDATED_FILES=$(gh pr diff $PR_NUMBER --name-only --repo code-kern-ai/refinery-submodule-parent-images)
     while IFS= read -r file; do
         if [[ $file != requirements/* ]] || [[ $file != *.in ]]; then
             continue
@@ -32,7 +32,8 @@ if [ -n $PR_NUMBER ] && [ -z $PARENT_IMAGE_TYPE ]; then
         UPDATED_PARENT_TYPES+=($parent_image_type)
 
     done <<< "$UPDATED_FILES"
-    echo "::notice::Exporting matrix for parent image types: $UPDATED_PARENT_TYPES"
+    # TODO: UPDATED_PARENT_TYPES are not resolved correctly
+    echo -e "::notice::Exporting matrix for parent image types: $UPDATED_PARENT_TYPES"
 elif [ -n $PARENT_IMAGE_TYPE ]; then
     echo "::notice::Exporting matrix for parent image type: $PARENT_IMAGE_TYPE"
     UPDATED_PARENT_TYPES=( $PARENT_IMAGE_TYPE )
@@ -40,6 +41,7 @@ fi
 
 PARENT_IMAGE_TYPES=""
 UPDATE_APPS=""
+INCLUDES=""
 for parent_image_type in "${UPDATED_PARENT_TYPES[@]}"; do
     PARENT_IMAGE_TYPES+="\"$parent_image_type\","
     if [ $EDIT_DOCKERFILE = true ]; then
@@ -51,6 +53,8 @@ for parent_image_type in "${UPDATED_PARENT_TYPES[@]}"; do
         if [[ ! "$UPDATE_APPS" == *"$app"* ]]; then
             UPDATE_APPS+='"'$app'",'
         fi
+        # Includes require keeping track of constants, but is a controlled approach (instead of UPDATE_APPS)
+        INCLUDES+='{ "parent_image_type": "'${parent_image_type}'", "app": "'${app}'" },'
     done
 done
 

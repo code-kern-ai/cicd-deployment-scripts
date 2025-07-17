@@ -5,7 +5,15 @@ export torch_cpu=(
     "refinery-ml-exec-env"
 )
 
+export torch_cpu_dockerfile=(
+    "refinery-embedder"
+    "refinery-ml-exec-env"
+)
+
 export torch_cuda=(
+    "refinery-embedder"
+)
+export torch_cuda_dockerfile=(
     "refinery-embedder"
 )
 
@@ -36,6 +44,12 @@ export mini=(
 )
 
 export exec_env=(
+    "refinery-ac-exec-env"
+    "refinery-lf-exec-env"
+    "cognition-exec-env"
+)
+
+export exec_env_dockerfile=(
     "refinery-ac-exec-env"
     "refinery-lf-exec-env"
     "cognition-exec-env"

@@ -3,7 +3,7 @@
 set -e
 
 PARENT_IMAGE_NAME="refinery-parent-images"
-RELEASE_TAG=""
+RELEASE_TAG="parent-image-updates"
 DOCKER_REGISTRY="kernai"
 DOCKERFILE="Dockerfile"
 HEAD_REF="parent-image-updates"
@@ -24,7 +24,8 @@ grep "${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}" $DOCKERFILE | while read -r line 
     ALREADY_UPDATED=$(echo $PI_EXISTING_TAG | grep $RELEASE_TAG || true)
 
     if [ -z $ALREADY_UPDATED ] && [ -z $HEAD_REF ]; then
-        PARENT_IMAGE_TYPE=$(echo $PI_EXISTING_TAG | cut -d '-' -f 2-)
+        image_version=$(echo $PI_EXISTING_TAG | cut -d '-' -f 1)
+        PARENT_IMAGE_TYPE=$(echo $PI_EXISTING_TAG | sed "s|${image_version}-||g")
     elif [ -n $ALREADY_UPDATED ] && [ -z $HEAD_REF ]; then
         PARENT_IMAGE_TYPE=$(echo $PI_EXISTING_TAG | sed "s|${RELEASE_TAG}-||g")
     elif [ -n $HEAD_REF ]; then
