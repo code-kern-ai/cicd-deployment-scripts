@@ -3,16 +3,14 @@
 set -e
 
 PARENT_IMAGE_NAME="refinery-parent-images"
-PARENT_IMAGE_TYPE=""
 RELEASE_TAG=""
 DOCKER_REGISTRY="kernai"
 DOCKERFILE="Dockerfile"
 
-while getopts i:t:l:r:d: flag
+while getopts i:l:r:d: flag
 do
     case "${flag}" in
         i) PARENT_IMAGE_NAME=${OPTARG};;
-        t) PARENT_IMAGE_TYPE=$(echo ${OPTARG} | sed 's|_|-|g');;
         l) RELEASE_TAG=${OPTARG};;
         r) DOCKER_REGISTRY=${OPTARG};;
         d) DOCKERFILE=${OPTARG};;
@@ -21,6 +19,7 @@ done
 
 grep "${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}" $DOCKERFILE | while read -r line ; do
     PI_EXISTING_TAG=$(echo $line | sed 's|FROM ||g' | cut -d ':' -f 2)
+    PARENT_IMAGE_TYPE=$(echo $PI_EXISTING_TAG | cut -d '-' -f 2-)
     PI_EXISTING_IMAGE="${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}:${PI_EXISTING_TAG}"
     PI_NEW_IMAGE="${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}:${RELEASE_TAG}-${PARENT_IMAGE_TYPE}"
 

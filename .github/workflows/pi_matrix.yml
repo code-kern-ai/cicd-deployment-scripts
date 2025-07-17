@@ -43,7 +43,7 @@ jobs:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
     outputs:
       parent_image_type: ${{ steps.generate-matrix.outputs.parent_image_type }}
-      include: ${{ steps.generate-matrix.outputs.include }}
+      app: ${{ steps.generate-matrix.outputs.app }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

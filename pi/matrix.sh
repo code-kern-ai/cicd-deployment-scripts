@@ -39,7 +39,7 @@ elif [ -n $PARENT_IMAGE_TYPE ]; then
 fi
 
 PARENT_IMAGE_TYPES=""
-INCLUDES=""
+UPDATE_APPS=""
 for parent_image_type in "${UPDATED_PARENT_TYPES[@]}"; do
     PARENT_IMAGE_TYPES+="\"$parent_image_type\","
     if [ $EDIT_DOCKERFILE = true ]; then
@@ -48,11 +48,13 @@ for parent_image_type in "${UPDATED_PARENT_TYPES[@]}"; do
         eval 'APP_REPOS=( "${'$(echo ${parent_image_type} | sed "s|-|_|g")'[@]}" )'
     fi
     for app in "${APP_REPOS[@]}"; do
-        INCLUDES+='{ "parent_image_type": "'${parent_image_type}'", "app": "'${app}'" },'
+        if [[ ! "$UPDATE_APPS" == *"$app"* ]]; then
+            UPDATE_APPS+='"'$app'",'
+        fi
     done
 done
 
-MATRIX='{"include": ['${INCLUDES::-1}']}'
+MATRIX='['${UPDATE_APPS::-1}']'
 echo $MATRIX | jq -C --indent 2 '.'
-echo "include=[${INCLUDES::-1}]" >> $GITHUB_OUTPUT
+echo "app=[${UPDATE_APPS::-1}]" >> $GITHUB_OUTPUT
 echo "parent_image_type=[${PARENT_IMAGE_TYPES::-1}]" >> $GITHUB_OUTPUT
