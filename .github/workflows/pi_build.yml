@@ -83,10 +83,10 @@ jobs:
         with:
           platforms: arm64,arm
 
-      - name: Log into DEV registry
+      - name: Log into DockerHub registry
         uses: docker/login-action@v3
         with:
-          registry: "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}"
+          # registry: "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}"
           username: "${{ env.DOCKERHUB_LOGIN_USERNAME }}"
           password: "${{ env.DOCKERHUB_LOGIN_PASSWORD }}"
 
