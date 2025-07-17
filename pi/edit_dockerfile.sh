@@ -6,7 +6,7 @@ PARENT_IMAGE_NAME="refinery-parent-images"
 RELEASE_TAG=""
 DOCKER_REGISTRY="kernai"
 DOCKERFILE="Dockerfile"
-HEAD_REF=""
+HEAD_REF="parent-image-updates"
 
 while getopts i:l:r:d:h: flag
 do
@@ -21,11 +21,19 @@ done
 
 grep "${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}" $DOCKERFILE | while read -r line ; do
     PI_EXISTING_TAG=$(echo $line | sed 's|FROM ||g' | cut -d ':' -f 2)
-    if [ -z $HEAD_REF ]; then
+    ALREADY_UPDATED=$(echo $PI_EXISTING_TAG | grep $RELEASE_TAG || true)
+    
+    if [ -z $ALREADY_UPDATED ] && [ -z $HEAD_REF ]; then
         PARENT_IMAGE_TYPE=$(echo $PI_EXISTING_TAG | cut -d '-' -f 2-)
-    else
+    elif [ -n $ALREADY_UPDATED ] && [ -z $HEAD_REF ]; then
+        PARENT_IMAGE_TYPE=$(echo $PI_EXISTING_TAG | sed "s|${RELEASE_TAG}-||g")
+    elif [ -n $HEAD_REF ]; then
         PARENT_IMAGE_TYPE=$(echo $PI_EXISTING_TAG | sed "s|${HEAD_REF}-||g")
+    else
+        echo "::error::Failed to determine parent image type from tag: ${PI_EXISTING_TAG}"
+        exit 1
     fi
+
     PI_EXISTING_IMAGE="${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}:${PI_EXISTING_TAG}"
     PI_NEW_IMAGE="${DOCKER_REGISTRY}/${PARENT_IMAGE_NAME}:${RELEASE_TAG}-${PARENT_IMAGE_TYPE}"
 
