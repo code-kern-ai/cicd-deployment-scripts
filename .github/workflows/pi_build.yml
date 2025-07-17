@@ -205,6 +205,8 @@ jobs:
           git push origin ${{ env.HEAD_REF }} || true
           echo "::notice::${{ matrix.app }} - updated requirement files and ${{ env.DOCKERFILE }}s"
 
+          rm -f requirements.txt gpu-requirements.txt || true
+
           export exitcode=0
           pip-compile --quiet \
             --output-file requirements.txt \
@@ -213,12 +215,25 @@ jobs:
           if [ $exitcode -ne 0 ]; then
             echo "::error::pip-compile failed with exit code $exitcode"
             exit $exitcode
-          else
-            git add requirements.txt
-            git commit -m "ci: update requirements.txt" || true
-            git push origin ${{ env.HEAD_REF }}
-            echo "::notice::${{ matrix.app }} - updated requirements.txt"
           fi
+          
+          if [ -f requirements/gpu-requirements.in ]; then
+            export exitcode=0
+            pip-compile --quiet \
+              --output-file gpu-requirements.txt \
+              requirements/gpu-requirements.in || export exitcode=$?
+
+            if [ $exitcode -ne 0 ]; then
+              echo "::error::pip-compile for GPU requirements failed with exit code $exitcode"
+              exit $exitcode
+            fi
+          fi
+
+          git add requirements.txt
+          git add gpu-requirements.txt || true
+          git commit -m "ci: update requirements.txt" || true
+          git push origin ${{ env.HEAD_REF }}
+          echo "::notice::${{ matrix.app }} - updated requirements.txt"
 
           gh pr create --draft \
             --title "test: parent image updates" \
