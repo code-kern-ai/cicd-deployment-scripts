@@ -164,7 +164,7 @@ jobs:
           cd ${{ github.workspace }}/${{ matrix.app }}
           REQUIREMENTS_FILES=$(ls requirements/*.txt)
           for requirement_file in $REQUIREMENTS_FILES; do
-            cp ${{ github.workspace }}/refinery-submodule-parent-images/$requirement_file $requirement_file
+            cp ${{ github.workspace }}/$requirement_file $requirement_file
           done
 
       - name: Perform Edit/Git Operations (Python)
