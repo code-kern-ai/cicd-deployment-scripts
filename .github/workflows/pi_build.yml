@@ -13,28 +13,29 @@ env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
 jobs:
-  configure-branch-name:
-    name: 'Configure Head Branch Name'
+  validate-branch-name:
+    name: 'Validate Head Branch Name'
     runs-on: ubuntu-latest
-    outputs:
-      gh_head_ref: ${{ steps.configure-branch-name.outputs.gh_head_ref }}
     steps:
-      - name: Configure branch name
-        id: configure-branch-name
-        run: echo "gh_head_ref=$(echo "${{ github.event.pull_request.head.ref }}" | sed 's|/|-|g')" >> $GITHUB_OUTPUT
+      - name: Validate branch name
+        run: |
+          if [ "${{ github.event.pull_request.head.ref }}" != "parent-image-updates" ]; then
+            echo "::error::Branch name must be 'parent-image-updates'. Current branch name: ${{ github.event.pull_request.head.ref }}"
+            exit 1
+          fi
 
   pi-matrix:
     uses: code-kern-ai/cicd-deployment-scripts/.github/workflows/pi_matrix.yml@dev
     secrets: inherit
-    needs: [configure-branch-name]
+    needs: [validate-branch-name]
     with:
-      checkout_ref: ${{ needs.configure-branch-name.outputs.gh_head_ref }}
+      checkout_ref: parent-image-updates
       repository: "${{ github.repository_owner }}/refinery-submodule-parent-images"
 
   pi-build:
     name: 'Parent Images: Docker Build'
     runs-on: ubuntu-latest
-    needs: [pi-matrix, configure-branch-name]
+    needs: [pi-matrix, validate-branch-name]
     environment: dev
     env:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
@@ -43,8 +44,8 @@ jobs:
       DEV_LOGIN_PASSWORD: ${{ secrets.DEV_LOGIN_PASSWORD }}
       PARENT_IMAGE_NAME: ${{ vars.PARENT_IMAGE_NAME }}
       DOCKERFILE: ${{ vars.DOCKERFILE }}
-      HEAD_REF: ${{ needs.configure-branch-name.outputs.gh_head_ref }}
-      IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || needs.configure-branch-name.outputs.gh_head_ref }}
+      HEAD_REF: parent-image-updates
+      IMAGE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || 'parent-image-updates' }}
     strategy:
       matrix:
         parent_image_type: ${{ fromJson(needs.pi-matrix.outputs.parent_image_type) }}
@@ -120,7 +121,7 @@ jobs:
   pi-update-app:
     name: 'Parent Images: App'
     runs-on: ubuntu-latest
-    needs: [pi-matrix, pi-build, configure-branch-name]
+    needs: [pi-matrix, pi-build, validate-branch-name]
     environment: dev
     continue-on-error: true
     env:
@@ -128,7 +129,7 @@ jobs:
       DOCKERHUB_CONTAINER_REGISTRY: ${{ vars.DOCKERHUB_CONTAINER_REGISTRY }}
       PARENT_IMAGE_NAME: ${{ vars.PARENT_IMAGE_NAME }}
       DOCKERFILE: ${{ vars.DOCKERFILE }}
-      HEAD_REF: ${{ needs.configure-branch-name.outputs.gh_head_ref }}
+      HEAD_REF: parent-image-updates
     strategy:
       matrix: 
         app: ${{ fromJson(needs.pi-matrix.outputs.app) }}
