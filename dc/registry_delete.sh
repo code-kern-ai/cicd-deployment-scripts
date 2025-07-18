@@ -8,7 +8,7 @@ set -e
 ENVIRONMENT_NAME="dev"
 GITHUB_OWNER="code-kern-ai"
 REGISTRY_URL="registry.dev.kern.ai"
-APP_NAME="hosted-inference-api"
+APP_NAME=""
 DELETE_TAG=""
 HTTPS_USERNAME=""
 DELETE_SINCE_DAYS=""
@@ -22,7 +22,7 @@ do
     case "${flag}" in
         e) ENVIRONMENT_NAME=${OPTARG};;
         g) GITHUB_OWNER=${OPTARG};;
-        r) REGISTRY_URL=${OPTARG};;
+        r) REGISTRY_URL=$(echo ${OPTARG} | sed "s|/${GITHUB_OWNER}||g");;
         a) APP_NAME=${OPTARG};;
         t) DELETE_TAG=${OPTARG};;
         u) HTTPS_USERNAME=${OPTARG};;
@@ -114,6 +114,7 @@ fi
 if [ -n $DELETE_TAG ]; then
     manifest=$(curl -s -u $HTTPS_USERNAME \
         -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+        -H "Accept: application/vnd.oci.image.index.v1+json" \
         https://$REGISTRY_URL/v2/$GITHUB_OWNER/$APP_NAME/manifests/$DELETE_TAG)
     
     validate_image_tag "$manifest" "$REGISTRY_URL/$GITHUB_OWNER/$APP_NAME:$DELETE_TAG"
