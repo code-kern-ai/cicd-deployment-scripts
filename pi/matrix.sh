@@ -2,7 +2,7 @@
 
 set -e
 
-PR_NUMBER="38"
+PR_NUMBER=""
 SOURCE_SCRIPT="pi/constants.sh"
 PARENT_IMAGE_TYPE=""
 EDIT_DOCKERFILE=false
@@ -21,7 +21,7 @@ source $SOURCE_SCRIPT
 
 UPDATED_PARENT_TYPES=()
 
-if [ -n $PR_NUMBER ] && [ -z $PARENT_IMAGE_TYPE ]; then
+if [ -n "$PR_NUMBER" ] && [ -z "$PARENT_IMAGE_TYPE" ]; then
     UPDATED_FILES=$(gh pr diff $PR_NUMBER --name-only --repo code-kern-ai/refinery-submodule-parent-images)
     while IFS= read -r file; do
         if [[ $file != requirements/* ]] || [[ $file != *.in ]]; then
@@ -34,7 +34,7 @@ if [ -n $PR_NUMBER ] && [ -z $PARENT_IMAGE_TYPE ]; then
     done <<< "$UPDATED_FILES"
     # TODO: UPDATED_PARENT_TYPES are not resolved correctly
     echo -e "::notice::Exporting matrix for parent image types: $UPDATED_PARENT_TYPES"
-elif [ -n $PARENT_IMAGE_TYPE ]; then
+elif [ -n "$PARENT_IMAGE_TYPE" ]; then
     echo "::notice::Exporting matrix for parent image type: $PARENT_IMAGE_TYPE"
     UPDATED_PARENT_TYPES=( $PARENT_IMAGE_TYPE )
 fi

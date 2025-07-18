@@ -31,6 +31,7 @@ jobs:
     with:
       checkout_ref: parent-image-updates
       repository: "${{ github.repository_owner }}/refinery-submodule-parent-images"
+      edit_dockerfile: true
 
   pi-build:
     name: 'Parent Images: Docker Build'
@@ -39,9 +40,9 @@ jobs:
     environment: dev
     env:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
-      DOCKERHUB_CONTAINER_REGISTRY: ${{ vars.DOCKERHUB_CONTAINER_REGISTRY }}
-      DOCKERHUB_LOGIN_USERNAME: ${{ secrets.DOCKERHUB_LOGIN_USERNAME }}
-      DOCKERHUB_LOGIN_PASSWORD: ${{ secrets.DOCKERHUB_LOGIN_PASSWORD }}
+      DEV_CONTAINER_REGISTRY: ${{ vars.DEV_CONTAINER_REGISTRY }}
+      DEV_LOGIN_USERNAME: ${{ secrets.DEV_LOGIN_USERNAME }}
+      DEV_LOGIN_PASSWORD: ${{ secrets.DEV_LOGIN_PASSWORD }}
       PARENT_IMAGE_NAME: ${{ vars.PARENT_IMAGE_NAME }}
       DOCKERFILE: ${{ vars.DOCKERFILE }}
       HEAD_REF: parent-image-updates
@@ -83,22 +84,22 @@ jobs:
         with:
           platforms: arm64,arm
 
-      - name: Log into DockerHub registry
+      - name: Log into DEV registry
         uses: docker/login-action@v3
         with:
-          # registry: "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}"
-          username: "${{ env.DOCKERHUB_LOGIN_USERNAME }}"
-          password: "${{ env.DOCKERHUB_LOGIN_PASSWORD }}"
+          registry: "${{ env.DEV_CONTAINER_REGISTRY }}"
+          username: "${{ env.DEV_LOGIN_USERNAME }}"
+          password: "${{ env.DEV_LOGIN_PASSWORD }}"
 
       - name: Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ env.HEAD_REF }}-${{ matrix.parent_image_type }}
         uses: docker/build-push-action@v5
         with:
           context: .
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ env.HEAD_REF }}-${{ matrix.parent_image_type }}-cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ env.HEAD_REF }}-${{ matrix.parent_image_type }}-cache,mode=max,image-manifest=true
+          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:dev-${{ matrix.parent_image_type }}-cache
+          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:dev-${{ matrix.parent_image_type }}-cache,mode=max,image-manifest=true
           platforms: linux/amd64
           file: ${{ env.DOCKERFILE }}
-          tags: ${{ env.DOCKERHUB_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ env.HEAD_REF }}-${{ matrix.parent_image_type }}
+          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ env.HEAD_REF }}-${{ matrix.parent_image_type }}
           push: true
           build-args: |
             platform=linux/amd64
@@ -108,11 +109,11 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ env.HEAD_REF }}-${{ matrix.parent_image_type }}-arm64-cache
-          cache-to: type=registry,ref=${{ env.DOCKERHUB_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ env.HEAD_REF }}-${{ matrix.parent_image_type }}-arm64-cache,mode=max,image-manifest=true
+          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:dev-${{ matrix.parent_image_type }}-arm64-cache
+          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:dev-${{ matrix.parent_image_type }}-arm64-cache,mode=max,image-manifest=true
           platforms: linux/arm64
           file: ${{ env.DOCKERFILE }}
-          tags: ${{ env.DOCKERHUB_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ env.HEAD_REF }}-${{ matrix.parent_image_type }}-arm64
+          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ env.HEAD_REF }}-${{ matrix.parent_image_type }}-arm64
           push: true
           build-args: |
             platform=linux/arm64
@@ -127,6 +128,7 @@ jobs:
     env:
       PYTHON_VERSION: ${{ vars.PYTHON_VERSION }}
       DOCKERHUB_CONTAINER_REGISTRY: ${{ vars.DOCKERHUB_CONTAINER_REGISTRY }}
+      DEV_CONTAINER_REGISTRY: ${{ vars.DEV_CONTAINER_REGISTRY }}
       PARENT_IMAGE_NAME: ${{ vars.PARENT_IMAGE_NAME }}
       DOCKERFILE: ${{ vars.DOCKERFILE }}
       HEAD_REF: parent-image-updates
@@ -180,6 +182,7 @@ jobs:
             -i "${{ env.PARENT_IMAGE_NAME }}" \
             -l "${{ env.HEAD_REF }}" \
             -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
+            -e "${{ env.DEV_CONTAINER_REGISTRY }}" \
             -d "${{ env.DOCKERFILE }}"
 
           if [ -f "dev.${{ env.DOCKERFILE }}" ]; then
@@ -187,6 +190,7 @@ jobs:
               -i "${{ env.PARENT_IMAGE_NAME }}" \
               -l "${{ env.HEAD_REF }}" \
               -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
+              -e "${{ env.DEV_CONTAINER_REGISTRY }}" \
               -d "dev.${{ env.DOCKERFILE }}"
           fi
           
@@ -195,6 +199,7 @@ jobs:
               -i "${{ env.PARENT_IMAGE_NAME }}" \
               -l "${{ env.HEAD_REF }}" \
               -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
+              -e "${{ env.DEV_CONTAINER_REGISTRY }}" \
               -d "gpu.${{ env.DOCKERFILE }}"
           fi
 
@@ -202,7 +207,6 @@ jobs:
           git add dev.${{ env.DOCKERFILE }} || true
           git add gpu.${{ env.DOCKERFILE }} || true
           git commit -m "ci: update requirements and Dockerfile" || true
-          git push origin ${{ env.HEAD_REF }} || true
           echo "::notice::${{ matrix.app }} - updated requirement files and ${{ env.DOCKERFILE }}s"
 
           rm -f requirements.txt gpu-requirements.txt || true
@@ -214,6 +218,7 @@ jobs:
           
           if [ $exitcode -ne 0 ]; then
             echo "::error::pip-compile failed with exit code $exitcode"
+            git push origin ${{ env.HEAD_REF }} || true
             exit $exitcode
           fi
           
