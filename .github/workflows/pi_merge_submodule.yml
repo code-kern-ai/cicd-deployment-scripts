@@ -97,7 +97,7 @@ jobs:
   gh-delete-submodule-branches:
     name: 'GitHub: Delete Submodule Branch'
     needs: [call-dc-registry-delete]
-    if: ${{ !failure() }}
+    if: ${{ !failure() && github.run_attempt == 1 }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

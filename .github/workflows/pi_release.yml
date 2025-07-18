@@ -65,6 +65,24 @@ jobs:
             -d "${{ env.DOCKERFILE }}" \
             -h "${{ env.HEAD_REF }}"
 
+          if [ -f "dev.${{ env.DOCKERFILE }}" ]; then
+            bash ${{ github.workspace }}/cicd-deployment-scripts/pi/edit_dockerfile.sh \
+              -i "${{ env.PARENT_IMAGE_NAME }}" \
+              -l "${{ env.HEAD_REF }}" \
+              -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
+              -d "dev.${{ env.DOCKERFILE }}" \
+              -h "${{ env.HEAD_REF }}"
+          fi
+          
+          if [ -f "gpu.${{ env.DOCKERFILE }}" ]; then
+            bash ${{ github.workspace }}/cicd-deployment-scripts/pi/edit_dockerfile.sh \
+              -i "${{ env.PARENT_IMAGE_NAME }}" \
+              -l "${{ env.HEAD_REF }}" \
+              -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
+              -d "gpu.${{ env.DOCKERFILE }}" \
+              -h "${{ env.HEAD_REF }}"
+          fi
+
           git config user.email "devtools@kern.ai"
           git config user.name "GitHub Actions"
 
