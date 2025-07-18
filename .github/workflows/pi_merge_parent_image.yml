@@ -75,12 +75,14 @@ jobs:
           context: .
           cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-cache
           cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}-cache,mode=max,image-manifest=true
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           file: ${{ env.DOCKERFILE }}
-          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}
+          tags: |
+            ${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.event.pull_request.base.ref }}-${{ env.PARENT_IMAGE_TYPE }}
+            ${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}
           push: true
           build-args: |
-            platform=linux/amd64
+            platform=linux/amd64,linux/arm64
             label=dockerfile-path=https://github.com/refinery-${{ env.PARENT_IMAGE_TYPE }}-parent-image/blob/${{ github.sha }}/Dockerfile
 
       ## Skip building arm64 for DEV builds
@@ -98,19 +100,19 @@ jobs:
       #       platform=linux/arm64
       #       label=dockerfile-path=https://github.com/refinery-${{ env.PARENT_IMAGE_TYPE }}-parent-image/blob/${{ github.sha }}/Dockerfile
 
-      - name: Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}-cache
-          cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}-cache,mode=max,image-manifest=true
-          platforms: linux/amd64
-          file: ${{ env.DOCKERFILE }}
-          tags: ${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}
-          push: true
-          build-args: |
-            platform=linux/amd64
-            label=dockerfile-path=https://github.com/refinery-${{ env.PARENT_IMAGE_TYPE }}-parent-image/blob/${{ github.sha }}/Dockerfile
+      # - name: Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}-cache
+      #     cache-to: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}-cache,mode=max,image-manifest=true
+      #     platforms: linux/amd64
+      #     file: ${{ env.DOCKERFILE }}
+      #     tags: ${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}
+      #     push: true
+      #     build-args: |
+      #       platform=linux/amd64
+      #       label=dockerfile-path=https://github.com/refinery-${{ env.PARENT_IMAGE_TYPE }}-parent-image/blob/${{ github.sha }}/Dockerfile
 
       ## Skip building arm64 for DEV builds
       # - name: Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ github.sha }}-${{ env.PARENT_IMAGE_TYPE }}-arm64
