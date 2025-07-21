@@ -242,7 +242,7 @@ jobs:
 
           gh pr create --draft \
             --title "test: parent image updates" \
-            --body "${{ github.event.pull_request.body }}" \
+            --body "Main PR: https://github.com/${{ github.repository_owner }}/refinery-submodule-parent-images/pull/${{ github.event.pull_request.number }}" \
             --base dev \
             --head ${{ env.HEAD_REF }} \
             --repo ${{ github.repository_owner }}/${{ matrix.app }} || true

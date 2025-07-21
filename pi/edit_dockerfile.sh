@@ -3,7 +3,7 @@
 set -e
 
 PARENT_IMAGE_NAME="refinery-parent-images"
-RELEASE_TAG="parent-image-updates"
+RELEASE_TAG="v2.0.0"
 DOCKER_REGISTRY="kernai"
 DEV_REGISTRY="registry.dev.kern.ai/code-kern-ai"
 DOCKERFILE="Dockerfile"
@@ -36,7 +36,10 @@ grep "${REGISTRY}/${PARENT_IMAGE_NAME}" $DOCKERFILE | while read -r line ; do
         PARENT_IMAGE_TYPE=$(echo $PI_EXISTING_TAG | sed "s|${image_version}-||g")
     elif [ -n "$ALREADY_UPDATED" ] && [ -z "$HEAD_REF" ]; then
         PARENT_IMAGE_TYPE=$(echo $PI_EXISTING_TAG | sed "s|${RELEASE_TAG}-||g")
-    elif [ -n "$HEAD_REF" ]; then
+    elif [ -z "$ALREADY_UPDATED" ] && [ -n "$HEAD_REF" ]; then
+        image_version=$(echo $PI_EXISTING_TAG | cut -d '-' -f 1)
+        PARENT_IMAGE_TYPE=$(echo $PI_EXISTING_TAG | sed "s|${image_version}-||g")
+    elif [ -n "$ALREADY_UPDATED" ] && [ -n "$HEAD_REF" ]; then
         PARENT_IMAGE_TYPE=$(echo $PI_EXISTING_TAG | sed "s|${HEAD_REF}-||g")
     else
         echo "::error::Failed to determine parent image type from tag: ${PI_EXISTING_TAG}"
