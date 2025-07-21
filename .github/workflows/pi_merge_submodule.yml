@@ -49,30 +49,15 @@ jobs:
           fetch-depth: 0
           submodules: 'true'
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install Dependencies
-        run: python -m pip install pip-tools
-      
       - name: Perform Edit/Git Operations
         run: |
-          cd ${{ github.workspace }}/submodules/parent-images
-          git checkout ${{ github.event.pull_request.base.ref }}
-          
-          cd ${{ github.workspace }}
-          git checkout ${{ needs.configure-branch-name.outputs.gh_head_ref }} || git checkout -b ${{ needs.configure-branch-name.outputs.gh_head_ref }}
-          git push origin ${{ needs.configure-branch-name.outputs.gh_head_ref }} && git pull origin ${{ needs.configure-branch-name.outputs.gh_head_ref }}
-
           git config user.email "devtools@kern.ai"
           git config user.name "GitHub Actions"
 
           git add submodules
-          git commit -m "ci: update submodules to origin/${{ needs.configure-branch-name.outputs.gh_head_ref }}" || true
-          git push origin ${{ needs.configure-branch-name.outputs.gh_head_ref }}
-          echo "::notice::${{ github.event.repository.name }} updated to origin/${{ needs.configure-branch-name.outputs.gh_head_ref }}"
+          git commit -m "ci: update submodules to origin/${{ github.event.pull_request.base.ref }}" || true
+          git push origin ${{ github.event.pull_request.base.ref }}
+          echo "::notice::${{ github.event.repository.name }} updated to origin/${{ github.event.pull_request.base.ref }}"
 
           gh pr create --draft \
             --title "${{ github.event.pull_request.title }}" \
