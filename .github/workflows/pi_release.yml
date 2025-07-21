@@ -68,7 +68,7 @@ jobs:
           if [ -f "dev.${{ env.DOCKERFILE }}" ]; then
             bash ${{ github.workspace }}/cicd-deployment-scripts/pi/edit_dockerfile.sh \
               -i "${{ env.PARENT_IMAGE_NAME }}" \
-              -l "${{ env.HEAD_REF }}" \
+              -l "${{ github.event.release.tag_name }}" \
               -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
               -d "dev.${{ env.DOCKERFILE }}" \
               -h "${{ env.HEAD_REF }}"
@@ -77,7 +77,7 @@ jobs:
           if [ -f "gpu.${{ env.DOCKERFILE }}" ]; then
             bash ${{ github.workspace }}/cicd-deployment-scripts/pi/edit_dockerfile.sh \
               -i "${{ env.PARENT_IMAGE_NAME }}" \
-              -l "${{ env.HEAD_REF }}" \
+              -l "${{ github.event.release.tag_name }}" \
               -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
               -d "gpu.${{ env.DOCKERFILE }}" \
               -h "${{ env.HEAD_REF }}"
