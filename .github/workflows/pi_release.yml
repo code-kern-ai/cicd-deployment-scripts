@@ -54,6 +54,9 @@ jobs:
           RELEASE_IMAGE="${{ env.DOCKERHUB_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:${{ github.event.release.tag_name }}-${{ vars.PARENT_IMAGE_TYPE }}"
           BASE_REF="dev"
           PR_TITLE="ci(pi): $RELEASE_IMAGE"
+
+          git config user.email "devtools@kern.ai"
+          git config user.name "GitHub Actions"
           
           git checkout "${{ env.HEAD_REF }}" || git checkout -b "${{ env.HEAD_REF }}"
           git push origin "${{ env.HEAD_REF }}" && git pull origin "${{ env.HEAD_REF }}"
@@ -64,6 +67,7 @@ jobs:
             -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
             -d "${{ env.DOCKERFILE }}" \
             -h "${{ env.HEAD_REF }}"
+          git add ${{ env.DOCKERFILE }}
 
           if [ -f "dev.${{ env.DOCKERFILE }}" ]; then
             bash ${{ github.workspace }}/cicd-deployment-scripts/pi/edit_dockerfile.sh \
@@ -72,6 +76,7 @@ jobs:
               -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
               -d "dev.${{ env.DOCKERFILE }}" \
               -h "${{ env.HEAD_REF }}"
+            git add dev.${{ env.DOCKERFILE }}
           fi
           
           if [ -f "gpu.${{ env.DOCKERFILE }}" ]; then
@@ -81,12 +86,9 @@ jobs:
               -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
               -d "gpu.${{ env.DOCKERFILE }}" \
               -h "${{ env.HEAD_REF }}"
+            git add gpu.${{ env.DOCKERFILE }}
           fi
 
-          git config user.email "devtools@kern.ai"
-          git config user.name "GitHub Actions"
-
-          git add ${{ env.DOCKERFILE }}
           git commit -m "$PR_TITLE" || true
           git push --force origin "${{ env.HEAD_REF }}"
           echo "::notice::${{ matrix.app }} updated to $RELEASE_IMAGE"
