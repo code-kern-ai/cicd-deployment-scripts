@@ -54,6 +54,8 @@ jobs:
           git config user.email "devtools@kern.ai"
           git config user.name "GitHub Actions"
 
+          git submodule update --remote --merge || true
+
           git add submodules
           git commit -m "ci: update submodules to origin/${{ github.event.pull_request.base.ref }}" || true
           git push origin ${{ github.event.pull_request.base.ref }}
@@ -92,4 +94,4 @@ jobs:
       
       - name: Delete Branch
         shell: bash
-        run: git push origin --delete ${{ github.event.pull_request.head.ref }}
+        run: git push origin --delete ${{ github.event.pull_request.head.ref }} || true
