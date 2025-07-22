@@ -183,7 +183,8 @@ jobs:
             -l "${{ env.HEAD_REF }}" \
             -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
             -e "${{ env.DEV_CONTAINER_REGISTRY }}" \
-            -d "${{ env.DOCKERFILE }}"
+            -d "${{ env.DOCKERFILE }}" \
+            -t "build"
 
           if [ -f "dev.${{ env.DOCKERFILE }}" ]; then
             bash ${{ github.workspace }}/cicd-deployment-scripts/pi/edit_dockerfile.sh \
@@ -191,7 +192,8 @@ jobs:
               -l "${{ env.HEAD_REF }}" \
               -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
               -e "${{ env.DEV_CONTAINER_REGISTRY }}" \
-              -d "dev.${{ env.DOCKERFILE }}"
+              -d "dev.${{ env.DOCKERFILE }}" \
+              -t "build"
           fi
           
           if [ -f "gpu.${{ env.DOCKERFILE }}" ]; then
@@ -200,7 +202,8 @@ jobs:
               -l "${{ env.HEAD_REF }}" \
               -r "${{ env.DOCKERHUB_CONTAINER_REGISTRY }}" \
               -e "${{ env.DEV_CONTAINER_REGISTRY }}" \
-              -d "gpu.${{ env.DOCKERFILE }}"
+              -d "gpu.${{ env.DOCKERFILE }}" \
+              -t "build"
           fi
 
           git add requirements/*.txt ${{ env.DOCKERFILE }}

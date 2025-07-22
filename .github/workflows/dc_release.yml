@@ -49,4 +49,4 @@ jobs:
       
       - name: Delete Branch
         shell: bash
-        run: git push origin --delete ${{ github.head_ref }}
+        run: git push origin --delete ${{ github.head_ref }} || true
