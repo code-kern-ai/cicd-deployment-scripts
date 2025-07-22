@@ -4,7 +4,7 @@ set -e
 
 HEAD_REF="parent-image-updates"
 PARENT_IMAGE_NAME="refinery-parent-images"
-RELEASE_TAG="latest"
+RELEASE_TAG="parent-image-updates"
 DOCKER_REGISTRY="kernai"
 DEV_REGISTRY="registry.dev.kern.ai/code-kern-ai"
 DOCKERFILE="Dockerfile"
@@ -22,7 +22,7 @@ do
     esac
 done
 
-DEV_UPDATED=$(grep "${DEV_REGISTRY}/${PARENT_IMAGE_NAME}:${HEAD_REF}" $DOCKERFILE)
+DEV_UPDATED=$(grep "${DEV_REGISTRY}/${PARENT_IMAGE_NAME}:${HEAD_REF}" $DOCKERFILE || true)
 if [ "$EDIT_TYPE" = "build" ]; then
     if [ -n "$DEV_UPDATED" ]; then
         echo "Parent image already updated in $DOCKERFILE"
