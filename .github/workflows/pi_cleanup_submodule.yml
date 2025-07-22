@@ -23,7 +23,7 @@ jobs:
     with:
       checkout_ref: parent-image-updates
       repository: "${{ github.repository_owner }}/refinery-submodule-parent-images"
-  
+
   gh-delete-branch:
     name: 'GitHub: Delete Branch'
     runs-on: ubuntu-latest

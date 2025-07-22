@@ -63,7 +63,7 @@ jobs:
 
   gh-delete-submodule-branches:
     name: 'GitHub: Delete Submodule Branch'
-    needs: [configure-branch-name, pi-update-submodule]
+    needs: [configure-branch-name, pi-update-parent-images]
     if: ${{ !failure() && github.run_attempt == 1 }}
     runs-on: ubuntu-latest
     steps:
