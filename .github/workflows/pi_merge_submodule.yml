@@ -59,12 +59,12 @@ jobs:
           git add submodules
           git commit -m "ci: update submodules to origin/${{ github.event.pull_request.base.ref }}" || true
           git push origin ${{ github.event.pull_request.base.ref }}
-          echo "::notice::${{ github.event.repository.name }} updated to origin/${{ github.event.pull_request.base.ref }}"
+          echo "::notice::https://github.com/${{ github.repository }}"
 
   gh-delete-submodule-branches:
     name: 'GitHub: Delete Submodule Branch'
     needs: [configure-branch-name, pi-update-parent-images]
-    if: ${{ !failure() && github.run_attempt == 1 }}
+    if: ${{ !failure() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
