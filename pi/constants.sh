@@ -25,6 +25,7 @@ export common_dockerfile=(
     "refinery-weak-supervisor"
     "refinery-model-provider"
     "cognition-gateway"
+    "cognition-task-master"
     "cognition-integration-provider"
 )
 
