@@ -4,74 +4,105 @@ on:
   workflow_call:
 
 jobs:
-  az-acr-delete-test:
-    name: "Docker: Delete Test Tags"
+  dc-registry-delete:
+    name: 'Docker Compose: Delete Registry Images'
     runs-on: ubuntu-latest
     environment: dev
     env:
-      AZURE_CONTAINER_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY }}
-      ACR_LOGIN_USERNAME: ${{ secrets.ACR_LOGIN_USERNAME }}
-      ACR_LOGIN_PASSWORD: ${{ secrets.ACR_LOGIN_PASSWORD }}
+      ENVIRONMENT_NAME: dev
+      DEV_CONTAINER_REGISTRY: ${{ vars.DEV_CONTAINER_REGISTRY }}
+      DEV_LOGIN_USERNAME: ${{ secrets.DEV_LOGIN_USERNAME }}
+      DEV_LOGIN_PASSWORD: ${{ secrets.DEV_LOGIN_PASSWORD }}
     steps:
-      - name: Azure Cloud Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      
-      - name: Configure branch name
-        id: branch_name
-        run: echo "GH_REF_NAME=$(echo "test-${{ github.event.ref }}" | sed 's|/|-|g')" >> $GITHUB_OUTPUT
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        repository: 'code-kern-ai/cicd-deployment-scripts'
 
-      - name: Delete Container Image
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            az acr repository delete \
-              --name ${{ env.AZURE_CONTAINER_REGISTRY }} \
-              --image ${{ github.event.repository.name }}:${{ steps.branch_name.outputs.GH_REF_NAME }} \
-              --yes || true
+    - name: Configure branch name
+      id: branch_name
+      run: echo "GH_REF_NAME=$(echo "test-${{ github.event.ref }}" | sed 's|/|-|g')" >> $GITHUB_OUTPUT
+
+    - name: Perform Registry Image Deletion
+      shell: bash
+      run: |
+        bash ./dc/registry_delete.sh \
+          -e ${{ env.ENVIRONMENT_NAME }} \
+          -g ${{ github.repository_owner }} \
+          -r ${{ env.DEV_CONTAINER_REGISTRY }} \
+          -a ${{ github.event.repository.name }} \
+          -t "${{ steps.branch_name.outputs.GH_REF_NAME }}" \
+          -u "${{ env.DEV_LOGIN_USERNAME }}:${{ env.DEV_LOGIN_PASSWORD }}"
+
+  # az-acr-delete-test:
+  #   name: "Docker: Delete Test Tags"
+  #   runs-on: ubuntu-latest
+  #   environment: dev
+  #   env:
+  #     AZURE_CONTAINER_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY }}
+  #     ACR_LOGIN_USERNAME: ${{ secrets.ACR_LOGIN_USERNAME }}
+  #     ACR_LOGIN_PASSWORD: ${{ secrets.ACR_LOGIN_PASSWORD }}
+  #   steps:
+  #     - name: Azure Cloud Login
+  #       uses: azure/login@v2
+  #       with:
+  #         client-id: ${{ secrets.AZURE_CLIENT_ID }}
+  #         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+  #         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+  #     - name: Configure branch name
+  #       id: branch_name
+  #       run: echo "GH_REF_NAME=$(echo "test-${{ github.event.ref }}" | sed 's|/|-|g')" >> $GITHUB_OUTPUT
+
+  #     - name: Delete Container Image
+  #       uses: azure/cli@v2
+  #       with:
+  #         inlineScript: |
+  #           az acr repository delete \
+  #             --name ${{ env.AZURE_CONTAINER_REGISTRY }} \
+  #             --image ${{ github.event.repository.name }}:${{ steps.branch_name.outputs.GH_REF_NAME }} \
+  #             --yes || true
             
-            az acr repository delete \
-              --name ${{ env.AZURE_CONTAINER_REGISTRY }} \
-              --image ${{ github.event.repository.name }}:${{ steps.branch_name.outputs.GH_REF_NAME }}-cache \
-              --yes || true
+  #           az acr repository delete \
+  #             --name ${{ env.AZURE_CONTAINER_REGISTRY }} \
+  #             --image ${{ github.event.repository.name }}:${{ steps.branch_name.outputs.GH_REF_NAME }}-cache \
+  #             --yes || true
 
-  az-acr-delete-matrix:
-    name: 'Docker: Delete Branch Tags'
-    runs-on: ubuntu-latest
-    environment: dev
-    env:
-      AZURE_CONTAINER_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY }}
-      ACR_LOGIN_USERNAME: ${{ secrets.ACR_LOGIN_USERNAME }}
-      ACR_LOGIN_PASSWORD: ${{ secrets.ACR_LOGIN_PASSWORD }}
-    strategy:
-      matrix:
-        platform: [amd64, arm64]
-    steps:
-      - name: Azure Cloud Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  # az-acr-delete-matrix:
+  #   name: 'Docker: Delete Branch Tags'
+  #   runs-on: ubuntu-latest
+  #   environment: dev
+  #   env:
+  #     AZURE_CONTAINER_REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY }}
+  #     ACR_LOGIN_USERNAME: ${{ secrets.ACR_LOGIN_USERNAME }}
+  #     ACR_LOGIN_PASSWORD: ${{ secrets.ACR_LOGIN_PASSWORD }}
+  #   strategy:
+  #     matrix:
+  #       platform: [amd64, arm64]
+  #   steps:
+  #     - name: Azure Cloud Login
+  #       uses: azure/login@v2
+  #       with:
+  #         client-id: ${{ secrets.AZURE_CLIENT_ID }}
+  #         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+  #         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       
-      - name: Configure branch name
-        id: branch_name
-        run: echo "GH_REF_NAME=$(echo "${{ github.event.ref }}" | sed 's|/|-|g')" >> $GITHUB_OUTPUT
+  #     - name: Configure branch name
+  #       id: branch_name
+  #       run: echo "GH_REF_NAME=$(echo "${{ github.event.ref }}" | sed 's|/|-|g')" >> $GITHUB_OUTPUT
 
-      - name: Delete Branch Container Image
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            az acr repository delete \
-              --name ${{ env.AZURE_CONTAINER_REGISTRY }} \
-              --image ${{ github.event.repository.name }}:${{ matrix.platform}}-${{ steps.branch_name.outputs.GH_REF_NAME }} \
-              --yes
+  #     - name: Delete Branch Container Image
+  #       uses: azure/cli@v2
+  #       with:
+  #         inlineScript: |
+  #           az acr repository delete \
+  #             --name ${{ env.AZURE_CONTAINER_REGISTRY }} \
+  #             --image ${{ github.event.repository.name }}:${{ matrix.platform}}-${{ steps.branch_name.outputs.GH_REF_NAME }} \
+  #             --yes
 
-            az acr repository delete \
-              --name ${{ env.AZURE_CONTAINER_REGISTRY }} \
-              --image ${{ github.event.repository.name }}:${{ matrix.platform}}-${{ steps.branch_name.outputs.GH_REF_NAME }}-cache \
-              --yes || true
+  #           az acr repository delete \
+  #             --name ${{ env.AZURE_CONTAINER_REGISTRY }} \
+  #             --image ${{ github.event.repository.name }}:${{ matrix.platform}}-${{ steps.branch_name.outputs.GH_REF_NAME }}-cache \
+  #             --yes || true
   
