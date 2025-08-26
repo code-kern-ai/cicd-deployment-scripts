@@ -22,7 +22,7 @@ jobs:
 
     - name: Configure branch name
       id: branch_name
-      run: echo "GH_REF_NAME=$(echo "test-${{ github.event.ref }}" | sed 's|/|-|g')" >> $GITHUB_OUTPUT
+      run: echo "GH_REF_NAME=$(echo "${{ github.event.ref }}" | sed 's|/|-|g')" >> $GITHUB_OUTPUT
 
     - name: Perform Registry Image Deletion
       shell: bash
