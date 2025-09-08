@@ -48,8 +48,8 @@ jobs:
         tofu_wrapper: false
         github_token: ${{ secrets.GH_TOKEN }}
 
-    # - name: GitHub Configuration
-    #   run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
+    - name: GitHub Configuration
+      run: echo https://oauth2:${{ secrets.GH_TOKEN }}@github.com > ${HOME}/.git-credentials
 
     # Initialize a new or existing OpenTofu working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: OpenTofu Init
@@ -116,8 +116,8 @@ jobs:
       # with:
       #   github_token: ${{ secrets.GH_TOKEN }}
 
-    - name: GitHub Configuration
-      run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
+    # - name: GitHub Configuration
+    #   run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com
 
     # Initialize a new or existing OpenTofu working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: OpenTofu Init
