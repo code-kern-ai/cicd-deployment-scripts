@@ -16,6 +16,9 @@ permissions:
   contents: read
   pull-requests: write
 
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
 jobs:
   tofu-plan:
     name: 'OpenTofu Plan'
@@ -48,10 +51,8 @@ jobs:
         tofu_wrapper: false
         github_token: ${{ secrets.GH_TOKEN }}
 
-    - name: GitHub Configuration
-      run: |
-        echo $HOME
-        echo https://oauth2:${{ secrets.GH_TOKEN }}@github.com > ${HOME}/.git-credentials
+    # - name: GitHub Configuration
+    #   run: echo https://oauth2:${{ secrets.GH_TOKEN }}@github.com > ${HOME}/.git-credentials
 
     # Initialize a new or existing OpenTofu working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: OpenTofu Init
