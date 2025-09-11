@@ -9,6 +9,7 @@ export THIRD_PARTY_SERVICES=(
     oathkeeper
     object-storage
     qdrant
+    privatemode-proxy
 )
 
 
