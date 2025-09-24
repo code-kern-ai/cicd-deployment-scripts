@@ -244,7 +244,7 @@ jobs:
           echo "::notice::${{ matrix.app }} - updated requirements.txt"
 
           gh pr create --draft \
-            --title "test: parent image updates" \
+            --title "ci(pi): parent image updates" \
             --body "Main PR: https://github.com/${{ github.repository_owner }}/refinery-submodule-parent-images/pull/${{ github.event.pull_request.number }}" \
             --base dev \
             --head ${{ env.HEAD_REF }} \

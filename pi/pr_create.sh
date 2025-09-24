@@ -43,7 +43,7 @@ EOF
 else
     PR_BODY=$(cat <<EOF
 $EXISTING_PR_BODY
-- https://github.com/$REPOSITORY_OWNER/$REPOSITORY_NAME/pull/$RELEASE_TAG
+- https://github.com/$REPOSITORY_OWNER/$REPOSITORY_NAME/releases/tag/$RELEASE_TAG
 EOF
 )
     EXISTING_PR_NUMBER=$(gh pr list \
