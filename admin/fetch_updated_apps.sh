@@ -26,6 +26,11 @@ function get_docker_compose_services() {
             echo "${service}"
         fi
     done
+    
+    echo "cognition-exec-env"
+    echo "refinery-lf-exec-env"
+    echo "refinery-ml-exec-env"
+    echo "refinery-ac-exec-env"
 }
 
 function get_latest_app_tag() {
