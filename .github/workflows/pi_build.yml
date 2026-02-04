@@ -52,7 +52,7 @@ jobs:
         parent_image_type: ${{ fromJson(needs.pi-matrix.outputs.parent_image_type) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           token: ${{ secrets.GH_TOKEN }}
           repository: '${{ github.repository_owner }}/refinery-${{ matrix.parent_image_type }}-parent-image'
@@ -60,9 +60,10 @@ jobs:
           submodules: 'true'
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+          pip-version: '25'
 
       - name: Install Dependencies
         if: matrix.parent_image_type != 'next'
@@ -137,16 +138,17 @@ jobs:
         app: ${{ fromJson(needs.pi-matrix.outputs.app) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           token: ${{ secrets.GH_TOKEN }}
           repository: '${{ github.repository_owner }}/refinery-submodule-parent-images'
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+          pip-version: '25'
 
       - name: Install Dependencies
         run: python -m pip install pip-tools
