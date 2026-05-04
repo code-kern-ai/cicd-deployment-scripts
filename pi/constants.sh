@@ -21,7 +21,6 @@ export common_dockerfile=(
     "refinery-gateway"
     "refinery-neural-search"
     "refinery-tokenizer"
-    "refinery-updater"
     "refinery-weak-supervisor"
     "refinery-model-provider"
     "cognition-gateway"
