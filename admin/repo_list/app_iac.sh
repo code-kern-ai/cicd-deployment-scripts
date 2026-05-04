@@ -23,7 +23,6 @@ export REPO_LIST_APP_IAC=(
     tf-azure-refinery-neural-search
     tf-azure-refinery-tokenizer
     tf-azure-refinery-ui
-    tf-azure-refinery-updater
     tf-azure-refinery-weak-supervisor
     tf-azure-refinery-websocket
 )

@@ -14,7 +14,6 @@ APP_REPOS=(
     refinery-neural-search
     refinery-tokenizer
     refinery-ui
-    refinery-updater
     refinery-weak-supervisor
     refinery-websocket
     refinery-ac-exec-env

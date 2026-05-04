@@ -27,7 +27,6 @@ declare -A secret_rename_mapping=( \
     ["refinery-neural-search"]="rf-nrl-search" \
     ["refinery-tokenizer"]="rf-tokenizer" \
     ["refinery-ui"]="none" \
-    ["refinery-updater"]="rf-updater" \
     ["refinery-weak-supervisor"]="rf-weak-supvsr" \
     ["refinery-websocket"]="rf-websocket" \
 )
