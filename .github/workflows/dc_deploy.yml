@@ -2,18 +2,15 @@ name: 'DC: Deploy'
 
 on:
   workflow_call:
-    inputs:
-      ssh_host:
+    secrets:
+      SSH_HOST:
         required: true
-        type: string
         description: "SSH host"
-      ssh_user:
+      SSH_USER:
         required: true
-        type: string
         description: "SSH user"
-      ssh_private_key:
+      SSH_PRIVATE_KEY:
         required: true
-        type: string
         description: "SSH private_key"
 
 # Special permissions required for OIDC authentication
@@ -26,13 +23,14 @@ jobs:
   dc-release:
     name: Release
     runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
     steps:
       - name: Execute remote SSH commands using password
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ inputs.ssh_host }}
-          username: ${{ inputs.ssh_user }}
-          key: ${{ inputs.ssh_private_key }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: /bin/sh ./trigger_dev_deployment.sh
 
   gh-delete-branch:
