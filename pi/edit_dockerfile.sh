@@ -42,7 +42,7 @@ else
 fi
 
 grep "${REGISTRY}/${PARENT_IMAGE_NAME}" $DOCKERFILE | while read -r line ; do
-    PI_EXISTING_TAG=$(echo $line | sed 's|FROM ||g' | cut -d ':' -f 2)
+    PI_EXISTING_TAG=$(echo $line | sed 's|ARG PARENT_IMAGE=||g' | cut -d ':' -f 2)
     PI_EXISTING_IMAGE="${REGISTRY}/${PARENT_IMAGE_NAME}:${PI_EXISTING_TAG}"
 
     if [ -n "$DEV_UPDATED" ]; then
