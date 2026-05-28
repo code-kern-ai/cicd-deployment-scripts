@@ -2,16 +2,6 @@ name: 'DC: Deploy'
 
 on:
   workflow_call:
-    secrets:
-      SSH_HOST:
-        required: true
-        description: "SSH host"
-      SSH_USER:
-        required: true
-        description: "SSH user"
-      SSH_PRIVATE_KEY:
-        required: true
-        description: "SSH private_key"
 
 # Special permissions required for OIDC authentication
 permissions:
@@ -36,6 +26,7 @@ jobs:
   gh-delete-branch:
     name: 'GitHub: Delete Branch'
     runs-on: ubuntu-latest
+    environment: dev
     needs: [dc-release]
     if: github.event_name == 'pull_request' && github.event.pull_request.merged && !failure() && !cancelled()
     steps:
