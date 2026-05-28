@@ -10,12 +10,12 @@ permissions:
   actions: read
 
 jobs:
-  dc-release:
-    name: Release
+  dc-deploy:
+    name: 'DC: Deploy'
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'prod' && 'prod' || 'dev' }}
     steps:
-      - name: Execute remote SSH commands using password
+      - name: Execute remote SSH deploy
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -27,7 +27,7 @@ jobs:
     name: 'GitHub: Delete Branch'
     runs-on: ubuntu-latest
     environment: dev
-    needs: [dc-release]
+    needs: [dc-deploy]
     if: github.event_name == 'pull_request' && github.event.pull_request.merged && !failure() && !cancelled()
     steps:
       - name: Checkout repository
