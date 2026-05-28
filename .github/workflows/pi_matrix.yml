@@ -46,7 +46,7 @@ jobs:
       app: ${{ steps.generate-matrix.outputs.app }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ${{ inputs.repository }}
           ref: ${{ inputs.checkout_ref }}

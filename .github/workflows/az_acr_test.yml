@@ -20,7 +20,7 @@ jobs:
       GH_REF_NAME: test-${{ steps.branch_name.outputs.GH_REF_NAME }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: 'true'
 

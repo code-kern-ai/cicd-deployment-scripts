@@ -2,16 +2,6 @@ name: 'DC: Deploy'
 
 on:
   workflow_call:
-    secrets:
-      SSH_HOST:
-        required: true
-        description: "SSH host"
-      SSH_USER:
-        required: true
-        description: "SSH user"
-      SSH_PRIVATE_KEY:
-        required: true
-        description: "SSH private_key"
 
 # Special permissions required for OIDC authentication
 permissions:
@@ -40,7 +30,7 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.pull_request.merged && !failure() && !cancelled()
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           token: ${{ secrets.GH_TOKEN }}
       

@@ -37,7 +37,7 @@ jobs:
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout cicd-deployment-scripts
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         repository: 'code-kern-ai/cicd-deployment-scripts'
     
@@ -82,7 +82,7 @@ jobs:
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout cicd-deployment-scripts
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         repository: 'code-kern-ai/cicd-deployment-scripts'
     

@@ -922,7 +922,7 @@ Triggers:
 **Jobs:**
 
 - tf-module-docs
-	- `actions/checkout@v4`
+	- `actions/checkout@v6`
 	- `Render OpenTofu docs and push changes back to PR`
 
 

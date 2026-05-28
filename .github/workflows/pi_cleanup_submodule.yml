@@ -30,7 +30,7 @@ jobs:
     needs: [configure-branch-name]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           token: ${{ secrets.GH_TOKEN }}
       
@@ -47,7 +47,7 @@ jobs:
         app: ${{ fromJson(needs.pi-matrix.outputs.app) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ${{ github.repository_owner }}/${{ matrix.app }}
           token: ${{ secrets.GH_TOKEN }}
