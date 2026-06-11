@@ -50,7 +50,7 @@ jobs:
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: GitHub Configuration
       run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf https://github.com

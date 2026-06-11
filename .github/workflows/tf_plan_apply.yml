@@ -40,13 +40,13 @@ jobs:
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         token: ${{ secrets.GH_TOKEN }}
 
     # Install the latest version of the OpenTofu CLI
     - name: Setup OpenTofu
-      uses: opentofu/setup-opentofu@v1
+      uses: opentofu/setup-opentofu@v2
       with:
         tofu_wrapper: false
 
@@ -87,7 +87,7 @@ jobs:
     # Save plan to artifacts  
     - name: Publish OpenTofu Plan
       if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.pull_request.merged }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: tfplan
         path: tfplan
@@ -110,11 +110,11 @@ jobs:
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     # Install the latest version of OpenTofu CLI and configure the OpenTofu CLI configuration file with a OpenTofu Cloud user API token
     - name: Setup OpenTofu
-      uses: opentofu/setup-opentofu@v1
+      uses: opentofu/setup-opentofu@v2
 
     # Initialize a new or existing OpenTofu working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: OpenTofu Init
@@ -127,7 +127,7 @@ jobs:
 
     # Download saved plan from artifacts  
     - name: Download OpenTofu Plan
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: tfplan
 

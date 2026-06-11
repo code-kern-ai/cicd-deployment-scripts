@@ -20,7 +20,7 @@ jobs:
     if: ${{ github.ref_name == 'dev' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.ref_name }}
 
@@ -38,7 +38,7 @@ jobs:
     if: ${{ github.ref_name != 'prod' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.ref_name }}
 
@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.ref_name }}
 

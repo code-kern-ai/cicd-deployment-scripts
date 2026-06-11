@@ -43,6 +43,8 @@ jobs:
       DEV_CONTAINER_REGISTRY: ${{ vars.DEV_CONTAINER_REGISTRY }}
       DEV_LOGIN_USERNAME: ${{ secrets.DEV_LOGIN_USERNAME }}
       DEV_LOGIN_PASSWORD: ${{ secrets.DEV_LOGIN_PASSWORD }}
+      DOCKERHUB_LOGIN_USERNAME: ${{ secrets.DOCKERHUB_LOGIN_USERNAME }}
+      DOCKERHUB_LOGIN_PASSWORD: ${{ secrets.DOCKERHUB_LOGIN_PASSWORD }}
       PARENT_IMAGE_NAME: ${{ vars.PARENT_IMAGE_NAME }}
       DOCKERFILE: ${{ vars.DOCKERFILE }}
       HEAD_REF: parent-image-updates
@@ -76,24 +78,31 @@ jobs:
           pip-compile requirements/${{ matrix.parent_image_type }}-requirements.in
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
         with:
           platforms: linux/amd64,linux/arm64
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
         with:
           platforms: arm64,arm
 
       - name: Log into DEV registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: "${{ env.DEV_CONTAINER_REGISTRY }}"
           username: "${{ env.DEV_LOGIN_USERNAME }}"
           password: "${{ env.DEV_LOGIN_PASSWORD }}"
 
+      - name: Log into DHI registry
+        uses: docker/login-action@v4
+        with:
+          registry: "dhi.io"
+          username: "${{ env.DOCKERHUB_LOGIN_USERNAME }}"
+          password: "${{ env.DOCKERHUB_LOGIN_PASSWORD }}"
+
       - name: Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ env.HEAD_REF }}-${{ matrix.parent_image_type }}
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: .
           cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:dev-${{ matrix.parent_image_type }}-cache
@@ -107,7 +116,7 @@ jobs:
             label=dockerfile-path=https://github.com/refinery-${{ matrix.parent_image_type }}-parent-image/blob/${{ github.sha }}/${{ env.DOCKERFILE }}
 
       # - name: Build & Push ${{ env.PARENT_IMAGE_NAME }}:${{ env.HEAD_REF }}-${{ matrix.parent_image_type }}-arm64
-      #   uses: docker/build-push-action@v5
+      #   uses: docker/build-push-action@v7
       #   with:
       #     context: .
       #     cache-from: type=registry,ref=${{ env.DEV_CONTAINER_REGISTRY }}/${{ env.PARENT_IMAGE_NAME }}:dev-${{ matrix.parent_image_type }}-arm64-cache

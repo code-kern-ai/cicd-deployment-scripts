@@ -820,7 +820,7 @@
         "name": "tf-module-docs",
         "descriptive_name": null,
         "steps": [
-          "actions/checkout@v4",
+          "actions/checkout@v6",
           "Render OpenTofu docs and push changes back to PR"
         ]
       }
