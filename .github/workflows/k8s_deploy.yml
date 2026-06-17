@@ -21,7 +21,7 @@ permissions:
 jobs:
   k8-deploy:
     name: 'K8: Deploy'
-    runs-on: [self-hosted, "${{ inputs.environment }}"]
+    runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     env:
       APPLICATION_STARTUP_MESSAGE: "Application startup complete"

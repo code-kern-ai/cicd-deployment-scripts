@@ -35,7 +35,7 @@ jobs:
 
   pi-build:
     name: 'Parent Images: Docker Build'
-    runs-on: [self-hosted, dev]
+    runs-on: ubuntu-latest
     needs: [pi-matrix, validate-branch-name]
     environment: dev
     env:

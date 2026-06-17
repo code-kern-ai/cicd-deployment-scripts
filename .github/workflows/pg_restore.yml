@@ -16,7 +16,7 @@ on:
 jobs:
   pg-restore:
     name: 'Postgres: Restore ${{ inputs.database_name }}'
-    runs-on: [self-hosted, "${{ github.ref_name }}"]
+    runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     env:
       ENVIRONMENT_NAME: ${{ github.ref_name }}

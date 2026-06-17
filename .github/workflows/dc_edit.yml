@@ -15,7 +15,7 @@ env:
 jobs:
   dc-edit:
     name: 'Docker Compose: Edit Service'
-    runs-on: [self-hosted, "${{ github.event_name == 'release' && 'prod' || github.event.pull_request.base.ref }}"]
+    runs-on: ubuntu-latest
     environment: ${{ github.event_name == 'release' && 'prod' || github.event.pull_request.base.ref }}
     env:
       ENVIRONMENT_NAME: ${{ github.event_name == 'release' && 'prod' || github.event.pull_request.base.ref }}

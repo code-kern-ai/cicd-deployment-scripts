@@ -17,7 +17,7 @@ permissions:
 jobs:
   k8-restart:
     name: 'K8: Restart Cluster Deployment'
-    runs-on: [self-hosted, "${{ github.ref_name }}"]
+    runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     env:
       KUBELOGIN_VERSION: "v0.0.25"
