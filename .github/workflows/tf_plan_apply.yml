@@ -51,7 +51,7 @@ jobs:
         tofu_wrapper: false
 
     - name: GitHub Configuration
-      run: echo https://oauth2:${{ secrets.GH_TOKEN }}@github.com > ${HOME}/.git-credentials
+      run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf "https://github.com"
 
     # Initialize a new or existing OpenTofu working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: OpenTofu Init
@@ -115,6 +115,9 @@ jobs:
     # Install the latest version of OpenTofu CLI and configure the OpenTofu CLI configuration file with a OpenTofu Cloud user API token
     - name: Setup OpenTofu
       uses: opentofu/setup-opentofu@v2
+
+    - name: GitHub Configuration
+      run: git config --global url."https://oauth2:${{ secrets.GH_TOKEN }}@github.com".insteadOf "https://github.com"
 
     # Initialize a new or existing OpenTofu working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: OpenTofu Init
