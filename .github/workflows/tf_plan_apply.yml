@@ -22,7 +22,7 @@ env:
 jobs:
   tofu-plan:
     name: 'OpenTofu Plan'
-    runs-on: ["self-hosted", "${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}" ]
+    runs-on: ubuntu-latest
     environment: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}
     env:
       ENVIRONMENT_NAME: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}
@@ -96,7 +96,7 @@ jobs:
     name: 'OpenTofu Apply'
     needs: [tofu-plan]
     if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.pull_request.merged) && needs.tofu-plan.outputs.tf_plan_exit_code == 2 }}
-    runs-on: ["self-hosted", "${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}" ]
+    runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     env:
       ENVIRONMENT_NAME: ${{ github.ref_name }}
