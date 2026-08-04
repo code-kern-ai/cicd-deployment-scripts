@@ -12,6 +12,7 @@ export THIRD_PARTY_SERVICES=(
     object-storage
     qdrant
     privatemode-proxy
+    privatemode-proxy-direct
 )
 
 
