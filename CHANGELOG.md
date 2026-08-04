@@ -1,5 +1,81 @@
 # Changelog
 
+## [3.3.0](https://github.com/code-kern-ai/cicd-deployment-scripts/compare/v3.2.0...v3.3.0) (2026-08-04)
+
+
+### Features
+
+* parent image improvements ([0d25ab2](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/0d25ab2926f54aff2c50e3cb850c0631b4d97afb))
+
+
+### Bug Fixes
+
+* add exec-env to fetch_updated_apps ([6811a0e](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/6811a0e8b36d9b9fbb4d1316a7ecbb39ce1447b1))
+* add known_hosts to registry_delete.sh ([48da223](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/48da22302f0546a9a3275e0229ff85136bbe1997))
+* adding dockerfile changes to git ([50e74c2](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/50e74c20f6964744571d155087432eb1bbce4416))
+* dc registry delete in az acr delete ([418ca7f](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/418ca7fcb17868d47310c527212e0229edd97071))
+* delete_since_days order of execution ([9e0ebe8](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/9e0ebe83700617cb71d52c0cdf2eb354b576136f))
+* delete_since_days order of execution ([1be9659](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/1be9659cfaa8d17a890f391522bb088dd5d0405b))
+* dockerfile edit ([3275672](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/32756720074a005dd7f282116636341f19576226))
+* dockerhub login ([3a0d3a3](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/3a0d3a30ff55b06889c4d83606cb82adbfa1c938))
+* edit dockerfile defaults ([a0d7dfa](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/a0d7dfabb76585b4ae3349ee6e7ef1bbd9ebc6c6))
+* edit dockerfile for first-time updates ([ff241e3](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/ff241e36dbfaa6b0029627dde4a7c2be09bfc6a4))
+* fetch_updated_apps script ([78631f7](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/78631f78dc4bd0f950ded8a5694dcbc1eb5d5c7f))
+* file paths ([38388a9](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/38388a9235d5db33104f78c2788c80b7ca1339c9))
+* generate matrix for requirements.txt ([76fea8b](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/76fea8bcae1d0311b68d422994d2fa43a16dcbdd))
+* git config insteadof ([55a9e5a](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/55a9e5aafae4e15a4d675607b9a2d77f6d8b67da))
+* git pushes ([01e5a44](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/01e5a4430300362d4029f9d547c1cb017fb4241b))
+* grep fail gracefully ([d217174](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/d217174884c3f65c6d38a8c7b4df5ed792d2226b))
+* handle repos with no tags ([51692eb](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/51692eb037523962dbf97dfacd20cf844d8fdda8))
+* hardcode pip to 25 due to breaking changes with pip-compil ([f2fe58b](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/f2fe58bbb1ac714be4a1db7ed84fe99756ff3544))
+* install python dependencies ([e5e1963](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/e5e1963f8dbe18a0d0c719b8db5ac54b5e07abe2))
+* missing dockerfiles ([ec15a5b](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/ec15a5b7516015c20b99867fcc70c7a4a6071197))
+* multiple docker edits ([9956a71](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/9956a7105e4b141f89d91d74875e555b511dc7e4))
+* overwrite git config in tf_plan_apply_gh ([4576f5c](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/4576f5cb47730ce8af5032dbb11333a616cb236a))
+* pi_merge needs ([6e2f9ff](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/6e2f9ff1342dab78ac5bae1400fafcd5d69545b1))
+* **pi:** merge submodules run criteria ([221ee4b](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/221ee4b7c27ae3f1e8c5f97345f06450013303e9))
+* privatemode-proxy-direct exclusion ([6ee3d53](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/6ee3d534ba1597a1f5e8bb01abf4b3f5d8c7574c))
+* push requirements with conflicts ([31e913b](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/31e913b32b114d86f52575aaac1f2d70426b9763))
+* registry delete headers ([3a55fd0](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/3a55fd0c17e93698b5c516715bf388a4f1449eb9))
+* repeating repo updates ([cd2c6e4](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/cd2c6e420ef344c4a6280c80ffc0468f103d107e))
+* run tf plan apply on ubuntu-latest ([de3edf0](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/de3edf0b685a6d15a4bb4ad8ef1b7cc8c2216ce9))
+* secrets from gh env ([0b30543](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/0b305433ead59214dd042b786c04e47d84fafc09))
+* skip building arm64 for DEV builds ([9025d82](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/9025d821c340a766993602a6242029efba293c45))
+* SSH known_hosts configuration ([207e6b3](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/207e6b3bf58c690d401f3370ad29201e05555d40))
+* submodule update ([49d97e9](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/49d97e9de40849eea0983f1bf449030d53c2f806))
+* update dc_deploy.yml environment ([4458e32](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/4458e32850d515d3b20625ce522501c086133367))
+* update dc_deploy.yml to use environments ([916c0e5](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/916c0e5cca8be19ebb778b39468d8877c6911942))
+* updating dev.Dockerfile ([58d5f38](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/58d5f38d15752ebba02649155977a5646e1c5ce2))
+* use git-credentials ([bf1bfa9](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/bf1bfa91b5464597b9cd1f703fc86acbbb761376))
+* validate release tag regex ([8a58192](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/8a58192d2b7ddb914dcf558f6c470743100fd3c8))
+* workflow outputs ([b46f787](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/b46f7876ce1d9b687e0fdf2f6f93962050bc61d6))
+
+
+### Performance Improvements
+
+* add cognition-etl-provider to constants ([9afffb3](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/9afffb3ad4a88ee59b763ba670ad4a342f362f4f))
+* add cognition-task-master to pi updates ([68f1a9f](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/68f1a9ff2aca380decb4ecc7687e780c489cb351))
+* add force delete repo support ([dd00ea5](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/dd00ea51d526187d999b261bf201167a7ab6be8e))
+* add GPU compilation + rebuild requirements ([3646b21](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/3646b218cc2e14e504fda5b390a943da7ed90432))
+* add privatemode-proxy as third party service in admin fetch updated apps ([d066d84](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/d066d847ae4a45ab977b9fe732551e1f232b5965))
+* add tf_plan_apply_gh ([69ef4f3](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/69ef4f35dd3a59b89f526ca50591648df9f24810))
+* commit to parent repositories dev branch ([8e40fbe](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/8e40fbe486051cac7648dc877e3d1c0227048d52))
+* continue-on-error for dc bulk delete ([40ba045](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/40ba04593da93c3f82de9429d144d382fc15a54b))
+* delete image tag on branch deletion ([88b00f6](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/88b00f60155faf3d0b0139c6b015b9eedb4d6e53))
+* DEV registry delete bulk ([#21](https://github.com/code-kern-ai/cicd-deployment-scripts/issues/21)) ([d690347](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/d6903470760ddaad61e23717c1720a0d3eb971ce))
+* Docker hardened images ([#27](https://github.com/code-kern-ai/cicd-deployment-scripts/issues/27)) ([93bc868](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/93bc86844182fcc92297c028d5c51730402ff339))
+* image cleanup ([34c47ac](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/34c47ace12d2cda220543b70e2d2e1afdcf9e1cd))
+* only update parent requirements on 1st run attempt ([3db47e0](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/3db47e0b97ef21552b61aad573b8cf6d0d6fe004))
+* **pi:** update PR names and descs ([33d2704](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/33d270487c85a66d830f2132b0fd01e2fe58e788))
+* push parent image builds to dockerhub ([ed19542](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/ed1954217afcacf900f51b59bb6ffaecb19aa324))
+* self-hosted pi build ([0817260](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/081726023be5e0d62967b765e80f585e021e75d3))
+* ubuntu-latest over self-hosted ([154bf53](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/154bf53c7055f958960f7a8f0070bec00b80ebbc))
+* ubuntu-latest tf pan apply ([f61ff30](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/f61ff30d8c93b094c116a22443721b0f8f747e35))
+* update all dockerfiles on pi release ([dcdec12](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/dcdec123c91c547d0a34b8088762a786d46b66c7))
+* update github configuration ([5a84713](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/5a847137fc629562a52cb608fd59a9444f8fb1b4))
+* update parent image settings ([9a77a8d](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/9a77a8d51e1280022a5d4c0831fd796cc5df4416))
+* update streamline process ([89aa9ce](https://github.com/code-kern-ai/cicd-deployment-scripts/commit/89aa9ce3b2d2a1d6085258e245c62dc22a8534ff))
+
 ## [3.2.0](https://github.com/code-kern-ai/cicd-deployment-scripts/compare/v3.1.0...v3.2.0) (2025-01-07)
 
 
