@@ -6,6 +6,8 @@ export THIRD_PARTY_SERVICES=(
     postgres-migrate
     kratos-migrate
     kratos
+    hydra-migrate
+    hydra
     oathkeeper
     object-storage
     qdrant
