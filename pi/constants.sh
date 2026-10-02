@@ -8,6 +8,7 @@ export torch_cpu=(
 export torch_cpu_dockerfile=(
     "refinery-embedder"
     "refinery-ml-exec-env"
+    "cognition-etl-provider"
 )
 
 export torch_cuda=(
@@ -26,7 +27,6 @@ export common_dockerfile=(
     "cognition-gateway"
     "cognition-task-master"
     "cognition-integration-provider"
-    "cognition-etl-provider"
 )
 
 export common=(
