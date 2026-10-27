@@ -186,6 +186,7 @@ jobs:
           done
 
       - name: Perform Edit/Git Operations (Python)
+        id: edit
         run: |
           cd ${{ github.workspace }}/${{ matrix.app }}
 
@@ -232,7 +233,7 @@ jobs:
           
           if [ $exitcode -ne 0 ]; then
             echo "::error::pip-compile failed with exit code $exitcode"
-            git push origin ${{ env.HEAD_REF }} || true
+            git push origin ${{ env.HEAD_REF }} && touch ${{ github.workspace }}/.pi-pushed || true
             exit $exitcode
           fi
           
@@ -252,6 +253,7 @@ jobs:
           git add gpu-requirements.txt || true
           git commit -m "ci: update requirements.txt" || true
           git push origin ${{ env.HEAD_REF }}
+          touch ${{ github.workspace }}/.pi-pushed
           echo "::notice::${{ matrix.app }} - updated requirements.txt"
 
           gh pr create --draft \
@@ -260,3 +262,56 @@ jobs:
             --base dev \
             --head ${{ env.HEAD_REF }} \
             --repo ${{ github.repository_owner }}/${{ matrix.app }} || true
+
+      - name: Save affected repository
+        id: affected-repo
+        if: always()
+        env:
+          STATUS: ${{ steps.edit.outcome == 'success' && 'success' || 'failed' }}
+          PUSHED: ${{ hashFiles('.pi-pushed') != '' }}
+        run: |
+          jq -n \
+            --arg name "${{ matrix.app }}" \
+            --arg owner "${{ github.repository_owner }}" \
+            --arg server "${{ github.server_url }}" \
+            --arg status "$STATUS" \
+            --argjson pushed "$PUSHED" \
+            '{name: $name, repository: "\($owner)/\($name)", url: "\($server)/\($owner)/\($name)", status: $status, pushed: $pushed}' \
+            > ${{ matrix.app }}.json
+
+      - name: Upload affected repository
+        if: always() && steps.affected-repo.outcome == 'success'
+        uses: actions/upload-artifact@v7
+        with:
+          name: affected-repo-${{ matrix.app }}
+          path: ${{ matrix.app }}.json
+
+  pi-affected-repos:
+    name: 'Parent Images: Affected Repositories'
+    runs-on: ubuntu-latest
+    needs: [pi-update-app]
+    if: always() && needs.pi-update-app.result != 'skipped'
+    steps:
+      - name: Download affected repositories
+        uses: actions/download-artifact@v8
+        with:
+          pattern: affected-repo-*
+          path: affected-repo
+          merge-multiple: true
+
+      - name: List affected repositories
+        run: |
+          shopt -s nullglob
+          files=(affected-repo/*.json)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "[]" > affected-repos.json
+          else
+            jq -s 'sort_by(.status, .name)' "${files[@]}" > affected-repos.json
+          fi
+          cat affected-repos.json
+
+      - name: Upload affected repositories
+        uses: actions/upload-artifact@v7
+        with:
+          name: affected-repos
+          path: affected-repos.json
