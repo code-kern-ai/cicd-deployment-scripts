@@ -315,3 +315,22 @@ jobs:
         with:
           name: affected-repos
           path: affected-repos.json
+
+      - name: Update PR description
+        if: github.event.pull_request.number != ''
+        run: |
+          gh pr view ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }} \
+            --json body > pr.json
+
+          jq -r --slurpfile repos affected-repos.json '
+            (.body // "" | sub("\\s*<!-- affected-repos:start -->[\\s\\S]*<!-- affected-repos:end -->\\s*"; "")) as $body
+            | (if ($repos[0] | length) == 0 then "_None_"
+               else $repos[0] | map("- \(if .status == "success" then "✅" else "❌" end) \(.url)") | join("\n")
+               end) as $list
+            | "\($body)\n\n<!-- affected-repos:start -->\n### Affected repositories\n\n\($list)\n<!-- affected-repos:end -->"
+          ' pr.json > pr-body.md
+
+          gh pr edit ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }} \
+            --body-file pr-body.md
