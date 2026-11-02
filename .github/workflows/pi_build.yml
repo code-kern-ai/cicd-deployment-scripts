@@ -256,12 +256,21 @@ jobs:
           touch ${{ github.workspace }}/.pi-pushed
           echo "::notice::${{ matrix.app }} - updated requirements.txt"
 
-          gh pr create --draft \
+          PR_URL=$(gh pr create --draft \
             --title "ci(pi): parent image updates" \
             --body "Main PR: https://github.com/${{ github.repository_owner }}/refinery-submodule-parent-images/pull/${{ github.event.pull_request.number }}" \
             --base dev \
             --head ${{ env.HEAD_REF }} \
-            --repo ${{ github.repository_owner }}/${{ matrix.app }} || true
+            --repo ${{ github.repository_owner }}/${{ matrix.app }} \
+            || gh pr view ${{ env.HEAD_REF }} \
+              --repo ${{ github.repository_owner }}/${{ matrix.app }} \
+              --json url --jq '.url' \
+            || true)
+
+          if [ -n "$PR_URL" ]; then
+            echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+            echo "pr_number=${PR_URL##*/}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Save affected repository
         id: affected-repo
@@ -269,6 +278,8 @@ jobs:
         env:
           STATUS: ${{ steps.edit.outcome == 'success' && 'success' || 'failed' }}
           PUSHED: ${{ hashFiles('.pi-pushed') != '' }}
+          PR_URL: ${{ steps.edit.outputs.pr_url }}
+          PR_NUMBER: ${{ steps.edit.outputs.pr_number }}
         run: |
           jq -n \
             --arg name "${{ matrix.app }}" \
@@ -276,7 +287,11 @@ jobs:
             --arg server "${{ github.server_url }}" \
             --arg status "$STATUS" \
             --argjson pushed "$PUSHED" \
-            '{name: $name, repository: "\($owner)/\($name)", url: "\($server)/\($owner)/\($name)", status: $status, pushed: $pushed}' \
+            --arg pr_url "$PR_URL" \
+            --arg pr_number "$PR_NUMBER" \
+            '{name: $name, repository: "\($owner)/\($name)", url: "\($server)/\($owner)/\($name)", status: $status, pushed: $pushed,
+              pr_number: (if $pr_number == "" then null else ($pr_number | tonumber) end),
+              pr_url: (if $pr_url == "" then null else $pr_url end)}' \
             > ${{ matrix.app }}.json
 
       - name: Upload affected repository
@@ -324,11 +339,11 @@ jobs:
             --json body > pr.json
 
           jq -r --slurpfile repos affected-repos.json '
-            (.body // "" | sub("\\s*<!-- affected-repos:start -->[\\s\\S]*<!-- affected-repos:end -->\\s*"; "")) as $body
+            (.body // "" | sub("\\s*<!-- related-prs:start -->[\\s\\S]*<!-- related-prs:end -->\\s*"; "")) as $body
             | (if ($repos[0] | length) == 0 then "_None_"
-               else $repos[0] | map("- \(if .status == "success" then "✅" else "❌" end) \(.url)") | join("\n")
+               else $repos[0] | map("- \(if .status == "success" then "✅" else "❌" end) \(if .pr_number then "\(.repository)#\(.pr_number)" else "\(.url) (no PR)" end)") | join("\n")
                end) as $list
-            | "\($body)\n\n<!-- affected-repos:start -->\n### Affected repositories\n\n\($list)\n<!-- affected-repos:end -->"
+            | "\($body)\n\n<!-- related-prs:start -->\n### Related PRs\n\n\($list)\n<!-- related-prs:end -->"
           ' pr.json > pr-body.md
 
           gh pr edit ${{ github.event.pull_request.number }} \
